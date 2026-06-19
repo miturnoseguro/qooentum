@@ -827,7 +827,6 @@ async function handlePopupVoteSubmit(placeId, voteIdx) {
   if (!p) return;
 
   // Actualización optimista en el mapa: se ve al instante.
-  const pts = VOTE_PTS[voteIdx];
   p.status = voteIdx;
   p.reporters += 1;
   voteCount++;
@@ -842,8 +841,16 @@ async function handlePopupVoteSubmit(placeId, voteIdx) {
     return;
   }
 
+  await submitVoteToBackend(p, voteIdx);
+}
+
+async function submitVoteToBackend(p, voteIdx) {
+  const pts = VOTE_PTS[voteIdx];
   const result = await apiPost('vote', {
-    place: { id: p.id, name: p.name, type: p.type, addr: p.addr, lat: p.lat, lng: p.lng, logo: p.logo },
+    place: {
+      id: p.id, name: p.name, type: p.type, addr: p.addr, lat: p.lat, lng: p.lng,
+      logo: p.logo, rating: p.rating, reviewsN: p.reviewsN, verified: !!p.verified, open: p.open !== false,
+    },
     status: voteIdx,
     email: currentUser.email,
   });
@@ -980,17 +987,111 @@ function requestGpsPermission() {
   );
 }
 
+/* ─────────────── GOOGLE LOGIN (real, vía Google Identity Services) ───────────────
+   Usa el "token client" de GIS: pide un access_token con un popup de Google,
+   con ese token consultamos el perfil (nombre/foto/email) y se lo mandamos al
+   backend (acción "login") para que lo verifique y dé de alta/actualice al
+   usuario en la hoja "Usuarios".
+   ──────────────────────────────────────────────────────────────────────── */
+let tokenClient = null;
+
+function initGoogleTokenClient() {
+  if (!GOOGLE_AUTH_READY) return false;
+  if (tokenClient) return true;
+  if (!window.google || !google.accounts || !google.accounts.oauth2) return false;
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CONFIG.GOOGLE_CLIENT_ID,
+    scope: 'email profile',
+    callback: handleGoogleTokenResponse,
+    error_callback: (err) => {
+      console.warn('Google OAuth error:', err);
+      resetLoginButton();
+      if (!err || err.type !== 'popup_closed') showToast('⚠️ No se pudo iniciar sesión con Google');
+    },
+  });
+  return true;
+}
+
 function doGoogleLogin(btn) {
   if (isLoggedIn) return;
-  if (btn) { btn.dataset.loading = '1'; btn.classList.add('is-loading'); const t = btn.querySelector('.gbtn-txt'); if (t) t.textContent = 'Conectando…'; }
-  setTimeout(() => {
+  if (!GOOGLE_AUTH_READY) { showToast('⚠️ El login con Google todavía no está configurado'); return; }
+  if (!initGoogleTokenClient()) { showToast('⏳ Google se está cargando, probá de nuevo en un segundo'); return; }
+
+  const loginBtn = btn || document.getElementById('login-topbar-btn');
+  if (loginBtn) { loginBtn.classList.add('is-loading'); const t = loginBtn.querySelector('.gbtn-txt'); if (t) t.textContent = 'Conectando…'; }
+  tokenClient.requestAccessToken({ prompt: 'select_account' });
+}
+
+function resetLoginButton() {
+  const btn = document.getElementById('login-topbar-btn');
+  if (!btn) return;
+  btn.classList.remove('is-loading');
+  const t = btn.querySelector('.gbtn-txt');
+  if (t) t.textContent = 'Ingresar';
+}
+
+function initialsFromName(name) {
+  const parts = String(name || '').trim().split(/\s+/);
+  const a = (parts[0] || '')[0] || '';
+  const b = (parts[1] || '')[0] || '';
+  return (a + b).toUpperCase() || 'YO';
+}
+
+async function handleGoogleTokenResponse(resp) {
+  if (!resp || resp.error || !resp.access_token) {
+    resetLoginButton();
+    showToast('⚠️ No se pudo iniciar sesión con Google');
+    return;
+  }
+  try {
+    const profileRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${resp.access_token}` },
+    });
+    if (!profileRes.ok) throw new Error('No se pudo obtener el perfil de Google');
+    const profile = await profileRes.json();
+
+    let backendResult = null;
+    if (BACKEND_READY) {
+      backendResult = await apiPost('login', {
+        access_token: resp.access_token,
+        email: profile.email,
+        name: profile.name,
+        picture: profile.picture,
+      });
+    }
+
+    currentUser = {
+      email: profile.email,
+      name: profile.name || profile.email,
+      picture: profile.picture || '',
+    };
+    if (backendResult && typeof backendResult.points === 'number') userPts = backendResult.points;
     isLoggedIn = true;
+
     document.getElementById('login-topbar-btn').style.display = 'none';
     document.getElementById('user-chip').style.display = 'flex';
-    document.getElementById('topbar-avatar').innerHTML = `<div style="width:100%;height:100%;background:linear-gradient(135deg,#A855F7,#6366F1);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;">MG</div>`;
+    const avatarEl = document.getElementById('topbar-avatar');
+    if (currentUser.picture) {
+      avatarEl.innerHTML = `<img src="${currentUser.picture}" alt="${currentUser.name}" referrerpolicy="no-referrer">`;
+    } else {
+      avatarEl.textContent = initialsFromName(currentUser.name);
+    }
     updateUserHUD();
-    showToast('👋 ¡Bienvenido a Qooentum!');
-  }, 900);
+    showToast(`👋 ¡Hola, ${currentUser.name.split(' ')[0]}!`);
+
+    // Si había un reporte esperando login para sumar puntos, lo reintenta ahora.
+    if (pendingVote) {
+      const { placeId, voteIdx } = pendingVote;
+      pendingVote = null;
+      const p = places.find(x => x.id === placeId);
+      if (p) await submitVoteToBackend(p, voteIdx);
+    }
+  } catch (err) {
+    console.warn('Error de login:', err);
+    showToast('⚠️ Error al iniciar sesión con Google');
+  } finally {
+    resetLoginButton();
+  }
 }
 
 function updateUserHUD() {
@@ -1053,8 +1154,19 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 
+let rankingLoaded = false;
+
+async function ensureRankingLoaded() {
+  if (rankingLoaded || !BACKEND_READY) return;
+  const result = await apiGet('ranking', currentUser ? { email: currentUser.email } : {});
+  if (result && Array.isArray(result.ranking)) {
+    rankingData = result.ranking;
+    rankingLoaded = true;
+  }
+}
+
 function buildRanking() {
-  const sorted = [...RANKING_DATA].sort((a, b) => b.pts - a.pts);
+  const sorted = [...rankingData].sort((a, b) => b.pts - a.pts);
   const medals = ['🥇', '🥈', '🥉'];
   document.getElementById('rank-list').innerHTML = sorted.map((u, i) =>
     `<div class="rank-row${u.isMe ? ' is-me' : ''}" style="animation-delay:${i * .04}s">
@@ -1069,9 +1181,20 @@ function buildRanking() {
   ).join('');
 }
 
+let prizesLoaded = false;
+
+async function ensurePrizesLoaded() {
+  if (prizesLoaded || !BACKEND_READY) return;
+  const result = await apiGet('prizes');
+  if (result && Array.isArray(result.prizes)) {
+    prizesData = result.prizes;
+    prizesLoaded = true;
+  }
+}
+
 function buildPrizes() {
   document.getElementById('my-pts-prizes').textContent = userPts + ' pts disponibles';
-  document.getElementById('prizes-list').innerHTML = PRIZES_DATA.map((pr, idx) => {
+  document.getElementById('prizes-list').innerHTML = prizesData.map((pr, idx) => {
     const can = userPts >= pr.pts, pct = Math.min(100, Math.round((userPts / pr.pts) * 100));
     return `<div class="prize-row" style="animation-delay:${idx * .04}s">
       <div class="prize-emoji">${pr.emoji}</div>
@@ -1086,9 +1209,29 @@ function buildPrizes() {
   requestAnimationFrame(() => { document.querySelectorAll('.pbar-fill').forEach(el => { el.style.width = el.dataset.w + '%'; }); });
 }
 
-function redeemPrize(idx) {
-  const pr = PRIZES_DATA[idx];
+async function redeemPrize(idx) {
+  const pr = prizesData[idx];
   if (!pr || userPts < pr.pts) return;
+
+  if (!isLoggedIn) {
+    showToast('🔑 Iniciá sesión para canjear premios');
+    doGoogleLogin(document.getElementById('login-topbar-btn'));
+    return;
+  }
+
+  if (BACKEND_READY) {
+    const result = await apiPost('redeem', { email: currentUser.email, prize_id: pr.id });
+    if (result && typeof result.points === 'number') {
+      userPts = result.points;
+      updateUserHUD();
+      buildPrizes();
+      showToast(result.code ? `🎁 Canjeaste: ${pr.name} · Código ${result.code}` : `🎁 Canjeaste: ${pr.name}`);
+    } else {
+      showToast('⚠️ No se pudo procesar el canje');
+    }
+    return;
+  }
+
   userPts -= pr.pts; updateUserHUD(); buildPrizes();
   showToast(`🎁 Canjeaste: ${pr.name}`);
 }
@@ -1097,8 +1240,8 @@ function switchTab(tab) {
   ['map', 'ranking', 'prizes'].forEach(t => {
     document.getElementById('panel-' + t).classList.toggle('visible', t === tab);
   });
-  if (tab === 'ranking') buildRanking();
-  if (tab === 'prizes') buildPrizes();
+  if (tab === 'ranking') { buildRanking(); ensureRankingLoaded().then(buildRanking); }
+  if (tab === 'prizes') { buildPrizes(); ensurePrizesLoaded().then(buildPrizes); }
   if (tab === 'map' && leafletMap) setTimeout(() => leafletMap.invalidateSize(), 50);
 }
 
@@ -1106,6 +1249,7 @@ window.addEventListener('DOMContentLoaded', () => {
   initMap();
   updateCrowdBar(calcCrowdPct());
   updateUserHUD();
+  initGoogleTokenClient();
 });
 
 /* ─────────────── PWA ─────────────── */
