@@ -4,6 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>FilaCero — Evitá las filas</title>
+
+<!-- ── PWA: manifest + icons + theme ── -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#00C48C">
+<meta name="description" content="Mapa en tiempo real de filas y ocupación en comercios cerca tuyo.">
+<link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./icons/icon-16.png">
+<link rel="icon" type="image/x-icon" href="./icons/favicon.ico">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FilaCero">
+<meta name="mobile-web-app-capable" content="yes">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&display=swap" rel="stylesheet">
@@ -35,8 +49,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 /* ── TOPBAR ── */
 .topbar{display:flex;align-items:center;gap:14px;padding:0 18px;height:60px;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(226,232,240,.7);flex-shrink:0;z-index:100;}
 .brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:17px;letter-spacing:-.6px;white-space:nowrap;color:var(--text);text-decoration:none;}
-.brand-mark{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,#00C48C,#00A87A);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,196,140,.35);}
-.brand-mark svg{width:17px;height:17px;color:#fff;}
+.brand-mark{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,#00C48C,#00A87A);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,196,140,.35);overflow:hidden;}
+.brand-mark img{width:100%;height:100%;object-fit:cover;}
 .brand span em{color:var(--green);font-style:normal;}
 
 .cbar-wrap{flex:1;max-width:300px;}
@@ -194,6 +208,15 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 #react-popup-root{position:fixed;inset:0;z-index:10000;pointer-events:none;}
 #react-popup-root.active{pointer-events:all;}
 
+/* ── INSTALL PROMPT ── */
+.install-banner{position:absolute;top:14px;left:14px;right:auto;z-index:999;background:rgba(15,23,42,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow-lg);max-width:260px;animation:adSlideIn .5s cubic-bezier(.34,1.56,.64,1);}
+.install-banner img{width:34px;height:34px;border-radius:9px;flex-shrink:0;}
+.install-banner-body{flex:1;min-width:0;}
+.install-banner-title{font-size:12px;font-weight:800;color:#fff;}
+.install-banner-sub{font-size:10px;color:rgba(255,255,255,.6);margin-top:1px;}
+.install-banner-btn{background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit;}
+.install-banner-close{background:none;border:none;color:rgba(255,255,255,.45);font-size:14px;cursor:pointer;padding:2px 4px;line-height:1;}
+
 /* ── MOBILE ── */
 @media(max-width:680px){
   .cbar-wrap{max-width:120px;}
@@ -208,7 +231,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   <header class="topbar">
     <div class="brand">
       <div class="brand-mark">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <img src="./icons/icon-96.png" alt="FilaCero">
       </div>
       <span>Fila<em>Cero</em></span>
     </div>
@@ -250,6 +273,15 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
         <div class="gps-float-btn" id="gps-btn" onclick="requestGpsPermission()" title="Activar ubicación">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 3"/></svg>
         </div>
+      </div>
+      <div class="install-banner" id="install-banner" style="display:none">
+        <img src="./icons/icon-96.png" alt="FilaCero">
+        <div class="install-banner-body">
+          <div class="install-banner-title">Instalar FilaCero</div>
+          <div class="install-banner-sub">Acceso rápido desde tu pantalla de inicio</div>
+        </div>
+        <button class="install-banner-btn" onclick="installPwa()">Instalar</button>
+        <button class="install-banner-close" onclick="document.getElementById('install-banner').style.display='none'">✕</button>
       </div>
       <div class="ad-banner" id="ad-banner">
         <div class="ad-label">Publicidad</div>
@@ -903,6 +935,34 @@ window.addEventListener('DOMContentLoaded', () => {
   initMap();
   updateCrowdBar(calcCrowdPct());
   updateUserHUD();
+});
+
+/* ─────────────── PWA: SERVICE WORKER + INSTALL ─────────────── */
+let deferredInstallPrompt = null;
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW registration failed:', err));
+  });
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (!isStandalone) document.getElementById('install-banner').style.display = 'flex';
+});
+
+function installPwa() {
+  document.getElementById('install-banner').style.display = 'none';
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.finally(() => { deferredInstallPrompt = null; });
+}
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('install-banner').style.display = 'none';
+  showToast('✅ FilaCero instalada');
 });
 </script>
 </body>
