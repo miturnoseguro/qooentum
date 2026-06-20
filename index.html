@@ -137,9 +137,11 @@ html,body{
 .leaflet-popup-content-wrapper{border-radius:14px !important;border:1px solid var(--border) !important;padding:0 !important;box-shadow:var(--shadow-lg) !important;}
 .leaflet-popup-content{margin:0 !important;}
 .leaflet-popup-tip-container{display:none;}
-.leaflet-control-zoom{border:1px solid var(--border) !important;border-radius:12px !important;overflow:hidden;box-shadow:var(--shadow) !important;}
-.leaflet-control-zoom a{color:var(--text2) !important;font-size:17px !important;font-weight:700 !important;line-height:32px !important;width:32px !important;height:32px !important;}
-.leaflet-control-zoom a:hover{color:var(--green) !important;background:var(--green-lt) !important;}
+.leaflet-control-zoom{border:1px solid var(--border) !important;border-radius:14px !important;overflow:hidden;box-shadow:var(--shadow-float) !important;background:rgba(255,255,255,.95) !important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);margin:0 14px 14px 0 !important;}
+.leaflet-control-zoom a{color:var(--text2) !important;font-size:22px !important;font-weight:700 !important;line-height:44px !important;width:44px !important;height:44px !important;background:transparent !important;transition:all .18s cubic-bezier(.34,1.56,.64,1) !important;}
+.leaflet-control-zoom a:first-child{border-bottom:1px solid var(--border) !important;}
+.leaflet-control-zoom a:hover{color:var(--green-dk) !important;background:var(--green-lt) !important;}
+.leaflet-control-zoom a:active{transform:scale(.94);}
 
 /* ── FLOATING CONTROLS ── */
 .map-float-controls{position:absolute;top:14px;right:14px;z-index:999;display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
@@ -546,7 +548,7 @@ const CONFIG = {
   GOOGLE_CLIENT_ID: '283820904318-leis6rl3mfhtve2amj59q8sq221dg3qf.apps.googleusercontent.com',
   DEFAULT_CENTER: { lat: -34.6083, lng: -58.3896 },
   SEARCH_RADIUS_M: 1000,
-  GPS_ZOOM: 17,
+  GPS_ZOOM: 18, // ~200m a la redonda (antes 17 ≈ 300m)
 };
 
 const BACKEND_READY = !CONFIG.APPS_SCRIPT_URL.startsWith('PEGAR_AQUI');
@@ -566,31 +568,6 @@ const VOTE_PTS = [10,10,15,20];
 const LEVEL_TITLES = ['Novato','Explorador','Cazador de Filas','Maestro del Mapa','Leyenda Urbana'];
 const XP_PER_LEVEL = 150;
 
-const SEED_PLACES = [
-  {id:'seed-0', name:'Carrefour Express', type:'Supermercado', logo:'🛒', rating:4.2, reviewsN:'1.2k', addr:'Av. Corrientes 1234', status:2, reporters:14, open:true, lat:-34.6048, lng:-58.3857, verified:true},
-  {id:'seed-1', name:'Farmacity Centro',  type:'Farmacia',     logo:'💊', rating:4.0, reviewsN:'856',  addr:'Florida 340',     status:0, reporters:5,  open:true, lat:-34.6037, lng:-58.3743, verified:true, photo:'https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=800&q=80'},
-  {id:'seed-2', name:'Disco San Nicolás', type:'Supermercado', logo:'🏪', rating:3.8, reviewsN:'2.1k', addr:'Av. Callao 540',  status:3, reporters:22, open:true, lat:-34.6011, lng:-58.3920},
-  {id:'seed-3', name:'Banco Nación',      type:'Banco / Cajeros', logo:'🏦', rating:3.2, reviewsN:'430', addr:'Florida 236', status:2, reporters:18, open:true, lat:-34.6074, lng:-58.3738, verified:true},
-  {id:'seed-4', name:'Rapipago',          type:'Pagos y servicios', logo:'💳', rating:3.6, reviewsN:'210', addr:'Lavalle 870', status:1, reporters:7, open:true, lat:-34.5997, lng:-58.3855},
-  {id:'seed-5', name:'Panadería La Farola', type:'Panadería', logo:'🥐', rating:4.7, reviewsN:'520', addr:'Av. Rivadavia 3400', status:0, reporters:3, open:true, lat:-34.6147, lng:-58.4148, verified:true},
-  {id:'seed-6', name:'Coto Belgrano',     type:'Supermercado', logo:'🛍️', rating:4.1, reviewsN:'3.4k', addr:'Av. Belgrano 1100', status:3, reporters:31, open:true, lat:-34.6165, lng:-58.3792, verified:true},
-  {id:'seed-7', name:'ANSES Centro',      type:'Oficina pública', logo:'📋', rating:2.9, reviewsN:'890', addr:'Av. de Mayo 760', status:3, reporters:40, open:true, lat:-34.6093, lng:-58.3802, verified:true},
-  {id:'seed-8', name:'McDonalds Callao',  type:'Comida rápida', logo:'🍔', rating:4.3, reviewsN:'5.1k', addr:'Av. Corrientes 1600', status:1, reporters:9, open:true, lat:-34.6038, lng:-58.3906, verified:true},
-  {id:'seed-9', name:'La Serenísima',     type:'Lácteos / Tienda', logo:'🥛', rating:4.5, reviewsN:'320', addr:'Scalabrini Ortiz 56', status:0, reporters:2, open:false, lat:-34.6072, lng:-58.4235},
-  {id:'seed-10',name:'Parrilla Don Pepe', type:'Restaurante', logo:'🍖', rating:4.6, reviewsN:'680', addr:'Av. Santa Fe 2100', status:0, reporters:4, open:true, lat:-34.5950, lng:-58.3990, verified:true},
-];
-
-const SEED_RANKING = [
-  {name:'Mariana G.',   init:'MG',reports:142,pts:1840,bg:'#E8FBF5',fg:'#007A59'},
-  {name:'Lucas T.',     init:'LT',reports:118,pts:1540,bg:'#FFF7ED',fg:'#9A3412'},
-  {name:'Sofía R.',     init:'SR',reports:95, pts:1210,bg:'#EEF2FF',fg:'#3730A3'},
-  {name:'Diego M.',     init:'DM',reports:78, pts:990, bg:'#FFFBEB',fg:'#92400E'},
-  {name:'Ana P.',       init:'AP',reports:61, pts:780, bg:'#FEF2F2',fg:'#991B1B'},
-  {name:'Carlos V.',    init:'CV',reports:54, pts:690, bg:'#E8FBF5',fg:'#007A59'},
-  {name:'Valentina F.', init:'VF',reports:49, pts:620, bg:'#FFFBEB',fg:'#92400E'},
-  {name:'Emilio B.',    init:'EB',reports:35, pts:440, bg:'#EEF2FF',fg:'#3730A3'},
-];
-
 const SEED_PRIZES = [
   {id:'p1',emoji:'☕',name:'Café gratis',            pts:200, cat:'Gastronomía',    partner:'Starbucks'},
   {id:'p2',emoji:'🎬',name:'Entrada de cine',         pts:400, cat:'Entretenimiento',partner:'Cinemark'},
@@ -605,8 +582,8 @@ const SEED_PRIZES = [
 /* ─────────────── STATE ─────────────── */
 let userPts = 0;
 let currentUser = null;
-let places = SEED_PLACES.map(p=>({...p}));
-let rankingData = SEED_RANKING.map(r=>({...r}));
+let places = []; // se cargan siempre desde el backend (OpenStreetMap + reportes reales), sin datos de relleno
+let rankingData = []; // se carga siempre desde la hoja Usuarios real, sin usuarios simulados
 let prizesData = SEED_PRIZES.map(p=>({...p}));
 let leafletMap = null, leafletMarkers = {};
 let isLoggedIn = false;
@@ -1075,7 +1052,8 @@ function addPoints(amount) {
 }
 
 function initMap() {
-  leafletMap = L.map('leaflet-map', { center: [CONFIG.DEFAULT_CENTER.lat, CONFIG.DEFAULT_CENTER.lng], zoom: 14, zoomControl: true });
+  leafletMap = L.map('leaflet-map', { center: [CONFIG.DEFAULT_CENTER.lat, CONFIG.DEFAULT_CENTER.lng], zoom: 14, zoomControl: false });
+  L.control.zoom({ position: 'bottomright' }).addTo(leafletMap);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
     subdomains: 'abcd',
@@ -1083,6 +1061,7 @@ function initMap() {
   }).addTo(leafletMap);
 
   buildMapMarkers();
+  setMapLoading(true);
   loadRealPlaces(CONFIG.DEFAULT_CENTER.lat, CONFIG.DEFAULT_CENTER.lng);
 
   if (navigator.geolocation) {
@@ -1090,6 +1069,7 @@ function initMap() {
       pos => {
         const { latitude, longitude } = pos.coords;
         leafletMap.setView([latitude, longitude], CONFIG.GPS_ZOOM);
+        setMapLoading(true);
         loadRealPlaces(latitude, longitude);
       },
       () => {},
@@ -1098,9 +1078,15 @@ function initMap() {
   }
 }
 
+function setMapLoading(isLoading) {
+  const el = document.getElementById('map-loading');
+  if (el) el.style.display = isLoading ? 'flex' : 'none';
+}
+
 async function loadRealPlaces(lat, lng) {
-  if (!BACKEND_READY) return;
+  if (!BACKEND_READY) { setMapLoading(false); return; }
   const result = await apiGet('places', { lat, lng, radius: CONFIG.SEARCH_RADIUS_M });
+  setMapLoading(false);
   if (!result || !Array.isArray(result.places) || result.places.length === 0) return;
   places = result.places;
   buildMapMarkers();
@@ -1401,8 +1387,20 @@ async function ensureRankingLoaded() {
 
 function buildRanking() {
   const sorted = [...rankingData].sort((a, b) => b.pts - a.pts);
+  const listEl = document.getElementById('rank-list');
+
+  if (!sorted.length) {
+    listEl.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:60px 24px;text-align:center;height:100%;">
+        <div style="font-size:34px">🏆</div>
+        <div style="font-size:14px;font-weight:800;color:var(--text)">Todavía no hay reportes</div>
+        <div style="font-size:12.5px;color:var(--text2);max-width:220px">Sé el primero en reportar el estado de un comercio y encabezá el ranking</div>
+      </div>`;
+    return;
+  }
+
   const medals = ['🥇', '🥈', '🥉'];
-  document.getElementById('rank-list').innerHTML = sorted.map((u, i) =>
+  listEl.innerHTML = sorted.map((u, i) =>
     `<div class="rank-row${u.isMe ? ' is-me' : ''}" style="animation-delay:${i * .04}s">
       <div class="rank-pos">${medals[i] || (i + 1)}</div>
       <div class="rank-avatar" style="background:${u.bg};color:${u.fg}">${u.init}</div>
