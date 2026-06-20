@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -479,6 +480,9 @@ const CONFIG = {
 
 const BACKEND_READY = !CONFIG.APPS_SCRIPT_URL.startsWith('PEGAR_AQUI');
 const GOOGLE_AUTH_READY = !CONFIG.GOOGLE_CLIENT_ID.startsWith('PEGAR_AQUI');
+
+// Clave usada en localStorage para persistir la sesión del usuario entre recargas.
+const SESSION_STORAGE_KEY = 'qooentum_user';
 
 /* ─────────────── DATA ─────────────── */
 const STATUS_CFG = [
@@ -1005,6 +1009,15 @@ function requestGpsPermission() {
    con ese token consultamos el perfil (nombre/foto/email) y se lo mandamos al
    backend (acción "login") para que lo verifique y dé de alta/actualice al
    usuario en la hoja "Usuarios".
+
+   PERSISTENCIA DE SESIÓN:
+   El access_token de Google vive ~1h y nunca se guarda (no hace falta:
+   el backend no lo vuelve a usar después del login). Lo que sí se persiste
+   en localStorage es el perfil básico del usuario ({email, name, picture}),
+   para no tener que volver a mostrar el popup de Google en cada recarga.
+   Al cargar la página, restoreSession() lee ese perfil, pinta la UI logueada
+   al instante, y de paso refresca los puntos reales contra el backend
+   (por si el usuario sumó/canjeó puntos desde otro dispositivo).
    ──────────────────────────────────────────────────────────────────────── */
 let tokenClient = null;
 
@@ -1050,6 +1063,21 @@ function initialsFromName(name) {
   return (a + b).toUpperCase() || 'YO';
 }
 
+// Pinta la UI de "usuario logueado" en el topbar. La usan tanto el login
+// real (handleGoogleTokenResponse) como la restauración de sesión guardada
+// (restoreSession), para no duplicar la lógica de pintado.
+function applyLoggedInUI() {
+  document.getElementById('login-topbar-btn').style.display = 'none';
+  document.getElementById('user-chip').style.display = 'flex';
+  const avatarEl = document.getElementById('topbar-avatar');
+  if (currentUser.picture) {
+    avatarEl.innerHTML = `<img src="${currentUser.picture}" alt="${currentUser.name}" referrerpolicy="no-referrer">`;
+  } else {
+    avatarEl.textContent = initialsFromName(currentUser.name);
+  }
+  updateUserHUD();
+}
+
 async function handleGoogleTokenResponse(resp) {
   if (!resp || resp.error || !resp.access_token) {
     resetLoginButton();
@@ -1081,15 +1109,10 @@ async function handleGoogleTokenResponse(resp) {
     if (backendResult && typeof backendResult.points === 'number') userPts = backendResult.points;
     isLoggedIn = true;
 
-    document.getElementById('login-topbar-btn').style.display = 'none';
-    document.getElementById('user-chip').style.display = 'flex';
-    const avatarEl = document.getElementById('topbar-avatar');
-    if (currentUser.picture) {
-      avatarEl.innerHTML = `<img src="${currentUser.picture}" alt="${currentUser.name}" referrerpolicy="no-referrer">`;
-    } else {
-      avatarEl.textContent = initialsFromName(currentUser.name);
-    }
-    updateUserHUD();
+    // Persiste el perfil para que la sesión sobreviva a un refresh/cierre de app.
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(currentUser));
+
+    applyLoggedInUI();
     showToast(`👋 ¡Hola, ${currentUser.name.split(' ')[0]}!`);
 
     // Si había un reporte esperando login para sumar puntos, lo reintenta ahora.
@@ -1105,6 +1128,56 @@ async function handleGoogleTokenResponse(resp) {
   } finally {
     resetLoginButton();
   }
+}
+
+// Restaura la sesión guardada en localStorage al abrir/recargar la app,
+// para que el usuario no tenga que volver a tocar "Ingresar" cada vez.
+async function restoreSession() {
+  const saved = localStorage.getItem(SESSION_STORAGE_KEY);
+  if (!saved) return;
+
+  try {
+    currentUser = JSON.parse(saved);
+  } catch (err) {
+    localStorage.removeItem(SESSION_STORAGE_KEY);
+    currentUser = null;
+    return;
+  }
+  if (!currentUser || !currentUser.email) {
+    localStorage.removeItem(SESSION_STORAGE_KEY);
+    currentUser = null;
+    return;
+  }
+
+  isLoggedIn = true;
+  applyLoggedInUI();
+
+  // Refresca los puntos reales contra el backend (por si cambiaron desde
+  // otro dispositivo, o el usuario canjeó un premio en otra sesión).
+  if (BACKEND_READY) {
+    const me = await apiGet('me', { email: currentUser.email });
+    if (me && me.exists) {
+      userPts = me.points || 0;
+      if (me.name) currentUser.name = me.name;
+      if (me.picture) currentUser.picture = me.picture;
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(currentUser));
+      applyLoggedInUI();
+    }
+  }
+}
+
+// Cierra la sesión local: borra el perfil guardado y vuelve a mostrar
+// el botón de "Ingresar". No revoca el acceso del lado de Google, solo
+// olvida la sesión de esta app en este dispositivo.
+function logout() {
+  localStorage.removeItem(SESSION_STORAGE_KEY);
+  currentUser = null;
+  isLoggedIn = false;
+  userPts = 0;
+  document.getElementById('user-chip').style.display = 'none';
+  document.getElementById('login-topbar-btn').style.display = 'flex';
+  updateUserHUD();
+  showToast('👋 Sesión cerrada');
 }
 
 function updateUserHUD() {
@@ -1263,6 +1336,7 @@ window.addEventListener('DOMContentLoaded', () => {
   updateCrowdBar(calcCrowdPct());
   updateUserHUD();
   initGoogleTokenClient();
+  restoreSession();
 });
 
 /* ─────────────── PWA ─────────────── */
