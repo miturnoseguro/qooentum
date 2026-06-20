@@ -43,7 +43,6 @@
   --shadow-lg:0 12px 40px rgba(15,23,42,.12),0 4px 12px rgba(15,23,42,.06);
   --shadow-float:0 8px 32px rgba(15,23,42,.18),0 2px 8px rgba(15,23,42,.10);
   --font-base:15px;
-  /* ── Safe area shortcuts ── */
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
   --sal: env(safe-area-inset-left, 0px);
@@ -52,7 +51,7 @@
 html,body{
   height:100%;
   overflow:hidden;
-  background:#fff; /* cubre el area del notch con blanco */
+  background:#fff;
   color:var(--text);
   font-family:'Inter',system-ui,sans-serif;
   font-size:var(--font-base);
@@ -68,14 +67,12 @@ html,body{
   overflow:hidden;
 }
 
-/* ── TOPBAR — absorbe el safe-area-inset-top ── */
+/* ── TOPBAR ── */
 .topbar{
   display:flex;
   align-items:center;
   gap:14px;
-  /* padding-top = safe area + espacio visual normal */
   padding: max(var(--sat), 10px) 18px 0;
-  /* height crece con el notch */
   height: calc(60px + var(--sat));
   background:rgba(255,255,255,.96);
   backdrop-filter:blur(16px);
@@ -105,6 +102,21 @@ html,body{
 .pts-label{font-size:13px;font-weight:800;color:var(--green);line-height:1.2;}
 .xp-bar-bg{height:4px;background:var(--surface2);border-radius:99px;margin-top:3px;overflow:hidden;border:1px solid var(--border);}
 .xp-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#00C48C,#22D3EE);box-shadow:0 0 6px rgba(34,211,238,.6);transition:width .6s cubic-bezier(.34,1.1,.64,1);}
+
+/* ── Cooldown chip en topbar ── */
+.cooldown-topbar-chip{
+  display:none;
+  font-size:10px;
+  font-weight:700;
+  color:#92400E;
+  background:#FFFBEB;
+  border:1px solid #FDE68A;
+  border-radius:99px;
+  padding:2px 8px;
+  margin-top:4px;
+  white-space:nowrap;
+  letter-spacing:.1px;
+}
 
 .login-topbar-btn{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#00C48C,#009E72);color:#fff;border:none;border-radius:99px;padding:8px 17px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;box-shadow:0 3px 10px rgba(0,196,140,.3);transition:all .2s;font-family:inherit;}
 .login-topbar-btn:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(0,196,140,.4);}
@@ -140,10 +152,34 @@ html,body{
 @keyframes gpsPulse{0%,100%{box-shadow:var(--shadow-float)}50%{box-shadow:0 0 0 6px rgba(99,102,241,.18),var(--shadow-float)}}
 @keyframes rotate{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 
+/* ── COOLDOWN MAP BADGE — píldora centrada superior del mapa ── */
+.cooldown-map-badge{
+  position:absolute;
+  top:14px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:998;
+  background:rgba(255,251,235,.97);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border:1px solid #FDE68A;
+  border-radius:99px;
+  padding:8px 18px;
+  font-size:12px;
+  font-weight:700;
+  color:#92400E;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  box-shadow:0 4px 16px rgba(146,64,14,.14);
+  white-space:nowrap;
+  pointer-events:none;
+  animation:adSlideIn .35s cubic-bezier(.34,1.56,.64,1);
+}
+
 /* ── AD BANNER ── */
 .ad-banner{
   position:absolute;
-  /* sube el banner sobre el home indicator */
   bottom: calc(80px + var(--sab));
   left:14px;
   z-index:999;
@@ -192,7 +228,7 @@ html,body{
 .fc-tail{width:2px;height:6px;background:#CBD5E1;}
 .fc-base{width:6px;height:6px;border-radius:50%;background:#CBD5E1;}
 
-/* ── FLOATING NAV PILL — clara, consistente con el resto de la UI ── */
+/* ── FLOATING NAV PILL ── */
 .bottom-nav{
   position:absolute;
   bottom: max(20px, calc(var(--sab) + 12px));
@@ -218,8 +254,6 @@ html,body{
 .nav-btn.active{color:var(--green-dk);background:var(--green-lt);font-weight:800;}
 .nav-btn.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:20px;height:2px;background:var(--green);border-radius:0 0 3px 3px;animation:tabIndicator .22s ease;}
 @keyframes tabIndicator{from{width:0;opacity:0}to{width:20px;opacity:1}}
-
-/* ── Tab "Mapa": destacada dentro de la pill, más grande que el resto ── */
 .nav-btn.is-main{padding:12px 24px;font-size:14.5px;font-weight:800;color:var(--text);}
 .nav-btn.is-main svg{width:20px;height:20px;}
 .nav-btn.is-main.active{color:#fff;background:linear-gradient(135deg,var(--green),var(--green-dk));box-shadow:0 4px 14px rgba(0,196,140,.35);}
@@ -367,6 +401,10 @@ html,body{
           <span class="pts-label" id="my-pts">240 pts</span>
         </div>
         <div class="xp-bar-bg"><div class="xp-bar-fill" id="xp-bar-fill" style="width:0%"></div></div>
+        <!-- Cooldown chip: aparece debajo de la barra XP cuando hay bloqueo activo -->
+        <div class="cooldown-topbar-chip" id="cooldown-topbar-chip">
+          ⏳ Reportar en <span id="cooldown-topbar-txt"></span>
+        </div>
       </div>
     </div>
     <button class="login-topbar-btn" id="login-topbar-btn" onclick="doGoogleLogin(this)">
@@ -379,6 +417,12 @@ html,body{
   <div id="panel-map" class="panel visible" style="position:relative;">
     <div class="map-pane">
       <div id="leaflet-map"></div>
+
+      <!-- Badge flotante de cooldown en el mapa: visible solo cuando hay bloqueo activo -->
+      <div class="cooldown-map-badge" id="cooldown-map-badge" style="display:none">
+        ⏳ Próximo reporte en <span id="cooldown-map-txt"></span>
+      </div>
+
       <div class="map-float-controls">
         <div class="map-refresh-btn" onclick="manualRefresh()">
           <svg id="refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
@@ -462,31 +506,18 @@ html,body{
 
 <script>
 /* ════════════════════════════════════════════════════════════
-   CONFIG — completar después de desplegar el backend
+   CONFIG
    ════════════════════════════════════════════════════════════ */
 const CONFIG = {
-  // URL del Web App de Apps Script (Implementar > Nueva implementación > Aplicación web).
-  // Ejemplo: 'https://script.google.com/macros/s/AKfycb.../exec'
   APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzIHUOeq5y7gvk8vDPavJ1OjGo_gZp0EHlWTtc5wB90rZOxGaZsQelYPEK5H81-byCiMQ/exec',
-
-  // Client ID de OAuth 2.0 (Google Cloud Console > Credenciales > ID de cliente OAuth > Aplicación web)
-  // Ejemplo: '1234567890-abc123.apps.googleusercontent.com'
   GOOGLE_CLIENT_ID: '283820904318-leis6rl3mfhtve2amj59q8sq221dg3qf.apps.googleusercontent.com',
-
-  // Centro por defecto del mapa si el usuario no comparte ubicación (Buenos Aires, Microcentro)
   DEFAULT_CENTER: { lat: -34.6083, lng: -58.3896 },
-
-  // Radio de búsqueda de comercios reales (metros)
   SEARCH_RADIUS_M: 1000,
-
-  // Zoom al activar el GPS, para mostrar ~300m a la redonda
   GPS_ZOOM: 17,
 };
 
 const BACKEND_READY = !CONFIG.APPS_SCRIPT_URL.startsWith('PEGAR_AQUI');
 const GOOGLE_AUTH_READY = !CONFIG.GOOGLE_CLIENT_ID.startsWith('PEGAR_AQUI');
-
-// Clave usada en localStorage para persistir la sesión del usuario entre recargas.
 const SESSION_STORAGE_KEY = 'qooentum_user';
 
 /* ─────────────── DATA ─────────────── */
@@ -502,10 +533,6 @@ const VOTE_PTS = [10,10,15,20];
 const LEVEL_TITLES = ['Novato','Explorador','Cazador de Filas','Maestro del Mapa','Leyenda Urbana'];
 const XP_PER_LEVEL = 150;
 
-// Datos semilla: se usan como primer render (instantáneo) y como respaldo
-// si el backend todavía no está configurado o falla una consulta puntual.
-// En cuanto CONFIG.APPS_SCRIPT_URL está completo, todo esto se reemplaza
-// por datos reales/dinámicos provenientes del Google Sheet.
 const SEED_PLACES = [
   {id:'seed-0', name:'Carrefour Express', type:'Supermercado', logo:'🛒', rating:4.2, reviewsN:'1.2k', addr:'Av. Corrientes 1234', status:2, reporters:14, open:true, lat:-34.6048, lng:-58.3857, verified:true},
   {id:'seed-1', name:'Farmacity Centro',  type:'Farmacia',     logo:'💊', rating:4.0, reviewsN:'856',  addr:'Florida 340',     status:0, reporters:5,  open:true, lat:-34.6037, lng:-58.3743, verified:true, photo:'https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=800&q=80'},
@@ -544,7 +571,7 @@ const SEED_PRIZES = [
 
 /* ─────────────── STATE ─────────────── */
 let userPts = 0;
-let currentUser = null;          // { email, name, picture } una vez logueado
+let currentUser = null;
 let places = SEED_PLACES.map(p=>({...p}));
 let rankingData = SEED_RANKING.map(r=>({...r}));
 let prizesData = SEED_PRIZES.map(p=>({...p}));
@@ -552,14 +579,11 @@ let leafletMap = null, leafletMarkers = {};
 let isLoggedIn = false;
 let countdown = 30;
 let voteCount = 0;
-let pendingVote = null; // {placeId, statusIdx} si el usuario reporta sin estar logueado
+let pendingVote = null;
 
-/* ── Cooldown entre reportes: el usuario no puede reportar más de una vez
-   cada VOTE_COOLDOWN_HOURS horas (en ningún comercio). nextVoteAt llega
-   siempre del backend (login/me/vote) — nunca se calcula solo del lado
-   del cliente, para que no se pueda evadir cambiando la hora del equipo. ── */
+/* ── Cooldown ── */
 const VOTE_COOLDOWN_HOURS_FALLBACK = 8;
-let nextVoteAt = null; // Date | null — null = puede votar ahora
+let nextVoteAt = null; // Date | null
 
 function applyCooldownInfo(info) {
   if (!info) return;
@@ -579,15 +603,39 @@ function formatCooldownRemaining(ms) {
   return `${h} h ${m} min`;
 }
 
-/* ─────────────── BACKEND API (Apps Script Web App) ─────────────────
-   GET  ?action=places&lat=..&lng=..&radius=..   → lugares reales + estado de la comunidad
-   GET  ?action=ranking                          → top usuarios por puntos
-   GET  ?action=prizes                           → catálogo de premios
-   GET  ?action=me&email=..                      → perfil + puntos del usuario
-   POST {action:'login',  access_token}          → valida el login de Google y crea/actualiza el usuario
-   POST {action:'vote',   place, status, email}  → guarda un reporte y suma puntos
-   POST {action:'redeem', email, prize_id}       → canjea un premio
-   ──────────────────────────────────────────────────────────────── */
+/* ─────────────── COOLDOWN UI — tick cada 1 segundo ───────────────
+   Actualiza tres lugares a la vez:
+     1. Chip debajo de la barra XP en el topbar
+     2. Píldora flotante centrada en el mapa
+     3. Re-renderiza el popup abierto para que su botón se habilite
+        automáticamente en cuanto vence el cooldown
+   ────────────────────────────────────────────────────────────────── */
+function tickCooldownUI() {
+  const ms = getVoteCooldownRemainingMs();
+  const onCd = ms > 0;
+
+  // 1. Topbar chip
+  const topbarChip = document.getElementById('cooldown-topbar-chip');
+  const topbarTxt  = document.getElementById('cooldown-topbar-txt');
+  if (topbarChip && topbarTxt) {
+    topbarChip.style.display = onCd ? 'block' : 'none';
+    if (onCd) topbarTxt.textContent = formatCooldownRemaining(ms);
+  }
+
+  // 2. Badge flotante en el mapa (solo visible si el panel mapa está activo)
+  const mapBadge    = document.getElementById('cooldown-map-badge');
+  const mapBadgeTxt = document.getElementById('cooldown-map-txt');
+  if (mapBadge && mapBadgeTxt) {
+    const mapVisible = document.getElementById('panel-map').classList.contains('visible');
+    mapBadge.style.display = (onCd && mapVisible && isLoggedIn) ? 'flex' : 'none';
+    if (onCd) mapBadgeTxt.textContent = formatCooldownRemaining(ms);
+  }
+
+  // 3. Re-renderizar popup si el cooldown acaba de vencer
+  if (!onCd && currentPopupPlace) renderPopup(currentPopupPlace);
+}
+
+/* ─────────────── BACKEND API ─────────────── */
 async function apiGet(action, params = {}) {
   if (!BACKEND_READY) return null;
   const qs = new URLSearchParams({ action, ...params }).toString();
@@ -605,8 +653,6 @@ async function apiGet(action, params = {}) {
 async function apiPost(action, payload = {}) {
   if (!BACKEND_READY) return null;
   try {
-    // Sin header Content-Type a propósito: así el request queda como
-    // "simple request" y Apps Script lo puede recibir sin problemas de CORS.
     const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
       method: 'POST',
       body: JSON.stringify({ action, ...payload }),
@@ -621,9 +667,6 @@ async function apiPost(action, payload = {}) {
   }
 }
 
-// Variante de apiPost solo para 'vote': el backend puede rechazar el
-// reporte por cooldown (error 'COOLDOWN:<iso-date>'), que no es una falla
-// de conexión sino una regla de negocio — no debe mostrar el toast genérico.
 async function apiPostVote(payload) {
   if (!BACKEND_READY) return { ok: false, network: false, result: null };
   try {
@@ -645,7 +688,6 @@ async function apiPostVote(payload) {
     return { ok: false, network: false, result: null };
   }
 }
-
 
 /* ─────────────── REACT POPUP ─────────────── */
 const { useState, useEffect, useRef } = React;
@@ -684,8 +726,7 @@ function PlacePopup({ place, onClose, onVoteSubmit, cooldownRemainingMs }) {
     });
   }, []);
 
-  // Cuenta regresiva en vivo mientras el popup está abierto, por si el
-  // cooldown vence justo durante la visita (caso borde, pero prolijo).
+  // Cuenta regresiva en vivo dentro del popup
   useEffect(() => {
     if (cooldownMs <= 0) return;
     const id = setInterval(() => {
@@ -799,13 +840,16 @@ function PlacePopup({ place, onClose, onVoteSubmit, cooldownRemainingMs }) {
           React.createElement('span', { style:{ fontSize:12, fontWeight:700, color:'#007A59' } }, 'Estás cerca · podés reportar')
         ),
         React.createElement('p', { style:{ margin:'0 0 10px', fontSize:11, fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.8px' } }, '¿Cómo está ahora?'),
+        // Bloque de cooldown activo
         onCooldown && React.createElement('div', {
           style:{ display:'flex', alignItems:'center', gap:10, background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:12, padding:'13px 14px', marginBottom:12 }
         },
           React.createElement('span', { style:{ fontSize:20 } }, '⏳'),
           React.createElement('div', null,
             React.createElement('p', { style:{ margin:0, fontSize:13, fontWeight:800, color:'#92400E' } }, 'Ya reportaste recientemente'),
-            React.createElement('p', { style:{ margin:'2px 0 0', fontSize:12, color:'#92400E' } }, `Podés volver a reportar en ${formatCooldownRemaining(cooldownMs)}`)
+            React.createElement('p', { style:{ margin:'2px 0 0', fontSize:12, color:'#92400E' } },
+              `Podés volver a reportar en ${formatCooldownRemaining(cooldownMs)}`
+            )
           )
         ),
         !submitted && React.createElement('div', { style:{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:12, opacity: onCooldown ? 0.5 : 1, pointerEvents: onCooldown ? 'none' : 'auto' } },
@@ -868,7 +912,9 @@ function PlacePopup({ place, onClose, onVoteSubmit, cooldownRemainingMs }) {
             React.createElement('line', { x1:22, y1:2, x2:11, y2:13 }),
             React.createElement('polygon', { points:'22 2 15 22 11 13 2 9 22 2' })
           ),
-          onCooldown ? `Disponible en ${formatCooldownRemaining(cooldownMs)}` : 'Reportar estado'
+          onCooldown
+            ? `Disponible en ${formatCooldownRemaining(cooldownMs)}`
+            : 'Reportar estado'
         ),
         React.createElement('p', { style:{ margin:'10px 0 0', fontSize:11, color:'#94A3B8', display:'flex', alignItems:'center', gap:5, fontWeight:500 } },
           React.createElement('svg', { viewBox:'0 0 24 24', fill:'none', stroke:'currentColor', strokeWidth:2, strokeLinecap:'round', strokeLinejoin:'round', style:{ width:12, height:12, flexShrink:0 } },
@@ -914,16 +960,11 @@ async function handlePopupVoteSubmit(placeId, voteIdx) {
   const p = places.find(x => x.id === placeId);
   if (!p) return;
 
-  // El popup ya bloquea el envío si hay cooldown activo, pero se vuelve a
-  // chequear acá por si el tiempo venció justo mientras estaba abierto:
-  // así nunca se aplica una actualización optimista que después el
-  // backend va a rechazar.
   if (isLoggedIn && getVoteCooldownRemainingMs() > 0) {
     showToast(`⏳ Podés reportar de nuevo en ${formatCooldownRemaining(getVoteCooldownRemainingMs())}`);
     return;
   }
 
-  // Actualización optimista en el mapa: se ve al instante.
   p.status = voteIdx;
   p.reporters += 1;
   voteCount++;
@@ -931,7 +972,6 @@ async function handlePopupVoteSubmit(placeId, voteIdx) {
   updateCrowdBar(calcCrowdPct());
 
   if (!isLoggedIn) {
-    // Sin cuenta no se pueden guardar puntos: se pide login y se reintenta el voto.
     pendingVote = { placeId, voteIdx };
     showToast('🔑 Iniciá sesión para sumar tus puntos');
     doGoogleLogin(document.getElementById('login-topbar-btn'));
@@ -953,14 +993,12 @@ async function submitVoteToBackend(p, voteIdx) {
   });
 
   if (res.cooldown) {
-    // El backend rechazó el reporte por cooldown (ej: dos pestañas a la vez,
-    // o el cliente todavía no había sincronizado el último voto). Se revierte
-    // la actualización optimista del marcador y se informa cuándo podrá
-    // volver a reportar.
+    // El backend rechazó por cooldown: revertir actualización optimista
     nextVoteAt = res.nextVoteAt ? new Date(res.nextVoteAt) : null;
     p.reporters = Math.max(0, p.reporters - 1);
     refreshMarkerIcon(p.id);
     updateCrowdBar(calcCrowdPct());
+    tickCooldownUI(); // actualiza inmediatamente los badges
     showToast(`⏳ Ya reportaste hace poco · próximo en ${formatCooldownRemaining(getVoteCooldownRemainingMs())}`);
     return;
   }
@@ -970,14 +1008,12 @@ async function submitVoteToBackend(p, voteIdx) {
     updateUserHUD();
     flashPoints();
     applyCooldownInfo(res.result);
+    tickCooldownUI(); // muestra el badge/chip de cooldown inmediatamente post-voto
     showToast(`🎉 +${pts} puntos ganados`);
   } else if (res.ok) {
-    addPoints(pts); // respaldo local si el backend respondió sin puntos
+    addPoints(pts);
     showToast(`🎉 +${pts} puntos ganados`);
   } else {
-    // Falla de red/backend: se mantiene la actualización optimista del
-    // mapa (ya se ve el nuevo estado) pero no se suman puntos locales,
-    // para no inflar el contador si el reporte no llegó a guardarse.
     showToast('⚠️ No se pudo conectar con el servidor');
   }
 }
@@ -1007,35 +1043,30 @@ function addPoints(amount) {
 
 function initMap() {
   leafletMap = L.map('leaflet-map', { center: [CONFIG.DEFAULT_CENTER.lat, CONFIG.DEFAULT_CENTER.lng], zoom: 14, zoomControl: true });
-  // Basemap gris clarito (CartoDB Positron) — look limpio y minimalista
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
     subdomains: 'abcd',
     maxZoom: 20,
   }).addTo(leafletMap);
 
-  // Primer render instantáneo con datos semilla, mientras se cargan los reales.
-  // No se abre ningún popup automáticamente al cargar.
   buildMapMarkers();
-
   loadRealPlaces(CONFIG.DEFAULT_CENTER.lat, CONFIG.DEFAULT_CENTER.lng);
 
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       pos => {
         const { latitude, longitude } = pos.coords;
-        // Zoom cercano para mostrar ~300m a la redonda apenas se obtiene el GPS
         leafletMap.setView([latitude, longitude], CONFIG.GPS_ZOOM);
         loadRealPlaces(latitude, longitude);
       },
-      () => { /* el usuario no compartió ubicación: se queda con el centro por defecto */ },
+      () => {},
       { enableHighAccuracy: true, timeout: 6000 }
     );
   }
 }
 
 async function loadRealPlaces(lat, lng) {
-  if (!BACKEND_READY) return; // sin backend configurado, se queda con los datos semilla
+  if (!BACKEND_READY) return;
   const result = await apiGet('places', { lat, lng, radius: CONFIG.SEARCH_RADIUS_M });
   if (!result || !Array.isArray(result.places) || result.places.length === 0) return;
   places = result.places;
@@ -1113,21 +1144,7 @@ function requestGpsPermission() {
   );
 }
 
-/* ─────────────── GOOGLE LOGIN (real, vía Google Identity Services) ───────────────
-   Usa el "token client" de GIS: pide un access_token con un popup de Google,
-   con ese token consultamos el perfil (nombre/foto/email) y se lo mandamos al
-   backend (acción "login") para que lo verifique y dé de alta/actualice al
-   usuario en la hoja "Usuarios".
-
-   PERSISTENCIA DE SESIÓN:
-   El access_token de Google vive ~1h y nunca se guarda (no hace falta:
-   el backend no lo vuelve a usar después del login). Lo que sí se persiste
-   en localStorage es el perfil básico del usuario ({email, name, picture}),
-   para no tener que volver a mostrar el popup de Google en cada recarga.
-   Al cargar la página, restoreSession() lee ese perfil, pinta la UI logueada
-   al instante, y de paso refresca los puntos reales contra el backend
-   (por si el usuario sumó/canjeó puntos desde otro dispositivo).
-   ──────────────────────────────────────────────────────────────────────── */
+/* ─────────────── GOOGLE LOGIN ─────────────── */
 let tokenClient = null;
 
 function initGoogleTokenClient() {
@@ -1151,7 +1168,6 @@ function doGoogleLogin(btn) {
   if (isLoggedIn) return;
   if (!GOOGLE_AUTH_READY) { showToast('⚠️ El login con Google todavía no está configurado'); return; }
   if (!initGoogleTokenClient()) { showToast('⏳ Google se está cargando, probá de nuevo en un segundo'); return; }
-
   const loginBtn = btn || document.getElementById('login-topbar-btn');
   if (loginBtn) { loginBtn.classList.add('is-loading'); const t = loginBtn.querySelector('.gbtn-txt'); if (t) t.textContent = 'Conectando…'; }
   tokenClient.requestAccessToken({ prompt: 'select_account' });
@@ -1172,9 +1188,6 @@ function initialsFromName(name) {
   return (a + b).toUpperCase() || 'YO';
 }
 
-// Pinta la UI de "usuario logueado" en el topbar. La usan tanto el login
-// real (handleGoogleTokenResponse) como la restauración de sesión guardada
-// (restoreSession), para no duplicar la lógica de pintado.
 function applyLoggedInUI() {
   document.getElementById('login-topbar-btn').style.display = 'none';
   document.getElementById('user-chip').style.display = 'flex';
@@ -1185,6 +1198,7 @@ function applyLoggedInUI() {
     avatarEl.textContent = initialsFromName(currentUser.name);
   }
   updateUserHUD();
+  tickCooldownUI(); // sincroniza los badges de cooldown al mostrar el chip de usuario
 }
 
 async function handleGoogleTokenResponse(resp) {
@@ -1219,13 +1233,11 @@ async function handleGoogleTokenResponse(resp) {
     applyCooldownInfo(backendResult);
     isLoggedIn = true;
 
-    // Persiste el perfil para que la sesión sobreviva a un refresh/cierre de app.
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(currentUser));
 
     applyLoggedInUI();
     showToast(`👋 ¡Hola, ${currentUser.name.split(' ')[0]}!`);
 
-    // Si había un reporte esperando login para sumar puntos, lo reintenta ahora.
     if (pendingVote) {
       const { placeId, voteIdx } = pendingVote;
       pendingVote = null;
@@ -1240,8 +1252,6 @@ async function handleGoogleTokenResponse(resp) {
   }
 }
 
-// Restaura la sesión guardada en localStorage al abrir/recargar la app,
-// para que el usuario no tenga que volver a tocar "Ingresar" cada vez.
 async function restoreSession() {
   const saved = localStorage.getItem(SESSION_STORAGE_KEY);
   if (!saved) return;
@@ -1262,8 +1272,6 @@ async function restoreSession() {
   isLoggedIn = true;
   applyLoggedInUI();
 
-  // Refresca los puntos reales contra el backend (por si cambiaron desde
-  // otro dispositivo, o el usuario canjeó un premio en otra sesión).
   if (BACKEND_READY) {
     const me = await apiGet('me', { email: currentUser.email });
     if (me && me.exists) {
@@ -1277,9 +1285,6 @@ async function restoreSession() {
   }
 }
 
-// Cierra la sesión local: borra el perfil guardado y vuelve a mostrar
-// el botón de "Ingresar". No revoca el acceso del lado de Google, solo
-// olvida la sesión de esta app en este dispositivo.
 function logout() {
   localStorage.removeItem(SESSION_STORAGE_KEY);
   currentUser = null;
@@ -1289,6 +1294,7 @@ function logout() {
   document.getElementById('user-chip').style.display = 'none';
   document.getElementById('login-topbar-btn').style.display = 'flex';
   updateUserHUD();
+  tickCooldownUI();
   showToast('👋 Sesión cerrada');
 }
 
@@ -1297,6 +1303,9 @@ function updateUserHUD() {
   document.getElementById('my-pts').textContent = userPts + ' pts';
   document.getElementById('lvl-badge').textContent = 'LVL ' + info.level;
   document.getElementById('xp-bar-fill').style.width = info.pct + '%';
+  // Sincronizar también el panel de premios si está visible
+  const prizePts = document.getElementById('my-pts-prizes');
+  if (prizePts) prizePts.textContent = userPts + ' pts disponibles';
 }
 
 function levelUpCelebration(level) {
@@ -1339,12 +1348,6 @@ function doRefresh() {
     if (updated) renderPopup(updated);
   }
 }
-
-setInterval(() => {
-  countdown--;
-  if (countdown <= 0) { countdown = 30; doRefresh(); }
-  document.getElementById('refresh-txt').textContent = countdown + 's';
-}, 1000);
 
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -1439,9 +1442,20 @@ function switchTab(tab) {
     document.getElementById('panel-' + t).classList.toggle('visible', t === tab);
   });
   if (tab === 'ranking') { buildRanking(); ensureRankingLoaded().then(buildRanking); }
-  if (tab === 'prizes') { buildPrizes(); ensurePrizesLoaded().then(buildPrizes); }
+  if (tab === 'prizes')  { buildPrizes();  ensurePrizesLoaded().then(buildPrizes); }
   if (tab === 'map' && leafletMap) setTimeout(() => leafletMap.invalidateSize(), 50);
+  // Actualizar badge del mapa al volver a ese tab
+  tickCooldownUI();
 }
+
+/* ─────────────── INTERVAL PRINCIPAL ───────────────
+   Corre cada segundo: refresco automático del mapa + countdown de cooldown. */
+setInterval(() => {
+  countdown--;
+  if (countdown <= 0) { countdown = 30; doRefresh(); }
+  document.getElementById('refresh-txt').textContent = countdown + 's';
+  tickCooldownUI();
+}, 1000);
 
 window.addEventListener('DOMContentLoaded', () => {
   initMap();
