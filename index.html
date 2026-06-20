@@ -143,8 +143,10 @@ html,body{
 
 /* ── FLOATING CONTROLS ── */
 .map-float-controls{position:absolute;top:14px;right:14px;z-index:999;display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
-.map-refresh-btn{background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:12px;padding:7px 13px;font-size:12px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:6px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow-float);}
-.map-refresh-btn:hover{border-color:var(--green);color:var(--green);transform:translateY(-1px);}
+.map-refresh-btn{background:linear-gradient(135deg,#00C48C,#009E72);border:none;border-radius:12px;padding:9px 15px;font-size:12.5px;font-weight:800;color:#fff;display:flex;align-items:center;gap:7px;cursor:pointer;transition:all .2s;box-shadow:0 6px 18px rgba(0,196,140,.4);}
+.map-refresh-btn:hover{transform:translateY(-1px) scale(1.03);box-shadow:0 8px 22px rgba(0,196,140,.5);}
+.map-refresh-btn:active{transform:translateY(0) scale(.98);}
+.map-refresh-btn svg{width:15px;height:15px;flex-shrink:0;}
 .gps-float-btn{width:42px;height:42px;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .22s cubic-bezier(.34,1.56,.64,1);box-shadow:var(--shadow-float);}
 .gps-float-btn:hover{border-color:var(--blue);background:var(--blue-lt);transform:translateY(-2px) scale(1.06);}
 .gps-float-btn svg{width:18px;height:18px;color:var(--blue);}
@@ -296,7 +298,22 @@ html,body{
 
 /* ── PRIZES ── */
 .prizes-header-note{padding:11px 15px;background:linear-gradient(135deg,var(--green-lt),#D1FAF0);border-bottom:1px solid rgba(0,196,140,.2);font-size:12px;font-weight:600;color:var(--green-dk);display:flex;align-items:center;gap:6px;flex-shrink:0;}
-.prizes-list{flex:1;overflow-y:auto;background:var(--bg);padding:13px 15px;display:flex;flex-direction:column;gap:10px;}
+.prizes-coming-soon{
+  margin:13px 15px 0;
+  background:linear-gradient(135deg,#FFFBEB,#FEF3C7);
+  border:1px solid #FDE68A;
+  border-radius:var(--radius-lg);
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-shrink:0;
+  box-shadow:var(--shadow-sm);
+}
+.prizes-coming-soon-emoji{font-size:26px;flex-shrink:0;}
+.prizes-coming-soon-title{font-size:13.5px;font-weight:800;color:#92400E;}
+.prizes-coming-soon-sub{font-size:12px;color:#92400E;opacity:.85;margin-top:2px;}
+.prizes-list{flex:1;overflow-y:auto;background:var(--bg);padding:13px 15px;display:flex;flex-direction:column;gap:10px;position:relative;}
 .prize-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:15px;display:flex;align-items:center;gap:13px;transition:all .22s cubic-bezier(.34,1.56,.64,1);animation:rowIn .3s ease both;box-shadow:var(--shadow-sm);}
 .prize-row:hover{transform:translateY(-2px);box-shadow:var(--shadow);}
 .prize-emoji{font-size:30px;width:44px;text-align:center;flex-shrink:0;}
@@ -368,8 +385,17 @@ html,body{
 
 /* ── MOBILE ── */
 @media(max-width:680px){
-  .cbar-wrap{max-width:120px;}
+  .topbar{
+    flex-wrap:wrap;
+    height:auto;
+    padding: max(var(--sat), 10px) 14px 10px;
+    row-gap:10px;
+  }
+  .brand{order:1;}
   .brand span{display:none;}
+  .cbar-wrap{order:2;flex:1;max-width:none;min-width:0;margin-left:auto;}
+  .user-chip{order:3;width:100%;justify-content:flex-start;}
+  .login-topbar-btn{order:3;width:100%;justify-content:center;}
   .ad-banner{max-width:240px;}
   .bottom-nav{bottom: max(16px, calc(var(--sab) + 10px));}
 }
@@ -425,7 +451,7 @@ html,body{
 
       <div class="map-float-controls">
         <div class="map-refresh-btn" onclick="manualRefresh()">
-          <svg id="refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          <svg id="refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
           <span id="refresh-txt">30s</span>
         </div>
         <div class="gps-float-btn" id="gps-btn" onclick="requestGpsPermission()" title="Activar ubicación">
@@ -491,6 +517,13 @@ html,body{
     <div class="prizes-header-note">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       Reportá y acumulá puntos para canjear premios reales
+    </div>
+    <div class="prizes-coming-soon">
+      <div class="prizes-coming-soon-emoji">🚀</div>
+      <div>
+        <div class="prizes-coming-soon-title">¡Muy pronto vas a poder canjear!</div>
+        <div class="prizes-coming-soon-sub">Estamos cerrando los últimos detalles con nuestros partners. Mientras tanto, seguí sumando puntos.</div>
+      </div>
     </div>
     <div class="prizes-list" id="prizes-list"></div>
     <nav class="bottom-nav" id="bottom-nav-prizes">
@@ -1404,37 +1437,14 @@ function buildPrizes() {
         <div class="prize-cat">${pr.pts.toLocaleString('es-AR')} pts · ${pr.cat} · ${pr.partner}</div>
         <div class="pbar-bg"><div class="pbar-fill" style="width:0%" data-w="${pct}"></div></div>
       </div>
-      <div class="prize-cta ${can ? 'can' : 'cant'}"${can ? ` onclick="redeemPrize(${idx})"` : ''}>${can ? 'Canjear' : 'Faltan ' + (pr.pts - userPts).toLocaleString('es-AR') + ' pts'}</div>
+      <div class="prize-cta cant">Muy pronto</div>
     </div>`;
   }).join('');
   requestAnimationFrame(() => { document.querySelectorAll('.pbar-fill').forEach(el => { el.style.width = el.dataset.w + '%'; }); });
 }
 
 async function redeemPrize(idx) {
-  const pr = prizesData[idx];
-  if (!pr || userPts < pr.pts) return;
-
-  if (!isLoggedIn) {
-    showToast('🔑 Iniciá sesión para canjear premios');
-    doGoogleLogin(document.getElementById('login-topbar-btn'));
-    return;
-  }
-
-  if (BACKEND_READY) {
-    const result = await apiPost('redeem', { email: currentUser.email, prize_id: pr.id });
-    if (result && typeof result.points === 'number') {
-      userPts = result.points;
-      updateUserHUD();
-      buildPrizes();
-      showToast(result.code ? `🎁 Canjeaste: ${pr.name} · Código ${result.code}` : `🎁 Canjeaste: ${pr.name}`);
-    } else {
-      showToast('⚠️ No se pudo procesar el canje');
-    }
-    return;
-  }
-
-  userPts -= pr.pts; updateUserHUD(); buildPrizes();
-  showToast(`🎁 Canjeaste: ${pr.name}`);
+  showToast('🚀 Los canjes van a estar disponibles muy pronto');
 }
 
 function switchTab(tab) {
