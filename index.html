@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -103,21 +104,6 @@ html,body{
 .xp-bar-bg{height:4px;background:var(--surface2);border-radius:99px;margin-top:3px;overflow:hidden;border:1px solid var(--border);}
 .xp-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#00C48C,#22D3EE);box-shadow:0 0 6px rgba(34,211,238,.6);transition:width .6s cubic-bezier(.34,1.1,.64,1);}
 
-/* ── Cooldown chip en topbar ── */
-.cooldown-topbar-chip{
-  display:none;
-  font-size:10px;
-  font-weight:700;
-  color:#92400E;
-  background:#FFFBEB;
-  border:1px solid #FDE68A;
-  border-radius:99px;
-  padding:2px 8px;
-  margin-top:4px;
-  white-space:nowrap;
-  letter-spacing:.1px;
-}
-
 .login-topbar-btn{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#00C48C,#009E72);color:#fff;border:none;border-radius:99px;padding:8px 17px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;box-shadow:0 3px 10px rgba(0,196,140,.3);transition:all .2s;font-family:inherit;}
 .login-topbar-btn:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(0,196,140,.4);}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -155,31 +141,6 @@ html,body{
 .gps-float-btn.pulsing{animation:gpsPulse .8s ease-in-out infinite;}
 @keyframes gpsPulse{0%,100%{box-shadow:var(--shadow-float)}50%{box-shadow:0 0 0 6px rgba(99,102,241,.18),var(--shadow-float)}}
 @keyframes rotate{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-
-/* ── COOLDOWN MAP BADGE — píldora centrada superior del mapa ── */
-.cooldown-map-badge{
-  position:absolute;
-  top:14px;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:998;
-  background:rgba(255,251,235,.97);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-  border:1px solid #FDE68A;
-  border-radius:99px;
-  padding:8px 18px;
-  font-size:12px;
-  font-weight:700;
-  color:#92400E;
-  display:flex;
-  align-items:center;
-  gap:7px;
-  box-shadow:0 4px 16px rgba(146,64,14,.14);
-  white-space:nowrap;
-  pointer-events:none;
-  animation:adSlideIn .35s cubic-bezier(.34,1.56,.64,1);
-}
 
 /* ── AD BANNER ── */
 .ad-banner{
@@ -385,6 +346,32 @@ html,body{
 .install-banner-btn{background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit;}
 .install-banner-close{background:none;border:none;color:rgba(255,255,255,.45);font-size:14px;cursor:pointer;padding:2px 4px;line-height:1;}
 
+/* ── MAP LOADING INDICATOR ── */
+.map-loading-pill{
+  position:absolute;
+  top:14px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:998;
+  background:rgba(255,255,255,.96);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border:1px solid var(--border);
+  border-radius:99px;
+  padding:7px 16px;
+  font-size:12px;
+  font-weight:700;
+  color:var(--text2);
+  display:none;
+  align-items:center;
+  gap:8px;
+  box-shadow:var(--shadow-float);
+  white-space:nowrap;
+  pointer-events:none;
+}
+.map-loading-pill.show{display:flex;}
+.map-loading-spinner{width:12px;height:12px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--green);animation:spin .7s linear infinite;flex-shrink:0;}
+
 /* ── MOBILE ── */
 @media(max-width:680px){
   .topbar{
@@ -432,10 +419,6 @@ html,body{
           <span class="pts-label" id="my-pts">240 pts</span>
         </div>
         <div class="xp-bar-bg"><div class="xp-bar-fill" id="xp-bar-fill" style="width:0%"></div></div>
-        <!-- Cooldown chip: aparece debajo de la barra XP cuando hay bloqueo activo -->
-        <div class="cooldown-topbar-chip" id="cooldown-topbar-chip">
-          ⏳ Reportar en <span id="cooldown-topbar-txt"></span>
-        </div>
       </div>
     </div>
     <button class="login-topbar-btn" id="login-topbar-btn" onclick="doGoogleLogin(this)">
@@ -449,9 +432,10 @@ html,body{
     <div class="map-pane">
       <div id="leaflet-map"></div>
 
-      <!-- Badge flotante de cooldown en el mapa: visible solo cuando hay bloqueo activo -->
-      <div class="cooldown-map-badge" id="cooldown-map-badge" style="display:none">
-        ⏳ Próximo reporte en <span id="cooldown-map-txt"></span>
+      <!-- Pill de carga: visible mientras se sincroniza con OpenStreetMap en segundo plano -->
+      <div class="map-loading-pill" id="map-loading-pill">
+        <span class="map-loading-spinner"></span>
+        <span id="map-loading-txt">Buscando más comercios…</span>
       </div>
 
       <div class="map-float-controls">
@@ -551,7 +535,7 @@ const CONFIG = {
   GOOGLE_CLIENT_ID: '283820904318-leis6rl3mfhtve2amj59q8sq221dg3qf.apps.googleusercontent.com',
   DEFAULT_CENTER: { lat: -34.6083, lng: -58.3896 },
   SEARCH_RADIUS_M: 1000,
-  GPS_ZOOM: 18, // ~200m a la redonda (antes 17 ≈ 300m)
+  GPS_ZOOM: 16, // ~1km a la redonda visible, acorde al radio que se busca en el backend
 };
 
 const BACKEND_READY = !CONFIG.APPS_SCRIPT_URL.startsWith('PEGAR_AQUI');
@@ -594,18 +578,34 @@ let countdown = 30;
 let voteCount = 0;
 let pendingVote = null;
 
-/* ── Cooldown ── */
-const VOTE_COOLDOWN_HOURS_FALLBACK = 8;
-let nextVoteAt = null; // Date | null
+/* ── Cooldown POR COMERCIO ──────────────────────────────────────────
+   Antes el cooldown era global (un único nextVoteAt para todo el
+   usuario). Ahora cada comercio tiene su propio cooldown de 8hs:
+   el usuario puede reportar Pizzería Pepito a las 10:00 y reportar
+   Farmacity a las 10:05 sin problema; recién a las 18:00 va a poder
+   volver a reportar Pizzería Pepito.
+   placeCooldowns: { [place_id]: Date } -> próximo momento habilitado
+   ──────────────────────────────────────────────────────────────── */
+let placeCooldowns = {};
 
-function applyCooldownInfo(info) {
-  if (!info) return;
-  nextVoteAt = info.nextVoteAt ? new Date(info.nextVoteAt) : null;
+function applyCooldownInfo(cooldownsMap) {
+  if (!cooldownsMap) return;
+  Object.keys(cooldownsMap).forEach(placeId => {
+    const iso = cooldownsMap[placeId];
+    if (iso) placeCooldowns[placeId] = new Date(iso);
+  });
 }
 
-function getVoteCooldownRemainingMs() {
-  if (!nextVoteAt) return 0;
-  return Math.max(0, nextVoteAt.getTime() - Date.now());
+function applyPlaceCooldown(placeId, iso) {
+  if (!placeId) return;
+  if (iso) placeCooldowns[placeId] = new Date(iso);
+  else delete placeCooldowns[placeId];
+}
+
+function getVoteCooldownRemainingMs(placeId) {
+  const next = placeCooldowns[placeId];
+  if (!next) return 0;
+  return Math.max(0, next.getTime() - Date.now());
 }
 
 function formatCooldownRemaining(ms) {
@@ -616,36 +616,16 @@ function formatCooldownRemaining(ms) {
   return `${h} h ${m} min`;
 }
 
-/* ─────────────── COOLDOWN UI — tick cada 1 segundo ───────────────
-   Actualiza tres lugares a la vez:
-     1. Chip debajo de la barra XP en el topbar
-     2. Píldora flotante centrada en el mapa
-     3. Re-renderiza el popup abierto para que su botón se habilite
-        automáticamente en cuanto vence el cooldown
-   ────────────────────────────────────────────────────────────────── */
+/* Tick liviano: solo re-renderiza el popup abierto (si lo hay) cuando
+   su cooldown específico vence, para habilitar el botón de reportar
+   automáticamente sin que el usuario tenga que cerrar y volver a abrir. */
 function tickCooldownUI() {
-  const ms = getVoteCooldownRemainingMs();
-  const onCd = ms > 0;
-
-  // 1. Topbar chip
-  const topbarChip = document.getElementById('cooldown-topbar-chip');
-  const topbarTxt  = document.getElementById('cooldown-topbar-txt');
-  if (topbarChip && topbarTxt) {
-    topbarChip.style.display = onCd ? 'block' : 'none';
-    if (onCd) topbarTxt.textContent = formatCooldownRemaining(ms);
+  if (!currentPopupPlace) return;
+  const ms = getVoteCooldownRemainingMs(currentPopupPlace.id);
+  if (ms <= 0 && currentPopupPlace._wasOnCooldown) {
+    currentPopupPlace._wasOnCooldown = false;
+    renderPopup(currentPopupPlace);
   }
-
-  // 2. Badge flotante en el mapa (solo visible si el panel mapa está activo)
-  const mapBadge    = document.getElementById('cooldown-map-badge');
-  const mapBadgeTxt = document.getElementById('cooldown-map-txt');
-  if (mapBadge && mapBadgeTxt) {
-    const mapVisible = document.getElementById('panel-map').classList.contains('visible');
-    mapBadge.style.display = (onCd && mapVisible && isLoggedIn) ? 'flex' : 'none';
-    if (onCd) mapBadgeTxt.textContent = formatCooldownRemaining(ms);
-  }
-
-  // 3. Re-renderizar popup si el cooldown acaba de vencer
-  if (!onCd && currentPopupPlace) renderPopup(currentPopupPlace);
 }
 
 /* ─────────────── BACKEND API ─────────────── */
@@ -742,7 +722,7 @@ function PlacePopup({ place, onClose, onVoteSubmit, cooldownRemainingMs }) {
     });
   }, []);
 
-  // Cuenta regresiva en vivo dentro del popup
+  // Cuenta regresiva en vivo dentro del popup (cooldown de ESTE comercio)
   useEffect(() => {
     if (cooldownMs <= 0) return;
     const id = setInterval(() => {
@@ -867,18 +847,20 @@ function PlacePopup({ place, onClose, onVoteSubmit, cooldownRemainingMs }) {
           React.createElement('span', { style:{ fontSize:12, fontWeight:700, color:'#007A59' } }, 'Estás cerca · podés reportar')
         ),
         !onCooldown && React.createElement('p', { style:{ margin:'0 0 10px', fontSize:11, fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.8px' } }, '¿Cómo está ahora?'),
-        // Bloque de cooldown activo — versión compacta para que el popup no
-        // crezca de más y termine saliéndose de la pantalla. Reemplaza por
-        // completo a la grilla de votación + nota "estás cerca" mientras
-        // el usuario esté bloqueado.
+        // Bloque de cooldown activo — específico de ESTE comercio. El usuario
+        // puede seguir reportando cualquier otro comercio sin restricción;
+        // solo este lugar puntual queda bloqueado hasta que venza el cooldown.
         onCooldown && React.createElement('div', {
           style:{ display:'flex', alignItems:'center', gap:10, background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:12, padding:'12px 14px', marginBottom:4 }
         },
           React.createElement('span', { style:{ fontSize:20, flexShrink:0 } }, '⏳'),
           React.createElement('div', null,
-            React.createElement('p', { style:{ margin:0, fontSize:13, fontWeight:800, color:'#92400E' } }, 'Ya reportaste recientemente'),
+            React.createElement('p', { style:{ margin:0, fontSize:13, fontWeight:800, color:'#92400E' } }, `Ya reportaste ${place.name} hace poco`),
             React.createElement('p', { style:{ margin:'2px 0 0', fontSize:12, color:'#92400E' } },
-              `Podés volver a reportar en ${formatCooldownRemaining(cooldownMs)}`
+              `Podés volver a reportar este comercio en ${formatCooldownRemaining(cooldownMs)}`
+            ),
+            React.createElement('p', { style:{ margin:'4px 0 0', fontSize:11, color:'#92400E', opacity:.8 } },
+              'Mientras tanto podés reportar cualquier otro comercio sin problema'
             )
           )
         ),
@@ -964,6 +946,7 @@ let currentPopupPlace = null;
 
 function openPlacePopup(place) {
   currentPopupPlace = place;
+  currentPopupPlace._wasOnCooldown = getVoteCooldownRemainingMs(place.id) > 0;
   const container = document.getElementById('react-popup-root');
   container.classList.add('active');
   if (!popupRoot) popupRoot = ReactDOM.createRoot(container);
@@ -973,7 +956,7 @@ function openPlacePopup(place) {
 function renderPopup(place) {
   popupRoot.render(React.createElement(PlacePopup, {
     place, onClose: closePopup, onVoteSubmit: handlePopupVoteSubmit,
-    cooldownRemainingMs: getVoteCooldownRemainingMs(),
+    cooldownRemainingMs: getVoteCooldownRemainingMs(place.id),
   }));
 }
 
@@ -988,8 +971,8 @@ async function handlePopupVoteSubmit(placeId, voteIdx) {
   const p = places.find(x => x.id === placeId);
   if (!p) return;
 
-  if (isLoggedIn && getVoteCooldownRemainingMs() > 0) {
-    showToast(`⏳ Podés reportar de nuevo en ${formatCooldownRemaining(getVoteCooldownRemainingMs())}`);
+  if (isLoggedIn && getVoteCooldownRemainingMs(placeId) > 0) {
+    showToast(`⏳ Podés reportar ${p.name} de nuevo en ${formatCooldownRemaining(getVoteCooldownRemainingMs(placeId))}`);
     return;
   }
 
@@ -1021,13 +1004,13 @@ async function submitVoteToBackend(p, voteIdx) {
   });
 
   if (res.cooldown) {
-    // El backend rechazó por cooldown: revertir actualización optimista
-    nextVoteAt = res.nextVoteAt ? new Date(res.nextVoteAt) : null;
+    // El backend rechazó por cooldown DE ESTE COMERCIO: revertir actualización optimista
+    applyPlaceCooldown(p.id, res.nextVoteAt);
     p.reporters = Math.max(0, p.reporters - 1);
     refreshMarkerIcon(p.id);
     updateCrowdBar(calcCrowdPct());
-    tickCooldownUI(); // actualiza inmediatamente los badges
-    showToast(`⏳ Ya reportaste hace poco · próximo en ${formatCooldownRemaining(getVoteCooldownRemainingMs())}`);
+    if (currentPopupPlace && currentPopupPlace.id === p.id) renderPopup(p);
+    showToast(`⏳ Ya reportaste ${p.name} hace poco · próximo en ${formatCooldownRemaining(getVoteCooldownRemainingMs(p.id))}`);
     return;
   }
 
@@ -1035,8 +1018,7 @@ async function submitVoteToBackend(p, voteIdx) {
     userPts = res.result.points;
     updateUserHUD();
     flashPoints();
-    applyCooldownInfo(res.result);
-    tickCooldownUI(); // muestra el badge/chip de cooldown inmediatamente post-voto
+    if (res.result.cooldown) applyPlaceCooldown(res.result.cooldown.placeId, res.result.cooldown.nextVoteAt);
     showToast(`🎉 +${pts} puntos ganados`);
   } else if (res.ok) {
     addPoints(pts);
@@ -1079,7 +1061,6 @@ function initMap() {
   }).addTo(leafletMap);
 
   buildMapMarkers();
-  setMapLoading(true);
   loadRealPlaces(CONFIG.DEFAULT_CENTER.lat, CONFIG.DEFAULT_CENTER.lng);
 
   if (navigator.geolocation) {
@@ -1087,7 +1068,6 @@ function initMap() {
       pos => {
         const { latitude, longitude } = pos.coords;
         leafletMap.setView([latitude, longitude], CONFIG.GPS_ZOOM);
-        setMapLoading(true);
         loadRealPlaces(latitude, longitude);
       },
       () => {},
@@ -1096,19 +1076,43 @@ function initMap() {
   }
 }
 
-function setMapLoading(isLoading) {
-  const el = document.getElementById('map-loading');
-  if (el) el.style.display = isLoading ? 'flex' : 'none';
+function setMapLoading(isLoading, label) {
+  const el = document.getElementById('map-loading-pill');
+  const txt = document.getElementById('map-loading-txt');
+  if (!el) return;
+  if (label && txt) txt.textContent = label;
+  el.classList.toggle('show', !!isLoading);
 }
 
+/* ── Carga de comercios en DOS FASES para que se sienta instantánea:
+   FASE 1 (rápida): trae lo que el backend ya tiene guardado en la
+     planilla "Lugares" (sin consultar OpenStreetMap). Esto vuelve casi
+     al instante y ya pinta los comercios conocidos en el mapa.
+   FASE 2 (en segundo plano): le pide al backend que sincronice contra
+     OpenStreetMap (Overpass) para descubrir comercios nuevos en la
+     zona. Esto puede tardar unos segundos, pero como el usuario ya
+     está viendo el mapa con la FASE 1, no lo nota como una demora.
+     Cuando termina, se actualizan los marcadores con lo nuevo. ── */
 async function loadRealPlaces(lat, lng) {
-  if (!BACKEND_READY) { setMapLoading(false); return; }
-  const result = await apiGet('places', { lat, lng, radius: CONFIG.SEARCH_RADIUS_M });
+  if (!BACKEND_READY) return;
+
+  // FASE 1 — instantánea, solo lectura de lo ya guardado
+  const fast = await apiGet('places', { lat, lng, radius: CONFIG.SEARCH_RADIUS_M });
+  if (fast && Array.isArray(fast.places) && fast.places.length) {
+    places = fast.places;
+    buildMapMarkers();
+    updateCrowdBar(calcCrowdPct());
+  }
+
+  // FASE 2 — sincroniza con OpenStreetMap en segundo plano
+  setMapLoading(true, 'Buscando más comercios…');
+  const synced = await apiGet('sync_places', { lat, lng, radius: CONFIG.SEARCH_RADIUS_M });
   setMapLoading(false);
-  if (!result || !Array.isArray(result.places) || result.places.length === 0) return;
-  places = result.places;
-  buildMapMarkers();
-  updateCrowdBar(calcCrowdPct());
+  if (synced && Array.isArray(synced.places) && synced.places.length) {
+    places = synced.places;
+    buildMapMarkers();
+    updateCrowdBar(calcCrowdPct());
+  }
 }
 
 function makeStatusChipHTML(status) {
@@ -1235,7 +1239,6 @@ function applyLoggedInUI() {
     avatarEl.textContent = initialsFromName(currentUser.name);
   }
   updateUserHUD();
-  tickCooldownUI(); // sincroniza los badges de cooldown al mostrar el chip de usuario
 }
 
 async function handleGoogleTokenResponse(resp) {
@@ -1267,7 +1270,7 @@ async function handleGoogleTokenResponse(resp) {
       picture: profile.picture || '',
     };
     if (backendResult && typeof backendResult.points === 'number') userPts = backendResult.points;
-    applyCooldownInfo(backendResult);
+    if (backendResult && backendResult.cooldowns) applyCooldownInfo(backendResult.cooldowns);
     isLoggedIn = true;
 
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(currentUser));
@@ -1315,7 +1318,7 @@ async function restoreSession() {
       userPts = me.points || 0;
       if (me.name) currentUser.name = me.name;
       if (me.picture) currentUser.picture = me.picture;
-      applyCooldownInfo(me);
+      if (me.cooldowns) applyCooldownInfo(me.cooldowns);
       localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(currentUser));
       applyLoggedInUI();
     }
@@ -1327,11 +1330,10 @@ function logout() {
   currentUser = null;
   isLoggedIn = false;
   userPts = 0;
-  nextVoteAt = null;
+  placeCooldowns = {};
   document.getElementById('user-chip').style.display = 'none';
   document.getElementById('login-topbar-btn').style.display = 'flex';
   updateUserHUD();
-  tickCooldownUI();
   showToast('👋 Sesión cerrada');
 }
 
@@ -1470,12 +1472,11 @@ function switchTab(tab) {
   if (tab === 'ranking') { buildRanking(); ensureRankingLoaded().then(buildRanking); }
   if (tab === 'prizes')  { buildPrizes();  ensurePrizesLoaded().then(buildPrizes); }
   if (tab === 'map' && leafletMap) setTimeout(() => leafletMap.invalidateSize(), 50);
-  // Actualizar badge del mapa al volver a ese tab
-  tickCooldownUI();
 }
 
 /* ─────────────── INTERVAL PRINCIPAL ───────────────
-   Corre cada segundo: refresco automático del mapa + countdown de cooldown. */
+   Corre cada segundo: refresco automático del mapa + countdown de cooldown
+   del popup que esté abierto en ese momento (si lo hay). */
 setInterval(() => {
   countdown--;
   if (countdown <= 0) { countdown = 30; doRefresh(); }
