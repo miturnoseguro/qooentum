@@ -1,9 +1,9 @@
 {
-  "name": "FilaCero — Evitá las filas",
+  "name": "Qooentum — Enterate cuando gente hay, antes de ir",
   "short_name": "Qooentum",
   "description": "Enterate cuanta gente hay, antes de ir",
-  "start_url": "./index.html",
-  "scope": "./",
+  "start_url": "https://qooentum.com/index.html",
+  "scope": "https://qooentum.com/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#F0F4F8",
