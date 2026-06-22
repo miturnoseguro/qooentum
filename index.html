@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -71,7 +70,7 @@ html,body{
   display:flex;
   align-items:center;
   gap:14px;
-  padding: max(var(--sat), 10px) 18px 0;
+  padding: max(var(--sat), 10px) 18px 10px;
   height: calc(60px + var(--sat));
   background:rgba(255,255,255,.96);
   backdrop-filter:blur(16px);
@@ -79,13 +78,22 @@ html,body{
   border-bottom:1px solid rgba(226,232,240,.7);
   flex-shrink:0;
   z-index:100;
+  flex-wrap:nowrap;
 }
 .brand{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-decoration:none;cursor:pointer;flex-shrink:0;}
 .brand-mark{width:150px;height:43px;border-radius:11px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .brand-mark img{width:100%;height:100%;object-fit:cover;}
-/* Texto "powered by Bigdaat.com" debajo del logo */
 .brand-powered{font-size:9px;font-weight:500;color:var(--text3);letter-spacing:.15px;padding-left:2px;white-space:nowrap;line-height:1; position: relative; top: -10px; left: 27px;}
 .brand-powered strong{font-weight:700;color:var(--text3);}
+
+/* ── TOPBAR AUTH AREA (desktop: a la derecha del logo) ── */
+.topbar-auth{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-left:auto;
+  flex-shrink:0;
+}
 
 .cbar-wrap{flex:1;max-width:300px;}
 .cbar-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-bottom:5px;font-weight:600;letter-spacing:.1px;}
@@ -104,7 +112,7 @@ html,body{
 .xp-bar-bg{height:4px;background:var(--surface2);border-radius:99px;margin-top:3px;overflow:hidden;border:1px solid var(--border);}
 .xp-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#00C48C,#22D3EE);box-shadow:0 0 6px rgba(34,211,238,.6);transition:width .6s cubic-bezier(.34,1.1,.64,1);}
 /* ── USER CHIP WRAP ── */
-.user-chip-wrap{position:relative;display:none;}
+.user-chip-wrap{position:relative;}
 .chip-caret{width:12px;height:12px;color:var(--text3);flex-shrink:0;transition:transform .2s;}
 .user-chip-wrap.open .chip-caret{transform:rotate(180deg);}
 /* ── LOGOUT DROPDOWN ── */
@@ -156,7 +164,7 @@ html,body{
   position:absolute;
   top:14px;
   left:14px;
-  right:72px;
+  right:14px;
   z-index:999;
   animation:adSlideIn .4s cubic-bezier(.34,1.56,.64,1);
 }
@@ -276,24 +284,8 @@ html,body{
   flex-shrink:0;
 }
 
-/* ── FLOATING CONTROLS — debajo del buscador ── */
-.map-float-controls{position:absolute;top:66px;right:14px;z-index:999;display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
-.map-refresh-btn{
-  background:linear-gradient(135deg,#00C48C,#009E72);
-  border:none;border-radius:12px;padding:9px 15px;
-  font-size:11.5px;font-weight:800;color:#fff;
-  display:flex;align-items:center;gap:7px;
-  cursor:pointer;transition:all .2s;
-  box-shadow:0 6px 18px rgba(0,196,140,.4);
-  text-align:left;line-height:1.3;
-  font-family:inherit;
-}
-.map-refresh-btn:hover{transform:translateY(-1px) scale(1.03);box-shadow:0 8px 22px rgba(0,196,140,.5);}
-.map-refresh-btn:active{transform:translateY(0) scale(.98);}
-.map-refresh-btn svg{width:15px;height:15px;flex-shrink:0;}
-.map-refresh-btn-texts{display:flex;flex-direction:column;gap:1px;}
-.map-refresh-btn-main{font-size:12px;font-weight:800;line-height:1.2;}
-.map-refresh-btn-sub{font-size:10px;font-weight:600;opacity:.82;line-height:1.2;}
+/* ── FLOATING CONTROLS — GPS arriba a la derecha del buscador ── */
+.map-float-controls{position:absolute;top:14px;right:14px;z-index:999;display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
 .gps-float-btn{width:42px;height:42px;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .22s cubic-bezier(.34,1.56,.64,1);box-shadow:var(--shadow-float);}
 .gps-float-btn:hover{border-color:var(--blue);background:var(--blue-lt);transform:translateY(-2px) scale(1.06);}
 .gps-float-btn svg{width:18px;height:18px;color:var(--blue);}
@@ -302,6 +294,34 @@ html,body{
 .gps-float-btn.active svg{color:var(--green);}
 @keyframes gpsPulse{0%,100%{box-shadow:var(--shadow-float)}50%{box-shadow:0 0 0 6px rgba(99,102,241,.18),var(--shadow-float)}}
 @keyframes rotate{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+/* ── REFRESH BUTTON — flotante centrado arriba del nav ── */
+.map-refresh-btn{
+  position:absolute;
+  bottom: calc(76px + max(20px, calc(var(--sab) + 12px)));
+  left:50%;
+  transform:translateX(-50%);
+  z-index:600;
+  background:#fff;
+  border:1.5px solid var(--border);
+  border-radius:99px;
+  padding:9px 20px;
+  font-size:12px;font-weight:800;
+  color:var(--green-dk);
+  display:flex;align-items:center;gap:8px;
+  cursor:pointer;
+  transition:all .2s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:var(--shadow-float);
+  font-family:inherit;
+  white-space:nowrap;
+}
+.map-refresh-btn:hover{
+  transform:translateX(-50%) translateY(-2px) scale(1.04);
+  box-shadow:0 8px 24px rgba(0,196,140,.2);
+  border-color:var(--green);
+}
+.map-refresh-btn:active{transform:translateX(-50%) scale(.97);}
+.map-refresh-btn svg{width:15px;height:15px;color:var(--green);flex-shrink:0;}
 
 /* ── MAP MARKER CARDS ── */
 .fc-card-wrap{display:flex;flex-direction:column;align-items:center;cursor:pointer;filter:drop-shadow(0 3px 10px rgba(15,23,42,.16));transition:transform .18s cubic-bezier(.34,1.56,.64,1),filter .18s;}
@@ -544,19 +564,25 @@ html,body{
     height:auto;
     padding: max(var(--sat), 10px) 14px 10px;
     row-gap:10px;
+    align-items:center;
   }
-  .brand{order:1;}
-  .brand span{display:none;}
-  .cbar-wrap{order:2;flex:1;max-width:none;min-width:0;margin-left:auto;}
-  .user-chip{order:3;width:100%;justify-content:flex-start;}
-  .login-topbar-btn{order:3;width:100%;justify-content:center;}
+  .brand{order:1;flex-shrink:0;}
+  .cbar-wrap{order:2;flex:1;max-width:none;min-width:0;margin-left:0;}
+  /* En mobile: auth va en segunda fila, ancho completo */
+  .topbar-auth{
+    order:3;
+    width:100%;
+    margin-left:0;
+    justify-content:flex-start;
+  }
   .bottom-nav{bottom: max(16px, calc(var(--sab) + 10px));}
   .leaflet-control-zoom{margin:0 12px calc(92px + var(--sab)) 0 !important;}
-  .checkin-tabs{gap:6px;}
-  .checkin-tab{padding:10px 5px 9px;}
-  .map-search-wrap{right:62px;}
-  /* En mobile: controles flotantes debajo del buscador */
-  .map-float-controls{top:70px;}
+  .map-search-wrap{left:14px;right:14px;}
+  .map-float-controls{top:14px;right:14px;}
+  /* Refresh button en mobile: ajustar bottom */
+  .map-refresh-btn{
+    bottom: calc(72px + max(16px, calc(var(--sab) + 10px)));
+  }
 }
 /* ── CHECK-IN MODAL ── */
 .checkin-overlay{
@@ -673,54 +699,74 @@ html,body{
 <body>
 <div class="app">
   <header class="topbar">
-    <!-- LOGO: clic recarga la página y va al inicio -->
+    <!-- LOGO -->
     <a class="brand" href="javascript:void(0)" onclick="window.location.reload()" title="Ir al inicio">
       <div class="brand-mark">
         <img src="logo.png" alt="Qooentum" width="150" height="43">
       </div>
       <span class="brand-powered">powered by <strong>Bigdaat.com</strong></span>
     </a>
-    <!-- USER CHIP con dropdown logout -->
-    <div class="user-chip-wrap" id="user-chip-wrap">
-      <div class="user-chip" id="user-chip" onclick="toggleUserDropdown()">
-        <div class="avatar" id="topbar-avatar">YO</div>
-        <div class="user-chip-info">
-          <div class="pts-row">
-            <span class="lvl-badge" id="lvl-badge">Nivel 1</span>
-            <span class="pts-label" id="my-pts">0 pts</span>
-          </div>
-          <div class="xp-bar-bg"><div class="xp-bar-fill" id="xp-bar-fill" style="width:0%"></div></div>
-        </div>
-        <svg class="chip-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+
+    <!-- BARRA DE CROWD (centro) -->
+    <div class="cbar-wrap">
+      <div class="cbar-meta">
+        <span>Nivel de ocupación</span>
+        <span id="cbar-pct">–</span>
       </div>
-      <div class="user-dropdown" id="user-dropdown">
-        <button class="user-dropdown-item" onclick="doLogout()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;flex-shrink:0;">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
-          Cerrar sesión
-        </button>
+      <div class="cbar-track">
+        <div class="cbar-overlay" id="cbar-overlay" style="width:70%"></div>
+        <div class="cbar-needle" id="cbar-needle" style="left:30%"></div>
       </div>
     </div>
-    <button class="login-topbar-btn" id="login-topbar-btn" onclick="doGoogleLogin(this)">
-      <svg class="gicon" viewBox="0 0 48 48" style="width:14px;height:14px"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
-      <span class="gbtn-spinner"></span>
-      <span class="gbtn-txt">Ingresar</span>
-    </button>
+
+    <!-- AUTH: derecha en desktop, segunda fila en mobile -->
+    <div class="topbar-auth">
+      <!-- USER CHIP con dropdown logout -->
+      <div class="user-chip-wrap" id="user-chip-wrap" style="display:none;">
+        <div class="user-chip" id="user-chip" onclick="toggleUserDropdown()">
+          <div class="avatar" id="topbar-avatar">YO</div>
+          <div class="user-chip-info">
+            <div class="pts-row">
+              <span class="lvl-badge" id="lvl-badge">Nivel 1</span>
+              <span class="pts-label" id="my-pts">0 pts</span>
+            </div>
+            <div class="xp-bar-bg"><div class="xp-bar-fill" id="xp-bar-fill" style="width:0%"></div></div>
+          </div>
+          <svg class="chip-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="user-dropdown" id="user-dropdown">
+          <button class="user-dropdown-item" onclick="doLogout()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;flex-shrink:0;">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+      <button class="login-topbar-btn" id="login-topbar-btn" onclick="doGoogleLogin(this)">
+        <svg class="gicon" viewBox="0 0 48 48" style="width:14px;height:14px"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
+        <span class="gbtn-spinner"></span>
+        <span class="gbtn-txt">Ingresar</span>
+      </button>
+    </div>
   </header>
 
   <div id="panel-map" class="panel visible" style="position:relative;">
     <div class="map-pane">
       <div id="leaflet-map"></div>
 
-      <!-- BUSCADOR FLOTANTE -->
+      <!-- BUSCADOR FLOTANTE — ancho completo, GPS a la derecha inline -->
       <div class="map-search-wrap" id="map-search-wrap">
         <div class="map-search-bar">
           <svg class="map-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input class="map-search-input" id="map-search-input" type="text" placeholder="Buscar lugar por nombre y dirección para ver cuánta gente hay" autocomplete="off" spellcheck="false">
           <button class="map-search-clear" id="map-search-clear" onclick="clearSearch()">✕</button>
+          <!-- GPS integrado dentro del buscador -->
+          <div class="gps-float-btn" id="gps-btn" onclick="requestGpsPermission()" title="Centrar en mi ubicación" style="width:34px;height:34px;border-radius:9px;flex-shrink:0;box-shadow:none;border-color:var(--border);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 3"/></svg>
+          </div>
         </div>
         <div class="search-results-dropdown" id="search-results-dropdown"></div>
       </div>
@@ -730,18 +776,11 @@ html,body{
         Tocá el comercio donde estás
       </div>
 
-      <div class="map-float-controls">
-        <button class="map-refresh-btn" onclick="manualRefresh()" title="Actualizar comercios visibles">
-          <svg id="refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-          <div class="map-refresh-btn-texts">
-            <span class="map-refresh-btn-main">Actualizar</span>
-            <span class="map-refresh-btn-sub">Actualizá los locales</span>
-          </div>
-        </button>
-        <div class="gps-float-btn" id="gps-btn" onclick="requestGpsPermission()" title="Centrar en mi ubicación">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 3"/></svg>
-        </div>
-      </div>
+      <!-- REFRESH BUTTON — flotante centrado arriba del nav -->
+      <button class="map-refresh-btn" id="map-refresh-btn" onclick="manualRefresh()" title="Actualizar comercios visibles">
+        <svg id="refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Actualizar
+      </button>
 
       <div class="install-banner" id="install-banner" style="display:none">
         <img src="./icons/icon-96.png" alt="Qooentum">
@@ -753,7 +792,6 @@ html,body{
         <button class="install-banner-close" onclick="document.getElementById('install-banner').style.display='none'">✕</button>
       </div>
 
-      <!-- ad-banner oculto por ahora -->
       <div class="ad-banner" id="ad-banner" style="display:none">
         <div class="ad-label">Publicidad</div>
         <div class="ad-logo">🍕</div>
@@ -837,13 +875,13 @@ const CONFIG = {
   APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzq25vO_iow3D0Suwi7CpLcIhpYAedVPct8kA-vTCiOAr2gtjD-fvAnH-xQ1kVjUMBiGw/exec',
   GOOGLE_CLIENT_ID: '283820904318-leis6rl3mfhtve2amj59q8sq221dg3qf.apps.googleusercontent.com',
   DEFAULT_CENTER: { lat: -34.6083, lng: -58.3896 },
-  NEARBY_RADIUS_M: 30,          // Solo mostrar lugares a 30m en la carga inicial
+  NEARBY_RADIUS_M: 30,
   REPORT_RADIUS_M: 10,
-  GPS_ZOOM: 19,                 // Zoom muy cercano (~50m de radio visual)
-  MAX_MOVE_FROM_USER_M: 200,    // No dejar mover el mapa más de 200m del usuario
+  GPS_ZOOM: 19,
+  MAX_MOVE_FROM_USER_M: 200,
   CHECKIN_RADIUS_M: 150,
   CHECKIN_NEAR_M: 50,
-  OVERPASS_RADIUS_M: 250,       // Reducido para cargar menos datos
+  OVERPASS_RADIUS_M: 250,
   VOTE_COOLDOWN_MS: 8 * 60 * 60 * 1000,
 };
 
@@ -860,7 +898,6 @@ const STATUS_CFG = [
   {label:'Mucha gente',    sub:'Fila larga',       color:'#F97316'},
   {label:'Colapsado',      sub:'¡No vengas ahora!',color:'#EF4444'},
 ];
-/* Estado especial para locales sin reportes del día */
 const NO_REPORT_STATUS = { label:'Sin reportes hoy', sub:'Sé el primero en reportar', color:'#b2b2b2' };
 const WAIT  = ['Sin espera','~5 min','~15 min','+30 min'];
 const TREND = ['↘ Baja','→ Estable','↗ Sube','↗ Sube'];
@@ -924,8 +961,8 @@ const SEED_PRIZES = [
 /* ─────────────── STATE ─────────────── */
 let userPts = 0;
 let currentUser = null;
-let places = [];      // todos los lugares cargados (pueden ser de lejos via búsqueda)
-let nearbyPlaces = []; // solo los que están a ≤30m del usuario (se muestran en mapa)
+let places = [];
+let nearbyPlaces = [];
 let rankingData = [];
 let prizesData = SEED_PRIZES.map(p=>({...p}));
 let leafletMap = null, leafletMarkers = {};
@@ -950,7 +987,7 @@ let searchAbort = null;
 let searchQuery = '';
 
 /* ════════════════════════════════════════════════════════════
-   COOLDOWN — persistencia local
+   COOLDOWN
    ════════════════════════════════════════════════════════════ */
 function loadCooldownsFromStorage() {
   try {
@@ -1021,7 +1058,6 @@ function tickCooldownUI() {
   }
 }
 
-/* ── Haversine distance (metros) ── */
 function distanceMeter(lat1, lng1, lat2, lng2) {
   const R = 6371000;
   const toRad = d => d * Math.PI / 180;
@@ -1095,7 +1131,6 @@ function osmNodeToPlace(node) {
   };
 }
 
-// Carga lugares de OSM dentro de un radio dado
 async function loadOverpassPlaces(lat, lng, radius) {
   radius = radius || CONFIG.OVERPASS_RADIUS_M;
   const query = `
@@ -1123,11 +1158,9 @@ async function loadOverpassPlaces(lat, lng, radius) {
   }
 }
 
-// Búsqueda por nombre/dirección en Nominatim + OSM cercano al resultado
 async function searchPlacesByQuery(query) {
   if (!query || query.length < 2) return [];
 
-  // Primero buscar en places ya cargados (texto)
   const q = query.toLowerCase();
   const localMatches = places.filter(p =>
     p.name.toLowerCase().includes(q) || p.addr.toLowerCase().includes(q) || p.type.toLowerCase().includes(q)
@@ -1135,7 +1168,6 @@ async function searchPlacesByQuery(query) {
 
   if (localMatches.length >= 3) return localMatches;
 
-  // Nominatim geocoding para encontrar por nombre/dirección
   try {
     const viewboxLat = userLat || CONFIG.DEFAULT_CENTER.lat;
     const viewboxLng = userLng || CONFIG.DEFAULT_CENTER.lng;
@@ -1153,9 +1185,7 @@ async function searchPlacesByQuery(query) {
     if (!res.ok) throw new Error('Nominatim error');
     const data = await res.json();
 
-    // Filtrar solo comercios y lugares relevantes
     const relevant = data.filter(r => {
-      const t = (r.type || '') + ' ' + (r.class || '');
       return !['highway', 'boundary', 'landuse', 'natural', 'water'].includes(r.class);
     });
 
@@ -1257,7 +1287,6 @@ async function runSearch(query) {
     </div>`;
   }).join('');
 
-  // Attach click events
   dropdown.querySelectorAll('.search-result-item').forEach((el, i) => {
     el.addEventListener('click', () => {
       searchDropdown().classList.remove('open');
@@ -1274,17 +1303,11 @@ function clearSearch() {
   searchQuery = '';
 }
 
-// Abrir popup marcado como "resultado de búsqueda" (sin restricción de distancia)
+/* ── Abrir popup de búsqueda SIN mover el mapa ── */
 function openSearchResultPopup(place) {
-  // Agregar a places si no existe
   const existing = places.find(p => p.id === place.id);
   if (!existing) places.push(place);
-
-  // Centrar el mapa en el lugar buscado (permitido solo para búsqueda)
-  if (leafletMap) {
-    leafletMap.setView([place.lat, place.lng], 18, { animate: true });
-  }
-
+  // NO hacemos setView — mantenemos la vista intacta
   place._fromSearch = true;
   openPlacePopup(place);
 }
@@ -1406,7 +1429,6 @@ function PlacePopup({ place, onClose, onVoteSubmit, cooldownRemainingMs, isSearc
     },'Ingresar')
   );
 
-  // Badge de resultado de búsqueda
   const searchBadge = isSearchResult && React.createElement('div',{
     style:{display:'inline-flex',alignItems:'center',gap:5,background:'linear-gradient(135deg,#6366F1,#4F46E5)',color:'#fff',fontSize:10,fontWeight:800,padding:'3px 9px',borderRadius:99,letterSpacing:'.3px',textTransform:'uppercase',marginBottom:10}
   },
@@ -1631,13 +1653,11 @@ function updateUserMarker(lat, lng) {
   }
 }
 
-// Limitar el mapa a no alejarse más de MAX_MOVE_FROM_USER_M del usuario
 function enforceBounds() {
   if (!leafletMap || userLat === null) return;
   const center = leafletMap.getCenter();
   const dist = distanceMeter(userLat, userLng, center.lat, center.lng);
   if (dist > CONFIG.MAX_MOVE_FROM_USER_M) {
-    // Calcular la posición máxima permitida en la dirección que se movió
     const bearing = Math.atan2(center.lng - userLng, center.lat - userLat);
     const maxLat = userLat + (CONFIG.MAX_MOVE_FROM_USER_M / 111320) * Math.cos(bearing);
     const maxLng = userLng + (CONFIG.MAX_MOVE_FROM_USER_M / (111320 * Math.cos(userLat * Math.PI / 180))) * Math.sin(bearing);
@@ -1650,7 +1670,6 @@ function initMap() {
     center: [CONFIG.DEFAULT_CENTER.lat, CONFIG.DEFAULT_CENTER.lng],
     zoom: 16,
     zoomControl: false,
-    // No limitar zoom mínimo para que el usuario pueda hacer zoom out (pero bounds lo restringirán)
   });
   L.control.zoom({ position: 'bottomright' }).addTo(leafletMap);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -1658,7 +1677,6 @@ function initMap() {
     subdomains: 'abcd', maxZoom: 20,
   }).addTo(leafletMap);
 
-  // Aplicar límite de movimiento al final de cada drag/zoom
   leafletMap.on('moveend', enforceBounds);
 
   startGpsWatch();
@@ -1691,10 +1709,8 @@ function onGpsSuccess(pos) {
   updateUserMarker(latitude, longitude);
 
   if (isFirst) {
-    // Zoom muy cercano: ~50m de radio visual
     leafletMap.setView([latitude, longitude], CONFIG.GPS_ZOOM);
     document.getElementById('gps-btn').classList.add('active');
-    // Cargar lugares solo una vez al arrancar
     loadPlacesAt(latitude, longitude);
   }
 
@@ -1704,9 +1720,8 @@ function onGpsSuccess(pos) {
   }
 }
 
-// loadPlacesAt: solo carga al inicio o en manualRefresh
 async function loadPlacesAt(lat, lng, showLoading) {
-  if (mapInitialLoaded && !showLoading) return; // ya cargado, no volver a cargar automáticamente
+  if (mapInitialLoaded && !showLoading) return;
 
   const [backendResult, osmPlaces] = await Promise.all([
     BACKEND_READY
@@ -1720,12 +1735,10 @@ async function loadPlacesAt(lat, lng, showLoading) {
 
   const all = mergePlaces(backendPlaces, osmPlaces);
 
-  // Guardar TODOS los lugares cargados para búsquedas
   all.forEach(p => {
     if (!places.find(x => x.id === p.id)) places.push(p);
   });
 
-  // Solo mostrar en el mapa los que están a ≤30m del usuario
   nearbyPlaces = all.filter(p => distanceMeter(lat, lng, p.lat, p.lng) <= CONFIG.NEARBY_RADIUS_M);
 
   mapInitialLoaded = true;
@@ -1755,7 +1768,6 @@ function buildMapMarkers(placesToShow) {
   placesToShow = placesToShow || nearbyPlaces;
   const newIds = new Set(placesToShow.map(p => p.id));
 
-  // Remover marcadores que ya no están
   Object.keys(leafletMarkers).forEach(id => {
     if (!newIds.has(id)) {
       leafletMarkers[id].remove();
@@ -1834,7 +1846,6 @@ function requestGpsPermission() {
   );
 }
 
-/* ── manualRefresh: recarga los lugares del área actual ── */
 async function manualRefresh() {
   const icon = document.getElementById('refresh-icon');
   icon.style.animation = 'none';
@@ -1844,7 +1855,6 @@ async function manualRefresh() {
   const lat = userLat ?? CONFIG.DEFAULT_CENTER.lat;
   const lng = userLng ?? CONFIG.DEFAULT_CENTER.lng;
 
-  // Resetear para permitir recarga
   mapInitialLoaded = false;
   places = [];
   nearbyPlaces = [];
@@ -1857,14 +1867,13 @@ async function manualRefresh() {
    CHECK-IN MODAL
    ══════════════════════════════════════════════ */
 function showCheckinModal(lat, lng) {
-  // Usar nearbyPlaces (≤30m) para el check-in, o todos si no hay suficientes
   const pool = nearbyPlaces.length ? nearbyPlaces : places;
   const sorted = pool
     .map(p => ({ ...p, _dist: Math.round(distanceMeter(lat, lng, p.lat, p.lng)) }))
     .sort((a, b) => a._dist - b._dist)
     .slice(0, 3);
 
-  if (!sorted.length) return; // no hay lugares, no mostrar modal
+  if (!sorted.length) return;
 
   const root = document.getElementById('checkin-overlay-root');
 
@@ -1940,8 +1949,34 @@ function exitPickMode() {
   document.getElementById('leaflet-map').style.cursor = '';
 }
 
-/* ─────────────── GOOGLE LOGIN ─────────────── */
+/* ═══════════════════════════════════════════════════════════
+   GOOGLE LOGIN — con persistencia de sesión robusta
+   ═══════════════════════════════════════════════════════════ */
 let tokenClient = null;
+/* Guardamos también el access_token para poder re-validar sin popup */
+const TOKEN_STORAGE_KEY = 'qooentum_gtoken';
+
+function saveTokenToStorage(token, expiresIn) {
+  try {
+    const expiresAt = Date.now() + (expiresIn ? expiresIn * 1000 : 3500 * 1000);
+    localStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify({ token, expiresAt }));
+  } catch(e) {}
+}
+
+function loadTokenFromStorage() {
+  try {
+    const raw = localStorage.getItem(TOKEN_STORAGE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || !data.token) return null;
+    /* Si el token expiró hace más de 5 min, lo descartamos */
+    if (data.expiresAt && Date.now() > data.expiresAt + 5 * 60 * 1000) {
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      return null;
+    }
+    return data.token;
+  } catch(e) { return null; }
+}
 
 function initGoogleTokenClient() {
   if (!GOOGLE_AUTH_READY) return false;
@@ -1982,6 +2017,7 @@ function doLogout() {
   userPts = 0;
   placeCooldowns = {};
   localStorage.removeItem(SESSION_STORAGE_KEY);
+  localStorage.removeItem(TOKEN_STORAGE_KEY);
   if (window.google && google.accounts && google.accounts.oauth2) {
     try { google.accounts.oauth2.revoke(); } catch(e) {}
   }
@@ -2028,14 +2064,18 @@ function applyLoggedInUI() {
   updateUserHUD();
 }
 
+async function fetchProfileFromToken(accessToken) {
+  const profileRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!profileRes.ok) throw new Error('No se pudo obtener el perfil de Google');
+  return await profileRes.json();
+}
+
 async function handleGoogleTokenResponse(resp) {
   if (!resp || resp.error || !resp.access_token) { resetLoginButton(); showToast('⚠️ No se pudo iniciar sesión con Google'); return; }
   try {
-    const profileRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-      headers: { Authorization: `Bearer ${resp.access_token}` },
-    });
-    if (!profileRes.ok) throw new Error('No se pudo obtener el perfil de Google');
-    const profile = await profileRes.json();
+    const profile = await fetchProfileFromToken(resp.access_token);
 
     const deviceEmail = localStorage.getItem(DEVICE_KEY);
     if (deviceEmail && deviceEmail !== profile.email) {
@@ -2053,8 +2093,12 @@ async function handleGoogleTokenResponse(resp) {
     if (backendResult && typeof backendResult.points === 'number') userPts = backendResult.points;
     if (backendResult && backendResult.cooldowns) applyCooldownInfo(backendResult.cooldowns);
     isLoggedIn = true;
+
+    /* Persistir sesión y token */
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(currentUser));
     localStorage.setItem(DEVICE_KEY, profile.email);
+    saveTokenToStorage(resp.access_token, resp.expires_in);
+
     applyLoggedInUI();
     hideToastAction();
     showToast(`👋 ¡Hola, ${currentUser.name.split(' ')[0]}!`);
@@ -2073,29 +2117,130 @@ async function handleGoogleTokenResponse(resp) {
   }
 }
 
+/* ════════════════════════════════════════════════════════════
+   RESTORE SESSION — intenta silenciosamente renovar el token
+   si la sesión está guardada. Si el token guardado sigue
+   vigente, re-autentica sin popup. Si expiró, muestra el
+   chip pero no el botón de Google (el usuario ya estuvo
+   logueado) y cuando haga clic en alguna acción se le pedirá
+   que reingrese.
+   ════════════════════════════════════════════════════════════ */
 async function restoreSession() {
   const saved = localStorage.getItem(SESSION_STORAGE_KEY);
   if (!saved) return;
-  try { currentUser = JSON.parse(saved); } catch { localStorage.removeItem(SESSION_STORAGE_KEY); currentUser = null; return; }
-  if (!currentUser || !currentUser.email) { localStorage.removeItem(SESSION_STORAGE_KEY); currentUser = null; return; }
+
+  try { currentUser = JSON.parse(saved); } catch {
+    localStorage.removeItem(SESSION_STORAGE_KEY);
+    currentUser = null; return;
+  }
+  if (!currentUser || !currentUser.email) {
+    localStorage.removeItem(SESSION_STORAGE_KEY);
+    currentUser = null; return;
+  }
 
   const deviceEmail = localStorage.getItem(DEVICE_KEY);
   if (deviceEmail && deviceEmail !== currentUser.email) {
     localStorage.removeItem(SESSION_STORAGE_KEY); currentUser = null; return;
   }
 
-  isLoggedIn = true;
-  applyLoggedInUI();
+  /* 1️⃣ Intentar re-validar con el access_token guardado */
+  const savedToken = loadTokenFromStorage();
+  if (savedToken) {
+    try {
+      const profile = await fetchProfileFromToken(savedToken);
+      if (profile && profile.email === currentUser.email) {
+        /* Token aún válido — sesión completamente restaurada */
+        isLoggedIn = true;
 
-  if (BACKEND_READY) {
-    const me = await apiGet('me', { email: currentUser.email });
-    if (me && me.exists) {
-      userPts = me.points || 0;
-      if (me.name) currentUser.name = me.name;
-      if (me.picture) currentUser.picture = me.picture;
-      if (me.cooldowns) applyCooldownInfo(me.cooldowns);
-      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(currentUser));
-      applyLoggedInUI();
+        if (BACKEND_READY) {
+          const me = await apiGet('me', { email: currentUser.email });
+          if (me && me.exists) {
+            userPts = me.points || 0;
+            if (me.name) currentUser.name = me.name;
+            if (me.picture) currentUser.picture = me.picture;
+            if (me.cooldowns) applyCooldownInfo(me.cooldowns);
+            localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(currentUser));
+          }
+        }
+
+        applyLoggedInUI();
+        return;
+      }
+    } catch(e) {
+      /* token inválido/expirado — continuar con restauración parcial */
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+    }
+  }
+
+  /* 2️⃣ Token expirado: intentar renovación silenciosa con Google
+        (funciona si el usuario tiene sesión activa en el navegador) */
+  const trysilent = () => new Promise(resolve => {
+    if (!GOOGLE_AUTH_READY) return resolve(false);
+    const waitGoogle = (tries) => {
+      if (tries <= 0) return resolve(false);
+      if (window.google && google.accounts && google.accounts.oauth2) {
+        if (!initGoogleTokenClient()) return resolve(false);
+        /* hint = email conocido, prompt vacío = sin popup */
+        const client = google.accounts.oauth2.initTokenClient({
+          client_id: CONFIG.GOOGLE_CLIENT_ID,
+          scope: 'email profile',
+          hint: currentUser.email,
+          callback: async (resp) => {
+            if (!resp || resp.error || !resp.access_token) return resolve(false);
+            try {
+              const profile = await fetchProfileFromToken(resp.access_token);
+              if (profile && profile.email === currentUser.email) {
+                currentUser = { email: profile.email, name: profile.name || profile.email, picture: profile.picture || '' };
+                saveTokenToStorage(resp.access_token, resp.expires_in);
+                localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(currentUser));
+                isLoggedIn = true;
+
+                if (BACKEND_READY) {
+                  const me = await apiGet('me', { email: currentUser.email });
+                  if (me && me.exists) {
+                    userPts = me.points || 0;
+                    if (me.cooldowns) applyCooldownInfo(me.cooldowns);
+                  }
+                }
+                applyLoggedInUI();
+                resolve(true);
+              } else resolve(false);
+            } catch(e) { resolve(false); }
+          },
+          error_callback: () => resolve(false),
+        });
+        /* prompt: '' = sin popup — solo funciona con sesión Google activa */
+        client.requestAccessToken({ prompt: '' });
+      } else {
+        setTimeout(() => waitGoogle(tries - 1), 400);
+      }
+    };
+    waitGoogle(10);
+  });
+
+  const renewed = await trysilent();
+  if (!renewed) {
+    /* 3️⃣ No se pudo renovar silenciosamente: mostrar UI parcial
+           (el usuario sabe que estuvo logueado pero necesita reingresar) */
+    isLoggedIn = false;
+    /* Mostramos el botón de login con el nombre/avatar del usuario anterior
+       para que sepa con qué cuenta tiene que reentrar */
+    applyLoggedInUI();   /* muestra el chip con la foto cacheada */
+    isLoggedIn = false;  /* pero marca como no logueado para bloquear votos */
+
+    /* Cambiamos el chip a un estado "reingresá" */
+    const chip = document.getElementById('user-chip');
+    if (chip) {
+      chip.title = 'Tu sesión expiró. Hacé clic para reingresar.';
+      chip.onclick = () => doGoogleLogin(document.getElementById('login-topbar-btn'));
+    }
+    document.getElementById('user-chip-wrap').style.display = 'flex';
+    document.getElementById('login-topbar-btn').style.display = 'none';
+
+    /* Fetching del backend de todos modos para obtener puntos */
+    if (BACKEND_READY) {
+      const me = await apiGet('me', { email: currentUser.email });
+      if (me && me.exists) { userPts = me.points || 0; if (me.cooldowns) applyCooldownInfo(me.cooldowns); updateUserHUD(); }
     }
   }
 }
