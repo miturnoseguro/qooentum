@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -79,9 +80,12 @@ html,body{
   flex-shrink:0;
   z-index:100;
 }
-.brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:17px;letter-spacing:-.6px;white-space:nowrap;color:var(--text);text-decoration:none;}
-.brand-mark{width:99px;height:33px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+.brand{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-decoration:none;cursor:pointer;flex-shrink:0;}
+.brand-mark{width:99px;height:33px;border-radius:11px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .brand-mark img{width:100%;height:100%;object-fit:cover;}
+/* Texto "powered by Bigdaat.com" debajo del logo */
+.brand-powered{font-size:9px;font-weight:500;color:var(--text3);letter-spacing:.15px;padding-left:2px;white-space:nowrap;line-height:1;}
+.brand-powered strong{font-weight:700;color:var(--text3);}
 
 .cbar-wrap{flex:1;max-width:300px;}
 .cbar-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-bottom:5px;font-weight:600;letter-spacing:.1px;}
@@ -95,10 +99,32 @@ html,body{
 .avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
 .user-chip-info{min-width:74px;}
 .pts-row{display:flex;align-items:center;gap:5px;}
-.lvl-badge{font-size:10px;font-weight:900;color:#fff;background:linear-gradient(135deg,#A855F7,#6366F1);padding:1px 7px;border-radius:6px;letter-spacing:.3px;box-shadow:0 0 8px rgba(168,85,247,.45);}
+.lvl-badge{font-size:10px;font-weight:900;color:#fff;background:linear-gradient(135deg,#A855F7,#6366F1);padding:1px 7px;border-radius:6px;letter-spacing:.2px;box-shadow:0 0 8px rgba(168,85,247,.45);}
 .pts-label{font-size:13px;font-weight:800;color:var(--green);line-height:1.2;}
 .xp-bar-bg{height:4px;background:var(--surface2);border-radius:99px;margin-top:3px;overflow:hidden;border:1px solid var(--border);}
 .xp-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#00C48C,#22D3EE);box-shadow:0 0 6px rgba(34,211,238,.6);transition:width .6s cubic-bezier(.34,1.1,.64,1);}
+/* ── USER CHIP WRAP ── */
+.user-chip-wrap{position:relative;display:none;}
+.chip-caret{width:12px;height:12px;color:var(--text3);flex-shrink:0;transition:transform .2s;}
+.user-chip-wrap.open .chip-caret{transform:rotate(180deg);}
+/* ── LOGOUT DROPDOWN ── */
+.user-dropdown{
+  position:absolute;top:calc(100% + 8px);right:0;
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:6px;box-shadow:var(--shadow-lg);min-width:170px;
+  display:none;z-index:9999;
+  animation:dropIn .18s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes dropIn{from{opacity:0;transform:translateY(-6px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.user-dropdown.open{display:block;}
+.user-dropdown-item{
+  display:flex;align-items:center;gap:9px;
+  padding:10px 13px;border-radius:10px;
+  font-size:13px;font-weight:700;color:var(--text2);
+  cursor:pointer;transition:all .15s;
+  border:none;background:none;width:100%;text-align:left;font-family:inherit;
+}
+.user-dropdown-item:hover{background:var(--red-lt);color:var(--red);}
 
 .login-topbar-btn{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#00C48C,#009E72);color:#fff;border:none;border-radius:99px;padding:8px 17px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;box-shadow:0 3px 10px rgba(0,196,140,.3);transition:all .2s;font-family:inherit;}
 .login-topbar-btn:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(0,196,140,.4);}
@@ -250,8 +276,8 @@ html,body{
   flex-shrink:0;
 }
 
-/* ── FLOATING CONTROLS ── */
-.map-float-controls{position:absolute;top:14px;right:14px;z-index:999;display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
+/* ── FLOATING CONTROLS — debajo del buscador ── */
+.map-float-controls{position:absolute;top:66px;right:14px;z-index:999;display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
 .map-refresh-btn{
   background:linear-gradient(135deg,#00C48C,#009E72);
   border:none;border-radius:12px;padding:9px 15px;
@@ -529,6 +555,8 @@ html,body{
   .checkin-tabs{gap:6px;}
   .checkin-tab{padding:10px 5px 9px;}
   .map-search-wrap{right:62px;}
+  /* En mobile: controles flotantes debajo del buscador */
+  .map-float-controls{top:70px;}
 }
 /* ── CHECK-IN MODAL ── */
 .checkin-overlay{
@@ -645,11 +673,13 @@ html,body{
 <body>
 <div class="app">
   <header class="topbar">
-    <div class="brand">
-      <div class="c">
+    <!-- LOGO: clic recarga la página y va al inicio -->
+    <a class="brand" href="javascript:void(0)" onclick="window.location.reload()" title="Ir al inicio">
+      <div class="brand-mark">
         <img src="logo.png" alt="Qooentum" width="129" height="37">
       </div>
-    </div>
+      <span class="brand-powered">powered by <strong>Bigdaat.com</strong></span>
+    </a>
     <div class="cbar-wrap">
       <div class="cbar-meta">
         <span>Ocupación de la zona</span>
@@ -660,14 +690,28 @@ html,body{
         <div class="cbar-needle" id="cbar-needle" style="left:0%"></div>
       </div>
     </div>
-    <div class="user-chip" id="user-chip" style="display:none" onclick="switchTab('prizes')">
-      <div class="avatar" id="topbar-avatar">YO</div>
-      <div class="user-chip-info">
-        <div class="pts-row">
-          <span class="lvl-badge" id="lvl-badge">LVL 1</span>
-          <span class="pts-label" id="my-pts">0 pts</span>
+    <!-- USER CHIP con dropdown logout -->
+    <div class="user-chip-wrap" id="user-chip-wrap">
+      <div class="user-chip" id="user-chip" onclick="toggleUserDropdown()">
+        <div class="avatar" id="topbar-avatar">YO</div>
+        <div class="user-chip-info">
+          <div class="pts-row">
+            <span class="lvl-badge" id="lvl-badge">Nivel 1</span>
+            <span class="pts-label" id="my-pts">0 pts</span>
+          </div>
+          <div class="xp-bar-bg"><div class="xp-bar-fill" id="xp-bar-fill" style="width:0%"></div></div>
         </div>
-        <div class="xp-bar-bg"><div class="xp-bar-fill" id="xp-bar-fill" style="width:0%"></div></div>
+        <svg class="chip-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="user-dropdown" id="user-dropdown">
+        <button class="user-dropdown-item" onclick="doLogout()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;flex-shrink:0;">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Cerrar sesión
+        </button>
       </div>
     </div>
     <button class="login-topbar-btn" id="login-topbar-btn" onclick="doGoogleLogin(this)">
@@ -826,6 +870,8 @@ const STATUS_CFG = [
   {label:'Mucha gente',    sub:'Fila larga',       color:'#F97316'},
   {label:'Colapsado',      sub:'¡No vengas ahora!',color:'#EF4444'},
 ];
+/* Estado especial para locales sin reportes del día */
+const NO_REPORT_STATUS = { label:'Sin reportes hoy', sub:'Sé el primero en reportar', color:'#b2b2b2' };
 const WAIT  = ['Sin espera','~5 min','~15 min','+30 min'];
 const TREND = ['↘ Baja','→ Estable','↗ Sube','↗ Sube'];
 const VOTE_PTS = [10,10,15,20];
@@ -1210,7 +1256,7 @@ async function runSearch(query) {
     const dist = (userLat !== null)
       ? (() => { const d = Math.round(distanceMeter(userLat, userLng, p.lat, p.lng)); return d < 1000 ? `${d}m` : `${(d/1000).toFixed(1)}km`; })()
       : '';
-    const sc = STATUS_CFG[p.status];
+    const sc = (!p.reporters || p.reporters === 0) ? NO_REPORT_STATUS : STATUS_CFG[p.status];
     return `<div class="search-result-item" data-idx="${i}">
       <div class="search-result-logo">${p.logo}</div>
       <div class="search-result-info">
@@ -1313,7 +1359,7 @@ function PlacePopup({ place, onClose, onVoteSubmit, cooldownRemainingMs, isSearc
     setTimeout(() => { onVoteSubmit(place.id, selectedVote); setTimeout(handleClose, 900); }, 600);
   }
 
-  const s = STATUS_CFG[place.status];
+  const s = (!place.reporters || place.reporters === 0) ? NO_REPORT_STATUS : STATUS_CFG[place.status];
   const photo = getPhoto(place);
 
   const overlayStyle = {
@@ -1702,15 +1748,15 @@ async function loadPlacesAt(lat, lng, showLoading) {
   }
 }
 
-function makeStatusChipHTML(status) {
-  const s = STATUS_CFG[status];
+function makeStatusChipHTML(place) {
+  const s = (!place.reporters || place.reporters === 0) ? NO_REPORT_STATUS : STATUS_CFG[place.status];
   return `<div class="fc-card-status" style="background:${s.color}"><div class="s-dot-sm"></div><div class="s-label-sm">${s.label}</div></div>`;
 }
 
 function makeIcon(place) {
   const verBadge = place.verified ? `<div class="fc-card-verified">✓</div>` : '';
   return L.divIcon({
-    html: `<div class="fc-card-wrap"><div class="fc-card"><div class="fc-card-head"><div class="fc-card-logo">${place.logo}${verBadge}</div><div class="fc-card-info"><div class="fc-card-name">${place.name}</div><div class="fc-card-type">${place.type}</div></div><span class="fc-card-open ${place.open?'open':'closed'}">${place.open?'Abierto':'Cerrado'}</span></div>${makeStatusChipHTML(place.status)}</div><div class="fc-tail"></div><div class="fc-base"></div></div>`,
+    html: `<div class="fc-card-wrap"><div class="fc-card"><div class="fc-card-head"><div class="fc-card-logo">${place.logo}${verBadge}</div><div class="fc-card-info"><div class="fc-card-name">${place.name}</div><div class="fc-card-type">${place.type}</div></div><span class="fc-card-open ${place.open?'open':'closed'}">${place.open?'Abierto':'Cerrado'}</span></div>${makeStatusChipHTML(place)}</div><div class="fc-tail"></div><div class="fc-base"></div></div>`,
     className: '', iconAnchor: [0, 168], popupAnchor: [0, -168],
   });
 }
@@ -1924,6 +1970,43 @@ function initGoogleTokenClient() {
   return true;
 }
 
+/* ════════════ LOGOUT / DROPDOWN ════════════ */
+function toggleUserDropdown() {
+  const wrap = document.getElementById('user-chip-wrap');
+  const dd = document.getElementById('user-dropdown');
+  dd.classList.toggle('open');
+  wrap.classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('user-chip-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('user-dropdown').classList.remove('open');
+    wrap.classList.remove('open');
+  }
+});
+
+function doLogout() {
+  isLoggedIn = false;
+  currentUser = null;
+  userPts = 0;
+  placeCooldowns = {};
+  localStorage.removeItem(SESSION_STORAGE_KEY);
+  if (window.google && google.accounts && google.accounts.oauth2) {
+    try { google.accounts.oauth2.revoke(); } catch(e) {}
+  }
+  document.getElementById('user-chip-wrap').style.display = 'none';
+  const btn = document.getElementById('login-topbar-btn');
+  btn.style.display = 'flex';
+  btn.classList.remove('is-loading');
+  const t = btn.querySelector('.gbtn-txt');
+  if (t) t.textContent = 'Ingresar';
+  document.getElementById('user-dropdown').classList.remove('open');
+  document.getElementById('user-chip-wrap').classList.remove('open');
+  updateUserHUD();
+  showToast('✅ Sesión cerrada correctamente');
+}
+
 function doGoogleLogin(btn) {
   if (isLoggedIn) return;
   if (!GOOGLE_AUTH_READY) { showToast('⚠️ El login con Google todavía no está configurado'); return; }
@@ -1948,7 +2031,7 @@ function initialsFromName(name) {
 
 function applyLoggedInUI() {
   document.getElementById('login-topbar-btn').style.display = 'none';
-  document.getElementById('user-chip').style.display = 'flex';
+  document.getElementById('user-chip-wrap').style.display = 'flex';
   const avatarEl = document.getElementById('topbar-avatar');
   if (currentUser.picture) { avatarEl.innerHTML = `<img src="${currentUser.picture}" alt="${currentUser.name}" referrerpolicy="no-referrer">`; }
   else { avatarEl.textContent = initialsFromName(currentUser.name); }
@@ -2030,7 +2113,7 @@ async function restoreSession() {
 function updateUserHUD() {
   const info = getLevelInfo(userPts);
   document.getElementById('my-pts').textContent = userPts + ' pts';
-  document.getElementById('lvl-badge').textContent = 'LVL ' + info.level;
+  document.getElementById('lvl-badge').textContent = 'Nivel ' + info.level;
   document.getElementById('xp-bar-fill').style.width = info.pct + '%';
   const prizePts = document.getElementById('my-pts-prizes');
   if (prizePts) prizePts.textContent = userPts + ' pts disponibles';
