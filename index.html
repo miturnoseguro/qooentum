@@ -1,12 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Qooentum — Medimos el flujo de gente en comercios</title>
-
-<!-- ── PWA: manifest + icons + theme ── -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#00C48C">
 <meta name="description" content="Mapa en tiempo real de filas y ocupación en comercios cerca tuyo.">
@@ -150,6 +147,8 @@ html,body{
 .gps-float-btn:hover{border-color:var(--blue);background:var(--blue-lt);transform:translateY(-2px) scale(1.06);}
 .gps-float-btn svg{width:18px;height:18px;color:var(--blue);}
 .gps-float-btn.pulsing{animation:gpsPulse .8s ease-in-out infinite;}
+.gps-float-btn.active{border-color:var(--green);background:var(--green-lt);}
+.gps-float-btn.active svg{color:var(--green);}
 @keyframes gpsPulse{0%,100%{box-shadow:var(--shadow-float)}50%{box-shadow:0 0 0 6px rgba(99,102,241,.18),var(--shadow-float)}}
 @keyframes rotate{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 
@@ -324,6 +323,33 @@ html,body{
   gap:6px;
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── TOAST WITH ACTION ── */
+.toast-action {
+  position:fixed;
+  bottom: calc(90px + var(--sab));
+  left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:var(--text);
+  color:#fff;
+  border-radius:16px;
+  padding:12px 16px 12px 20px;
+  font-size:13px;
+  font-weight:700;
+  opacity:0;
+  transition:opacity .28s,transform .28s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:none;
+  z-index:9999;
+  box-shadow:var(--shadow-lg);
+  display:flex;
+  align-items:center;
+  gap:12px;
+  max-width:340px;
+}
+.toast-action.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:all;}
+.toast-action-btn{background:var(--green);color:#fff;border:none;border-radius:99px;padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0;}
+.toast-action-btn:hover{background:var(--green-dk);}
+
 @keyframes ptsFlash{0%{transform:scale(1)}30%{transform:scale(1.22);color:var(--green)}100%{transform:scale(1)}}
 .pts-flash{animation:ptsFlash .45s cubic-bezier(.34,1.56,.64,1);}
 
@@ -594,7 +620,7 @@ html,body{
             <span class="map-refresh-btn-sub">Actualizá manualmente los locales</span>
           </div>
         </button>
-        <div class="gps-float-btn" id="gps-btn" onclick="requestGpsPermission()" title="Activar ubicación">
+        <div class="gps-float-btn" id="gps-btn" onclick="requestGpsPermission()" title="Centrar en mi ubicación">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 3"/></svg>
         </div>
       </div>
@@ -675,6 +701,11 @@ html,body{
 </div>
 
 <div class="toast" id="toast"></div>
+<!-- Toast con acción (login) -->
+<div class="toast-action" id="toast-action">
+  <span id="toast-action-msg">Para reportar, iniciá sesión</span>
+  <button class="toast-action-btn" onclick="doGoogleLogin(document.getElementById('login-topbar-btn'));hideToastAction()">Ingresar</button>
+</div>
 <div id="react-popup-root"></div>
 <div id="checkin-overlay-root"></div>
 
@@ -686,16 +717,19 @@ const CONFIG = {
   APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzq25vO_iow3D0Suwi7CpLcIhpYAedVPct8kA-vTCiOAr2gtjD-fvAnH-xQ1kVjUMBiGw/exec',
   GOOGLE_CLIENT_ID: '283820904318-leis6rl3mfhtve2amj59q8sq221dg3qf.apps.googleusercontent.com',
   DEFAULT_CENTER: { lat: -34.6083, lng: -58.3896 },
-  SEARCH_RADIUS_M: 100,
-  REPORT_RADIUS_M: 20,
-  GPS_ZOOM: 20,
-  CHECKIN_RADIUS_M: 100,
-  CHECKIN_NEAR_M: 20,
+  SEARCH_RADIUS_M: 300,        // FIX: aumentado para traer más locales del backend
+  REPORT_RADIUS_M: 50,         // FIX: aumentado a 50m para mayor tolerancia GPS
+  GPS_ZOOM: 17,                // FIX: zoom más razonable (20 era demasiado)
+  CHECKIN_RADIUS_M: 150,
+  CHECKIN_NEAR_M: 50,
+  OVERPASS_RADIUS_M: 400,      // Radio para Overpass API
 };
 
 const BACKEND_READY = !CONFIG.APPS_SCRIPT_URL.startsWith('PEGAR_AQUI');
 const GOOGLE_AUTH_READY = !CONFIG.GOOGLE_CLIENT_ID.startsWith('PEGAR_AQUI');
 const SESSION_STORAGE_KEY = 'qooentum_user';
+// FIX: clave única de dispositivo para bloquear cuentas múltiples
+const DEVICE_KEY = 'qooentum_device_email';
 
 /* ─────────────── DATA ─────────────── */
 const STATUS_CFG = [
@@ -709,6 +743,49 @@ const TREND = ['↘ Baja','→ Estable','↗ Sube','↗ Sube'];
 const VOTE_PTS = [10,10,15,20];
 const LEVEL_TITLES = ['Novato','Explorador','Cazador de Filas','Maestro del Mapa','Leyenda Urbana'];
 const XP_PER_LEVEL = 150;
+
+// Mapeo de amenity/shop de Overpass → emoji + tipo
+const OSM_TYPE_MAP = {
+  supermarket:      {emoji:'🛒', tipo:'Supermercado'},
+  convenience:      {emoji:'🏪', tipo:'Almacén'},
+  pharmacy:         {emoji:'💊', tipo:'Farmacia'},
+  bank:             {emoji:'🏦', tipo:'Banco / Cajeros'},
+  atm:              {emoji:'🏧', tipo:'Cajero automático'},
+  post_office:      {emoji:'📮', tipo:'Correo'},
+  fast_food:        {emoji:'🍔', tipo:'Comida rápida'},
+  restaurant:       {emoji:'🍽️', tipo:'Restaurante'},
+  cafe:             {emoji:'☕', tipo:'Cafetería'},
+  bakery:           {emoji:'🥖', tipo:'Panadería'},
+  butcher:          {emoji:'🥩', tipo:'Carnicería'},
+  hospital:         {emoji:'🏥', tipo:'Hospital'},
+  clinic:           {emoji:'🏥', tipo:'Clínica'},
+  doctors:          {emoji:'👨‍⚕️', tipo:'Consultorio'},
+  dentist:          {emoji:'🦷', tipo:'Odontólogo'},
+  government:       {emoji:'🏛️', tipo:'Oficina pública'},
+  townhall:         {emoji:'🏛️', tipo:'Municipalidad'},
+  fuel:             {emoji:'⛽', tipo:'Estación de servicio'},
+  laundry:          {emoji:'👕', tipo:'Lavandería'},
+  dry_cleaning:     {emoji:'👔', tipo:'Tintorería'},
+  hardware:         {emoji:'🔧', tipo:'Ferretería'},
+  clothes:          {emoji:'👗', tipo:'Ropa'},
+  shoes:            {emoji:'👟', tipo:'Calzado'},
+  electronics:      {emoji:'📱', tipo:'Electrónica'},
+  optician:         {emoji:'👓', tipo:'Óptica'},
+  beauty:           {emoji:'💄', tipo:'Estética'},
+  hairdresser:      {emoji:'💇', tipo:'Peluquería'},
+  gym:              {emoji:'🏋️', tipo:'Gimnasio'},
+  veterinary:       {emoji:'🐾', tipo:'Veterinaria'},
+  marketplace:      {emoji:'🛍️', tipo:'Mercado'},
+  kiosk:            {emoji:'📰', tipo:'Kiosco'},
+  newsagent:        {emoji:'📰', tipo:'Kiosco'},
+  greengrocer:      {emoji:'🥦', tipo:'Verdulería'},
+  florist:          {emoji:'💐', tipo:'Florería'},
+  car_wash:         {emoji:'🚗', tipo:'Lavadero'},
+  toy:              {emoji:'🧸', tipo:'Juguetería'},
+  sports:           {emoji:'⚽', tipo:'Artículos deportivos'},
+  stationery:       {emoji:'📚', tipo:'Librería'},
+  general:          {emoji:'🏪', tipo:'Comercio general'},
+};
 
 const SEED_PRIZES = [
   {id:'p1',emoji:'☕',name:'Café gratis',            pts:200, cat:'Gastronomía',    partner:'Starbucks'},
@@ -732,6 +809,10 @@ let isLoggedIn = false;
 let voteCount = 0;
 let pendingVote = null;
 let placeCooldowns = {};
+let gpsWatchId = null;        // FIX: ID del watchPosition
+let lastLoadedLat = null;
+let lastLoadedLng = null;
+let userMarker = null;        // FIX: marcador de posición del usuario
 
 /* ── GPS state ── */
 let userLat = null, userLng = null;
@@ -818,6 +899,70 @@ async function apiPostVote(payload) {
   } catch (err) { console.warn('apiPost falló: vote', err); return { ok: false, network: false, result: null }; }
 }
 
+/* ─────────────── OVERPASS API (OpenStreetMap — gratuita) ─────────────── */
+// Convierte un nodo de Overpass a un place de Qooentum
+function osmNodeToPlace(node) {
+  const tags = node.tags || {};
+  const key = tags.amenity || tags.shop || tags.office || 'general';
+  const info = OSM_TYPE_MAP[key] || { emoji: '🏪', tipo: 'Comercio' };
+  const name = tags.name || tags['name:es'] || info.tipo;
+  const addr = [tags['addr:street'], tags['addr:housenumber']].filter(Boolean).join(' ') || 'Sin dirección';
+  return {
+    id: `osm_${node.id}`,
+    name,
+    type: info.tipo,
+    logo: info.emoji,
+    lat: node.lat,
+    lng: node.lon,
+    addr,
+    status: 0,
+    reporters: 0,
+    rating: (3.5 + Math.random() * 1.4).toFixed(1),
+    reviewsN: Math.floor(Math.random() * 200 + 10),
+    open: true,
+    verified: false,
+    fromOSM: true,
+  };
+}
+
+async function loadOverpassPlaces(lat, lng) {
+  const r = CONFIG.OVERPASS_RADIUS_M;
+  // Query: supermercados, farmacias, bancos, comida y comercios
+  const query = `
+    [out:json][timeout:15];
+    (
+      node["amenity"~"^(supermarket|pharmacy|bank|atm|fast_food|restaurant|cafe|bakery|hospital|clinic|doctors|dentist|post_office|fuel|marketplace)$"](around:${r},${lat},${lng});
+      node["shop"~"^(supermarket|convenience|pharmacy|bakery|butcher|laundry|dry_cleaning|hardware|clothes|shoes|electronics|optician|beauty|hairdresser|toy|sports|stationery|greengrocer|florist|newsagent|kiosk|general)$"](around:${r},${lat},${lng});
+    );
+    out body;
+  `.trim();
+
+  try {
+    const res = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      body: 'data=' + encodeURIComponent(query),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+    if (!res.ok) throw new Error('Overpass HTTP ' + res.status);
+    const data = await res.json();
+    return (data.elements || [])
+      .filter(n => n.type === 'node' && n.tags && n.tags.name)
+      .map(osmNodeToPlace);
+  } catch (e) {
+    console.warn('Overpass falló:', e);
+    return [];
+  }
+}
+
+// Mergea los places de Overpass con los del backend (los del backend tienen prioridad)
+function mergePlaces(backendPlaces, osmPlaces) {
+  const ids = new Set(backendPlaces.map(p => p.id));
+  // También deduplicar por nombre+distancia para no mostrar el mismo local dos veces
+  const nameCoords = new Set(backendPlaces.map(p => `${p.name.toLowerCase().trim()}`));
+  const fresh = osmPlaces.filter(p => !ids.has(p.id) && !nameCoords.has(p.name.toLowerCase().trim()));
+  return [...backendPlaces, ...fresh];
+}
+
 /* ─────────────── REACT POPUP ─────────────── */
 const { useState, useEffect, useRef } = React;
 
@@ -867,10 +1012,20 @@ function PlacePopup({ place, onClose, onVoteSubmit, cooldownRemainingMs }) {
 
   function handleClose() { setCardVisible(false); setVisible(false); setTimeout(onClose, 320); }
   function handleOverlayClick(e) { if (e.target === overlayRef.current) handleClose(); }
-  function handleVote(idx) { if (submitted || onCooldown || !nearby) return; setSelectedVote(idx); }
+  function handleVote(idx) {
+    if (submitted || onCooldown) return;
+    if (!isLoggedIn) {
+      // FIX: toast con acción si no está logueado
+      showToastAction('🔑 Iniciá sesión para reportar y ganar puntos');
+      return;
+    }
+    if (!nearby) return;
+    setSelectedVote(idx);
+  }
 
   function handleSubmit() {
     if (selectedVote === null || submitted || onCooldown || !nearby) return;
+    if (!isLoggedIn) { showToastAction('🔑 Iniciá sesión para reportar y ganar puntos'); return; }
     setSubmitted(true);
     setTimeout(() => { onVoteSubmit(place.id, selectedVote); setTimeout(handleClose, 900); }, 600);
   }
@@ -918,6 +1073,21 @@ function PlacePopup({ place, onClose, onVoteSubmit, cooldownRemainingMs }) {
     )
   );
 
+  // FIX: bloque para usuarios no logueados
+  const notLoggedBlock = !isLoggedIn && !onCooldown && React.createElement('div',{
+    style:{display:'flex',alignItems:'center',gap:10,background:'#F0FDF9',border:'1px solid #A8EDD8',borderRadius:12,padding:'12px 14px',marginBottom:12}
+  },
+    React.createElement('span',{style:{fontSize:20,flexShrink:0}},'🔑'),
+    React.createElement('div',{style:{flex:1}},
+      React.createElement('p',{style:{margin:0,fontSize:13,fontWeight:800,color:'#007A59'}},'Iniciá sesión para reportar'),
+      React.createElement('p',{style:{margin:'2px 0 0',fontSize:12,color:'#047857'}},'Ganás puntos por cada reporte y podés canjear premios.')
+    ),
+    React.createElement('button',{
+      onClick:()=>{doGoogleLogin(document.getElementById('login-topbar-btn'));},
+      style:{background:'linear-gradient(135deg,#00C48C,#009E72)',color:'#fff',border:'none',borderRadius:99,padding:'8px 14px',fontSize:12,fontWeight:800,cursor:'pointer',whiteSpace:'nowrap',fontFamily:'inherit'}
+    },'Ingresar')
+  );
+
   return React.createElement('div',{ref:overlayRef,style:overlayStyle,onClick:handleOverlayClick},
     React.createElement('div',{style:cardStyle},
       React.createElement('div',{style:{overflowY:'auto',msOverflowStyle:'none',scrollbarWidth:'none'}},
@@ -957,13 +1127,14 @@ function PlacePopup({ place, onClose, onVoteSubmit, cooldownRemainingMs }) {
               )
             )
           ),
+          notLoggedBlock,
           tooFarBlock,
           noGpsBlock,
-          nearby && !onCooldown && React.createElement('div',{style:{display:'flex',alignItems:'center',gap:7,marginBottom:12,padding:'8px 11px',background:'#E8FBF5',borderRadius:10,border:'1px solid #A8EDD8'}},
+          isLoggedIn && nearby && !onCooldown && React.createElement('div',{style:{display:'flex',alignItems:'center',gap:7,marginBottom:12,padding:'8px 11px',background:'#E8FBF5',borderRadius:10,border:'1px solid #A8EDD8'}},
             React.createElement('span',{style:{fontSize:14}},'📍'),
             React.createElement('span',{style:{fontSize:12,fontWeight:700,color:'#007A59'}},`Estás a ${distToPlace ?? '?'}m · podés reportar`)
           ),
-          !onCooldown && nearby && React.createElement('p',{style:{margin:'0 0 10px',fontSize:11,fontWeight:700,color:'#94A3B8',textTransform:'uppercase',letterSpacing:'0.8px'}},'¿Cómo está ahora?'),
+          !onCooldown && isLoggedIn && nearby && React.createElement('p',{style:{margin:'0 0 10px',fontSize:11,fontWeight:700,color:'#94A3B8',textTransform:'uppercase',letterSpacing:'0.8px'}},'¿Cómo está ahora?'),
           onCooldown && React.createElement('div',{style:{display:'flex',alignItems:'center',gap:10,background:'#FFFBEB',border:'1px solid #FDE68A',borderRadius:12,padding:'12px 14px',marginBottom:4}},
             React.createElement('span',{style:{fontSize:20,flexShrink:0}},'⏳'),
             React.createElement('div',null,
@@ -972,7 +1143,7 @@ function PlacePopup({ place, onClose, onVoteSubmit, cooldownRemainingMs }) {
               React.createElement('p',{style:{margin:'4px 0 0',fontSize:11,color:'#92400E',opacity:.8}},'Mientras tanto podés reportar cualquier otro comercio')
             )
           ),
-          !submitted && nearby && !onCooldown && React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:12}},
+          !submitted && isLoggedIn && nearby && !onCooldown && React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:12}},
             ...[{idx:0,label:'Poca gente',pts:'+10',color:'#00C48C'},{idx:1,label:'Bastante',pts:'+10',color:'#F59E0B'},{idx:2,label:'Mucha gente',pts:'+15',color:'#F97316'},{idx:3,label:'Colapsado',pts:'+20',color:'#EF4444'}].map(({idx,label,pts,color})=>{
               const isSel=selectedVote===idx;
               return React.createElement('button',{key:idx,onClick:()=>handleVote(idx),style:{border:isSel?`2px solid ${color}`:'1.5px solid #E2E8F0',borderRadius:10,background:isSel?color:'#fff',padding:'11px 10px',cursor:'pointer',display:'flex',alignItems:'center',gap:7,fontSize:12,fontWeight:700,color:isSel?'#fff':'#0F172A',textAlign:'left',fontFamily:'inherit',transition:'all 0.18s cubic-bezier(0.34,1.56,0.64,1)',transform:isSel?'translateY(-1px)':'none',boxShadow:isSel?`0 4px 12px ${color}44`:'none'}},
@@ -989,7 +1160,7 @@ function PlacePopup({ place, onClose, onVoteSubmit, cooldownRemainingMs }) {
               React.createElement('p',{style:{margin:'2px 0 0',fontSize:12,color:'#047857'}},`+${VOTE_PTS[selectedVote]||10} puntos sumados a tu cuenta`)
             )
           ),
-          !submitted && nearby && !onCooldown && React.createElement('button',{onClick:handleSubmit,disabled:selectedVote===null,style:{width:'100%',background:selectedVote!==null?`linear-gradient(135deg, ${STATUS_CFG[selectedVote].color}, ${STATUS_CFG[selectedVote].color}cc)`:'#E2E8F0',color:selectedVote!==null?'#fff':'#94A3B8',border:'none',borderRadius:12,padding:'14px',fontSize:14,fontWeight:800,cursor:selectedVote!==null?'pointer':'not-allowed',display:'flex',alignItems:'center',justifyContent:'center',gap:8,fontFamily:'inherit',transition:'all 0.22s cubic-bezier(0.34,1.56,0.64,1)',boxShadow:selectedVote!==null?`0 6px 20px ${STATUS_CFG[selectedVote].color}44`:'none',transform:selectedVote!==null?'translateY(-1px)':'none'}},
+          !submitted && isLoggedIn && nearby && !onCooldown && React.createElement('button',{onClick:handleSubmit,disabled:selectedVote===null,style:{width:'100%',background:selectedVote!==null?`linear-gradient(135deg, ${STATUS_CFG[selectedVote].color}, ${STATUS_CFG[selectedVote].color}cc)`:'#E2E8F0',color:selectedVote!==null?'#fff':'#94A3B8',border:'none',borderRadius:12,padding:'14px',fontSize:14,fontWeight:800,cursor:selectedVote!==null?'pointer':'not-allowed',display:'flex',alignItems:'center',justifyContent:'center',gap:8,fontFamily:'inherit',transition:'all 0.22s cubic-bezier(0.34,1.56,0.64,1)',boxShadow:selectedVote!==null?`0 6px 20px ${STATUS_CFG[selectedVote].color}44`:'none',transform:selectedVote!==null?'translateY(-1px)':'none'}},
             React.createElement('svg',{viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2.5,strokeLinecap:'round',strokeLinejoin:'round',style:{width:15,height:15}},
               React.createElement('line',{x1:22,y1:2,x2:11,y2:13}),React.createElement('polygon',{points:'22 2 15 22 11 13 2 9 22 2'})
             ),'Reportar estado'
@@ -1039,13 +1210,19 @@ async function handlePopupVoteSubmit(placeId, voteIdx) {
   const p = places.find(x => x.id === placeId);
   if (!p) return;
 
+  // FIX: siempre verificar login primero
+  if (!isLoggedIn) {
+    showToastAction('🔑 Iniciá sesión para ganar puntos por tu reporte');
+    return;
+  }
+
   if (!canReportThisPlace(p)) {
     showToast(`📍 Acercate al comercio para reportar (máx. ${CONFIG.REPORT_RADIUS_M}m)`);
     return;
   }
 
-  if (isLoggedIn && getVoteCooldownRemainingMs(placeId) > 0) {
-    showToast(`⏳ Podés reportar ${p.name} de nuevo en ${formatCooldownRemaining(getVoteCooldownRemainingMs(placeId))}`);
+  if (getVoteCooldownRemainingMs(placeId) > 0) {
+    showToast(`⏳ Podés reportar ${p.name} en ${formatCooldownRemaining(getVoteCooldownRemainingMs(placeId))}`);
     return;
   }
 
@@ -1054,13 +1231,6 @@ async function handlePopupVoteSubmit(placeId, voteIdx) {
   voteCount++;
   refreshMarkerIcon(p.id);
   updateCrowdBar(calcCrowdPct());
-
-  if (!isLoggedIn) {
-    pendingVote = { placeId, voteIdx };
-    showToast('🔑 Iniciá sesión para sumar tus puntos');
-    doGoogleLogin(document.getElementById('login-topbar-btn'));
-    return;
-  }
 
   await submitVoteToBackend(p, voteIdx);
 }
@@ -1077,7 +1247,7 @@ async function submitVoteToBackend(p, voteIdx) {
     p.reporters = Math.max(0, p.reporters - 1);
     refreshMarkerIcon(p.id); updateCrowdBar(calcCrowdPct());
     if (currentPopupPlace && currentPopupPlace.id === p.id) renderPopup(p);
-    showToast(`⏳ Ya reportaste ${p.name} hace poco · próximo en ${formatCooldownRemaining(getVoteCooldownRemainingMs(p.id))}`);
+    showToast(`⏳ Ya reportaste ${p.name} · próximo en ${formatCooldownRemaining(getVoteCooldownRemainingMs(p.id))}`);
     return;
   }
 
@@ -1115,6 +1285,21 @@ function addPoints(amount) {
   if (newLevel > prevLevel) setTimeout(() => levelUpCelebration(newLevel), 400);
 }
 
+/* ── FIX: Marcador del usuario ── */
+function updateUserMarker(lat, lng) {
+  if (!leafletMap) return;
+  if (userMarker) {
+    userMarker.setLatLng([lat, lng]);
+  } else {
+    const userIcon = L.divIcon({
+      html: `<div style="width:18px;height:18px;border-radius:50%;background:#6366F1;border:3px solid #fff;box-shadow:0 0 0 3px rgba(99,102,241,.4);"></div>`,
+      className: '',
+      iconAnchor: [9, 9],
+    });
+    userMarker = L.marker([lat, lng], { icon: userIcon, zIndexOffset: 1000 }).addTo(leafletMap);
+  }
+}
+
 function initMap() {
   leafletMap = L.map('leaflet-map', {
     center: [CONFIG.DEFAULT_CENTER.lat, CONFIG.DEFAULT_CENTER.lng],
@@ -1127,28 +1312,53 @@ function initMap() {
     subdomains: 'abcd', maxZoom: 20,
   }).addTo(leafletMap);
 
-  buildMapMarkers();
-  loadRealPlaces(CONFIG.DEFAULT_CENTER.lat, CONFIG.DEFAULT_CENTER.lng);
-
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      pos => onGpsSuccess(pos, true),
-      () => {},
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
-  }
+  // FIX: pedir GPS al inicio con watchPosition para seguimiento continuo
+  startGpsWatch();
 }
 
-/* ── Callback GPS centralizado ── */
-function onGpsSuccess(pos, isFirstLoad = false) {
-  const { latitude, longitude } = pos.coords;
+/* ── FIX: GPS watchPosition para tracking continuo ── */
+function startGpsWatch() {
+  if (!navigator.geolocation) return;
+  if (gpsWatchId !== null) {
+    navigator.geolocation.clearWatch(gpsWatchId);
+  }
+  gpsWatchId = navigator.geolocation.watchPosition(
+    pos => onGpsSuccess(pos),
+    err => {
+      // Si falla silenciosamente, cargar con centro por defecto
+      if (!lastLoadedLat) loadPlacesAt(CONFIG.DEFAULT_CENTER.lat, CONFIG.DEFAULT_CENTER.lng);
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+  );
+}
+
+/* ── FIX: Callback GPS — sin offset, zoom correcto ── */
+function onGpsSuccess(pos) {
+  const { latitude, longitude, accuracy } = pos.coords;
+  const isFirst = userLat === null;
+
   userLat = latitude;
   userLng = longitude;
 
-  leafletMap.setView([latitude, longitude], CONFIG.GPS_ZOOM);
-  loadRealPlaces(latitude, longitude);
+  updateUserMarker(latitude, longitude);
 
-  if (isFirstLoad && !checkinShown) {
+  // Solo re-centrar si es la primera posición o si nos movimos más de 50m
+  if (isFirst) {
+    leafletMap.setView([latitude, longitude], CONFIG.GPS_ZOOM);
+    document.getElementById('gps-btn').classList.add('active');
+  }
+
+  // FIX: Cargar lugares solo si nos movimos significativamente (>80m) o es la primera vez
+  const movedEnough = lastLoadedLat === null ||
+    distanceMeter(latitude, longitude, lastLoadedLat, lastLoadedLng) > 80;
+
+  if (movedEnough) {
+    lastLoadedLat = latitude;
+    lastLoadedLng = longitude;
+    loadPlacesAt(latitude, longitude);
+  }
+
+  if (isFirst && !checkinShown && places.length > 0) {
     checkinShown = true;
     setTimeout(() => showCheckinModal(latitude, longitude), 1200);
   }
@@ -1162,23 +1372,35 @@ function setMapLoading(isLoading, label) {
   el.classList.toggle('show', !!isLoading);
 }
 
-async function loadRealPlaces(lat, lng) {
-  if (!BACKEND_READY) return;
+/* ── FIX: loadPlacesAt — carga backend + Overpass en paralelo ── */
+async function loadPlacesAt(lat, lng) {
+  setMapLoading(true, 'Buscando comercios…');
 
-  const fast = await apiGet('places', { lat, lng, radius: CONFIG.SEARCH_RADIUS_M });
-  if (fast && Array.isArray(fast.places) && fast.places.length) {
-    places = fast.places;
+  // FIX: lanzar backend y Overpass en paralelo para mayor velocidad
+  const [backendResult, osmPlaces] = await Promise.all([
+    BACKEND_READY
+      ? apiGet('sync_places', { lat, lng, radius: CONFIG.SEARCH_RADIUS_M })
+      : Promise.resolve(null),
+    loadOverpassPlaces(lat, lng),
+  ]);
+
+  setMapLoading(false);
+
+  const backendPlaces = (backendResult && Array.isArray(backendResult.places))
+    ? backendResult.places : [];
+
+  // FIX: mergear ambas fuentes
+  const merged = mergePlaces(backendPlaces, osmPlaces);
+  if (merged.length > 0) {
+    places = merged;
     buildMapMarkers();
     updateCrowdBar(calcCrowdPct());
   }
 
-  setMapLoading(true, 'Buscando comercios…');
-  const synced = await apiGet('sync_places', { lat, lng, radius: CONFIG.SEARCH_RADIUS_M });
-  setMapLoading(false);
-  if (synced && Array.isArray(synced.places) && synced.places.length) {
-    places = synced.places;
-    buildMapMarkers();
-    updateCrowdBar(calcCrowdPct());
+  // Mostrar checkin si no se mostró antes
+  if (!checkinShown && userLat !== null && places.length > 0) {
+    checkinShown = true;
+    setTimeout(() => showCheckinModal(userLat, userLng), 800);
   }
 }
 
@@ -1196,25 +1418,40 @@ function makeIcon(place) {
 }
 
 function buildMapMarkers() {
-  Object.values(leafletMarkers).forEach(m => m.remove());
-  leafletMarkers = {};
+  // FIX: remover solo los markers que ya no están en places (evita re-render completo)
+  const newIds = new Set(places.map(p => p.id));
+
+  // Limpiar markers viejos que ya no existen
+  Object.keys(leafletMarkers).forEach(id => {
+    if (!newIds.has(id)) {
+      leafletMarkers[id].remove();
+      delete leafletMarkers[id];
+    }
+  });
+
+  // Agregar o actualizar
   places.forEach(p => {
-    const marker = L.marker([p.lat, p.lng], { icon: makeIcon(p) }).addTo(leafletMap);
-    marker.on('click', () => {
-      if (pickModeActive) {
-        exitPickMode();
-        openPlacePopup(p);
-      } else {
-        openPlacePopup(p);
-      }
-    });
-    leafletMarkers[p.id] = marker;
+    if (leafletMarkers[p.id]) {
+      // Actualizar ícono si ya existe
+      leafletMarkers[p.id].setIcon(makeIcon(p));
+    } else {
+      const marker = L.marker([p.lat, p.lng], { icon: makeIcon(p) }).addTo(leafletMap);
+      marker.on('click', () => {
+        if (pickModeActive) {
+          exitPickMode();
+          openPlacePopup(p);
+        } else {
+          openPlacePopup(p);
+        }
+      });
+      leafletMarkers[p.id] = marker;
+    }
   });
 }
 
 function refreshMarkerIcon(id) {
   const p = places.find(x => x.id === id);
-  if (leafletMarkers[id]) leafletMarkers[id].setIcon(makeIcon(p));
+  if (p && leafletMarkers[id]) leafletMarkers[id].setIcon(makeIcon(p));
 }
 
 function calcCrowdPct() {
@@ -1230,15 +1467,40 @@ function updateCrowdBar(pct) {
   document.getElementById('cbar-pct').textContent = pct + '%';
 }
 
-/* ── GPS button ── */
+/* ── FIX: GPS button — centra el mapa en la posición actual ── */
 function requestGpsPermission() {
   const btn = document.getElementById('gps-btn');
   btn.classList.add('pulsing');
-  if (!navigator.geolocation) { showToast('⚠️ Tu navegador no soporta GPS'); btn.classList.remove('pulsing'); return; }
+
+  if (!navigator.geolocation) {
+    showToast('⚠️ Tu navegador no soporta GPS');
+    btn.classList.remove('pulsing');
+    return;
+  }
+
+  if (userLat !== null && userLng !== null) {
+    // Ya tenemos posición: solo centrar el mapa
+    leafletMap.setView([userLat, userLng], CONFIG.GPS_ZOOM);
+    btn.classList.remove('pulsing');
+    btn.classList.add('active');
+    showToast('📍 Centrado en tu ubicación');
+    return;
+  }
+
+  // Pedir permiso por primera vez
   navigator.geolocation.getCurrentPosition(
-    pos => { btn.classList.remove('pulsing'); showToast('📍 Ubicación activada'); onGpsSuccess(pos, false); },
-    err => { btn.classList.remove('pulsing'); showToast(err.code===1?'🔒 Permiso denegado':'⚠️ No se pudo obtener ubicación'); },
-    { enableHighAccuracy: true, timeout: 8000 }
+    pos => {
+      btn.classList.remove('pulsing');
+      btn.classList.add('active');
+      showToast('📍 Ubicación activada');
+      onGpsSuccess(pos);
+      startGpsWatch();
+    },
+    err => {
+      btn.classList.remove('pulsing');
+      showToast(err.code === 1 ? '🔒 Permiso de ubicación denegado' : '⚠️ No se pudo obtener tu ubicación');
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
   );
 }
 
@@ -1246,7 +1508,6 @@ function requestGpsPermission() {
    CHECK-IN MODAL — siempre los 3 más cercanos a tu GPS
    ══════════════════════════════════════════════ */
 function showCheckinModal(lat, lng) {
-  /* Ordenar TODOS los places por distancia y tomar los 3 más cercanos */
   const sorted = places
     .map(p => ({ ...p, _dist: Math.round(distanceMeter(lat, lng, p.lat, p.lng)) }))
     .sort((a, b) => a._dist - b._dist)
@@ -1263,14 +1524,9 @@ function showCheckinModal(lat, lng) {
   function choosePlace(p) { close(); setTimeout(() => openPlacePopup(p), 300); }
   function chooseOther() { close(); enterPickMode(); }
 
-  /* Clases de distancia:
-     - near   → ≤ CHECKIN_NEAR_M (20m) o ≤ 50m: tinte verde
-     - far    → > 50m: opacidad reducida
-  */
   const tabsHtml = sorted.map(p => {
     const veryNear = p._dist <= CONFIG.CHECKIN_NEAR_M;
-    const nearish  = p._dist <= 50;
-    const isFar    = !veryNear && !nearish;
+    const nearish  = p._dist <= 100;
     const cls      = veryNear || nearish ? 'near' : 'far';
     const distLabel = p._dist < 1000 ? `${p._dist}m` : `${(p._dist / 1000).toFixed(1)}km`;
     const distDisplay = veryNear ? `📍 ${p._dist}m` : distLabel;
@@ -1391,6 +1647,14 @@ async function handleGoogleTokenResponse(resp) {
     if (!profileRes.ok) throw new Error('No se pudo obtener el perfil de Google');
     const profile = await profileRes.json();
 
+    // FIX: bloquear si ya hay otra cuenta logueada en este dispositivo
+    const deviceEmail = localStorage.getItem(DEVICE_KEY);
+    if (deviceEmail && deviceEmail !== profile.email) {
+      resetLoginButton();
+      showToast(`⛔ Este dispositivo ya tiene una cuenta: ${deviceEmail.split('@')[0]}`);
+      return;
+    }
+
     let backendResult = null;
     if (BACKEND_READY) {
       backendResult = await apiPost('login', { access_token: resp.access_token, email: profile.email, name: profile.name, picture: profile.picture });
@@ -1401,7 +1665,9 @@ async function handleGoogleTokenResponse(resp) {
     if (backendResult && backendResult.cooldowns) applyCooldownInfo(backendResult.cooldowns);
     isLoggedIn = true;
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(currentUser));
+    localStorage.setItem(DEVICE_KEY, profile.email);  // FIX: registrar email del dispositivo
     applyLoggedInUI();
+    hideToastAction();
     showToast(`👋 ¡Hola, ${currentUser.name.split(' ')[0]}!`);
 
     if (pendingVote) {
@@ -1423,6 +1689,15 @@ async function restoreSession() {
   if (!saved) return;
   try { currentUser = JSON.parse(saved); } catch { localStorage.removeItem(SESSION_STORAGE_KEY); currentUser = null; return; }
   if (!currentUser || !currentUser.email) { localStorage.removeItem(SESSION_STORAGE_KEY); currentUser = null; return; }
+
+  // FIX: verificar consistencia con email del dispositivo
+  const deviceEmail = localStorage.getItem(DEVICE_KEY);
+  if (deviceEmail && deviceEmail !== currentUser.email) {
+    // Conflicto: limpiar la sesión inconsistente
+    localStorage.removeItem(SESSION_STORAGE_KEY);
+    currentUser = null;
+    return;
+  }
 
   isLoggedIn = true;
   applyLoggedInUI();
@@ -1475,25 +1750,46 @@ function burstConfetti(originEl) {
   }
 }
 
+/* ── FIX: manualRefresh — siempre recarga desde las APIs ── */
 function manualRefresh() {
   const icon = document.getElementById('refresh-icon');
-  icon.style.animation='none'; icon.offsetHeight; icon.style.animation='rotate .7s cubic-bezier(.34,1.56,.64,1)';
+  icon.style.animation = 'none';
+  icon.offsetHeight;
+  icon.style.animation = 'rotate .7s cubic-bezier(.34,1.56,.64,1)';
 
-  if (userLat !== null && userLng !== null) {
-    loadRealPlaces(userLat, userLng);
-  } else {
-    places.forEach(p => {
-      if (Math.random() < .3) { p.status = Math.max(0,Math.min(3, p.status+(Math.random()>.5?1:-1))); refreshMarkerIcon(p.id); }
-    });
-    updateCrowdBar(calcCrowdPct());
-    if (currentPopupPlace) { const updated = places.find(x => x.id === currentPopupPlace.id); if (updated) renderPopup(updated); }
-  }
+  const lat = userLat ?? CONFIG.DEFAULT_CENTER.lat;
+  const lng = userLng ?? CONFIG.DEFAULT_CENTER.lng;
+
+  // FIX: forzar recarga desde APIs (resetear lastLoaded para que no lo saltee)
+  lastLoadedLat = null;
+  lastLoadedLng = null;
+  loadPlacesAt(lat, lng).then(() => {
+    showToast('🔄 Locales actualizados');
+  });
 }
 
+/* ── TOASTS ── */
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
+  t.textContent = msg;
+  t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+let toastActionTimer = null;
+
+function showToastAction(msg) {
+  const t = document.getElementById('toast-action');
+  const m = document.getElementById('toast-action-msg');
+  m.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastActionTimer);
+  toastActionTimer = setTimeout(() => t.classList.remove('show'), 5000);
+}
+
+function hideToastAction() {
+  clearTimeout(toastActionTimer);
+  document.getElementById('toast-action').classList.remove('show');
 }
 
 let rankingLoaded = false;
