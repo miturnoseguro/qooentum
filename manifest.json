@@ -1,7 +1,7 @@
 {
   "name": "FilaCero — Evitá las filas",
-  "short_name": "FilaCero",
-  "description": "Mapa en tiempo real de filas y ocupación en comercios cerca tuyo.",
+  "short_name": "Qooentum",
+  "description": "Enterate cuanta gente hay, antes de ir",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
