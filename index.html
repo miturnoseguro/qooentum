@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -77,7 +78,8 @@ html,body{
   -webkit-backdrop-filter:blur(16px);
   border-bottom:1px solid rgba(226,232,240,.7);
   flex-shrink:0;
-  z-index:100;
+  position:relative;
+  z-index:1500;
   flex-wrap:nowrap;
 }
 .brand{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-decoration:none;cursor:pointer;flex-shrink:0;}
@@ -120,7 +122,7 @@ html,body{
   position:absolute;top:calc(100% + 8px);right:0;
   background:var(--surface);border:1px solid var(--border);border-radius:14px;
   padding:6px;box-shadow:var(--shadow-lg);min-width:170px;
-  display:none;z-index:9999;
+  display:none;z-index:10050;
   animation:dropIn .18s cubic-bezier(.34,1.56,.64,1);
 }
 @keyframes dropIn{from{opacity:0;transform:translateY(-6px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
@@ -560,25 +562,31 @@ html,body{
 /* ── MOBILE ── */
 @media(max-width:680px){
   .topbar{
-    flex-wrap:wrap;
+    flex-wrap:nowrap;
     height:auto;
-    padding: max(var(--sat), 10px) 14px 10px;
-    row-gap:10px;
+    padding: max(var(--sat), 10px) 12px 10px;
     align-items:center;
+    gap:8px;
   }
-  .brand{order:1;flex-shrink:0;}
-  .cbar-wrap{order:2;flex:1;max-width:none;min-width:0;margin-left:0;}
-  /* En mobile: auth va en segunda fila, ancho completo */
+  .brand{flex-shrink:0;}
+  .brand-mark{width:120px;height:35px;}
+  .brand-powered{display:none;}
   .topbar-auth{
-    order:3;
-    width:100%;
-    margin-left:0;
-    justify-content:flex-start;
+    margin-left:auto;
+    flex-shrink:0;
   }
+  .user-chip{padding:4px 10px 4px 4px;gap:7px;}
+  .avatar{width:28px;height:28px;font-size:10px;}
+  .user-chip-info{min-width:0;}
+  .pts-label{font-size:12px;}
+  .lvl-badge{font-size:9px;padding:1px 6px;}
+  .login-topbar-btn{padding:7px 13px;font-size:12px;}
   .bottom-nav{bottom: max(16px, calc(var(--sab) + 10px));}
   .leaflet-control-zoom{margin:0 12px calc(92px + var(--sab)) 0 !important;}
   .map-search-wrap{left:14px;right:14px;}
   .map-float-controls{top:14px;right:14px;}
+  /* Evita el zoom automático de iOS/Android al hacer foco en el buscador */
+  .map-search-input{font-size:16px;}
   /* Refresh button en mobile: ajustar bottom */
   .map-refresh-btn{
     bottom: calc(72px + max(16px, calc(var(--sab) + 10px)));
@@ -1795,9 +1803,12 @@ function calcCrowdPct() {
 
 function updateCrowdBar(pct) {
   pct = Math.max(5, Math.min(95, pct));
-  document.getElementById('cbar-needle').style.left = pct + '%';
-  document.getElementById('cbar-overlay').style.width = (100 - pct) + '%';
-  document.getElementById('cbar-pct').textContent = pct + '%';
+  const needle = document.getElementById('cbar-needle');
+  const overlay = document.getElementById('cbar-overlay');
+  const pctLabel = document.getElementById('cbar-pct');
+  if (needle) needle.style.left = pct + '%';
+  if (overlay) overlay.style.width = (100 - pct) + '%';
+  if (pctLabel) pctLabel.textContent = pct + '%';
 }
 
 function requestGpsPermission() {
