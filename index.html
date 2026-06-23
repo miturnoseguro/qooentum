@@ -1839,7 +1839,7 @@ function makeIcon(place) {
    zoom 13-14 → clusters por zona (~500m)
    zoom ≤ 12  → clusters grandes (~1.5km)
 */
-const CLUSTER_ZOOM_THRESHOLD = 17; // por encima de esto → markers individuales
+const CLUSTER_ZOOM_THRESHOLD = 14; // por encima de esto → markers individuales
 
 function getClusterGridDeg(zoom) {
   if (zoom >= 15) return 0.0015;   // ~150m — manzana
