@@ -116,10 +116,10 @@ html,body{
 .chip-caret{width:12px;height:12px;color:var(--text3);flex-shrink:0;transition:transform .2s;}
 .user-chip-wrap.open .chip-caret{transform:rotate(180deg);}
 .user-dropdown{
-  position:absolute;top:calc(100% + 8px);right:0;
+  top:calc(100% + 8px);right:0;
   background:var(--surface);border:1px solid var(--border);border-radius:14px;
   padding:6px;box-shadow:var(--shadow-lg);min-width:170px;
-  display:none;z-index:10050;
+  display:none;z-index:10050; position: fixed;
   animation:dropIn .18s cubic-bezier(.34,1.56,.64,1);
 }
 @keyframes dropIn{from{opacity:0;transform:translateY(-6px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
@@ -2278,6 +2278,14 @@ async function restoreSession() {
       }
     } catch(e) { localStorage.removeItem(TOKEN_STORAGE_KEY); }
   }
+
+  // Token vencido o inválido → limpiar sesión y mostrar botón de login
+  isLoggedIn = false;
+  currentUser = null;
+  localStorage.removeItem(SESSION_STORAGE_KEY);
+  document.getElementById('user-chip-wrap').style.display = 'none';
+  document.getElementById('login-topbar-btn').style.display = 'flex';
+}
 
   // Intento silencioso de renovación
   const trysilent = () => new Promise(resolve => {
