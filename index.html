@@ -2177,13 +2177,16 @@ function doLogout() {
   showToast('✅ Sesión cerrada correctamente');
 }
 
+// REEMPLAZAR la función doGoogleLogin existente con esta:
 function doGoogleLogin(btn) {
   if (isLoggedIn) return;
   if (!GOOGLE_AUTH_READY) { showToast('⚠️ El login con Google todavía no está configurado'); return; }
   if (!initGoogleTokenClient()) { showToast('⏳ Google se está cargando, probá de nuevo en un segundo'); return; }
   const loginBtn = btn || document.getElementById('login-topbar-btn');
   if (loginBtn) { loginBtn.classList.add('is-loading'); const t = loginBtn.querySelector('.gbtn-txt'); if (t) t.textContent = 'Conectando…'; }
-  tokenClient.requestAccessToken({ prompt: 'select_account' });
+  // Intentar renovación silenciosa si ya hubo sesión previa
+  const hasPrevSession = !!localStorage.getItem(SESSION_STORAGE_KEY);
+  tokenClient.requestAccessToken({ prompt: hasPrevSession ? '' : 'select_account' });
 }
 
 function resetLoginButton() {
@@ -2215,8 +2218,17 @@ async function fetchProfileFromToken(accessToken) {
   return await profileRes.json();
 }
 
+// REEMPLAZAR la función handleGoogleTokenResponse existente con esta:
 async function handleGoogleTokenResponse(resp) {
-  if (!resp || resp.error || !resp.access_token) { resetLoginButton(); showToast('⚠️ No se pudo iniciar sesión con Google'); return; }
+  if (!resp || resp.error || !resp.access_token) {
+    // Si fue una renovación silenciosa que falló, no mostrar error
+    // El chip ya está visible; el usuario puede hacer clic para reingresar
+    resetLoginButton();
+    if (resp && resp.error !== 'user_logged_out' && resp.error !== 'access_denied' && resp.error !== 'immediate_failed') {
+      showToast('⚠️ No se pudo iniciar sesión con Google');
+    }
+    return;
+  }
   try {
     const profile = await fetchProfileFromToken(resp.access_token);
     const deviceEmail = localStorage.getItem(DEVICE_KEY);
@@ -2229,6 +2241,7 @@ async function handleGoogleTokenResponse(resp) {
     if (BACKEND_READY) {
       backendResult = await apiPost('login', { access_token: resp.access_token, email: profile.email, name: profile.name, picture: profile.picture });
     }
+    const wasLoggedIn = isLoggedIn; // para saber si es renovación silenciosa
     currentUser = { email: profile.email, name: profile.name || profile.email, picture: profile.picture || '' };
     if (backendResult && typeof backendResult.points === 'number') userPts = backendResult.points;
     if (backendResult && backendResult.cooldowns) applyCooldownInfo(backendResult.cooldowns);
@@ -2238,7 +2251,10 @@ async function handleGoogleTokenResponse(resp) {
     saveTokenToStorage(resp.access_token, resp.expires_in);
     applyLoggedInUI();
     hideToastAction();
-    showToast(`👋 ¡Hola, ${currentUser.name.split(' ')[0]}!`);
+    // Solo saludar si es un login manual (no renovación silenciosa)
+    if (!wasLoggedIn) {
+      showToast(`👋 ¡Hola, ${currentUser.name.split(' ')[0]}!`);
+    }
     if (pendingVote) {
       const { placeId, voteIdx } = pendingVote; pendingVote = null;
       const p = places.find(x => x.id === placeId);
@@ -2250,6 +2266,7 @@ async function handleGoogleTokenResponse(resp) {
   } finally { resetLoginButton(); }
 }
 
+// REEMPLAZAR la función restoreSession existente con esta:
 async function restoreSession() {
   const saved = localStorage.getItem(SESSION_STORAGE_KEY);
   if (!saved) return;
@@ -2258,8 +2275,7 @@ async function restoreSession() {
   const deviceEmail = localStorage.getItem(DEVICE_KEY);
   if (deviceEmail && deviceEmail !== currentUser.email) { localStorage.removeItem(SESSION_STORAGE_KEY); currentUser = null; return; }
 
-  // Mostrar el chip inmediatamente con los datos guardados (UX instantánea)
-  // isLoggedIn = false hasta que validemos el token
+  // Mostrar chip inmediatamente (UX instantánea)
   applyLoggedInUI();
 
   const savedToken = loadTokenFromStorage();
@@ -2279,25 +2295,30 @@ async function restoreSession() {
           }
         }
         updateUserHUD();
-        return;
+        return; // Token válido, todo bien
       }
     } catch(e) { localStorage.removeItem(TOKEN_STORAGE_KEY); }
   }
 
-  // Token vencido o inexistente — igual mantenemos el chip visible
-  // pero isLoggedIn = false, así si intenta reportar le pide que reingrese
+  // Token vencido → intentar renovación SILENCIOSA automáticamente
+  // El usuario ya tuvo sesión, no debería tener que volver a elegir cuenta
   isLoggedIn = false;
-  // Hacer que el chip lleve al login al clickear
-  const chip = document.getElementById('user-chip');
-  if (chip) {
-    chip.title = 'Tu sesión expiró · tocá para reingresar';
-    chip.onclick = () => doGoogleLogin(document.getElementById('login-topbar-btn'));
+  await trysilentRenew();
+}
+
+async function trySilentRenew() {
+  // Esperar a que Google esté listo
+  let attempts = 0;
+  while ((!window.google || !google.accounts || !google.accounts.oauth2) && attempts < 20) {
+    await new Promise(r => setTimeout(r, 200));
+    attempts++;
   }
-  // Mostrar puntos guardados aunque no esté activo
-  if (BACKEND_READY) {
-    const me = await apiGet('me', { email: currentUser.email });
-    if (me && me.exists) { userPts = me.points || 0; updateUserHUD(); }
-  }
+  if (!initGoogleTokenClient()) return;
+
+  // Renovar sin popup — Google puede fallar si el usuario revocó permisos,
+  // en ese caso simplemente dejamos isLoggedIn = false y el chip queda visible
+  // pero inactivo hasta que el usuario haga clic.
+  tokenClient.requestAccessToken({ prompt: '' });
 }
 
 function updateUserHUD() {
