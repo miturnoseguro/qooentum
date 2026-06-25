@@ -133,7 +133,9 @@ html,body{
   cursor:pointer;transition:all .15s;
   border:none;background:none;width:100%;text-align:left;font-family:inherit;
 }
-.user-dropdown-item:hover{background:var(--red-lt);color:var(--red);}
+/* ── CAMBIO 2: hover genérico suave, solo logout en rojo ── */
+.user-dropdown-item:hover{background:var(--surface2);color:var(--text);}
+.user-dropdown-item.danger:hover{background:var(--red-lt);color:var(--red);}
 
 .login-topbar-btn{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#00C48C,#009E72);color:#fff;border:none;border-radius:99px;padding:8px 17px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;box-shadow:0 3px 10px rgba(0,196,140,.3);transition:all .2s;font-family:inherit;}
 .login-topbar-btn:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(0,196,140,.4);}
@@ -466,6 +468,15 @@ html,body{
 .cerca-search-clear{width:20px;height:20px;background:var(--surface2);border:none;border-radius:50%;display:none;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);font-size:12px;flex-shrink:0;}
 .cerca-search-clear.visible{display:flex;}
 
+/* ── CAMBIO 3: badge "toda la ciudad" cuando hay búsqueda activa ── */
+.cerca-city-badge{
+  display:none;align-items:center;gap:5px;
+  padding:4px 10px;background:var(--blue-lt);border:1px solid var(--blue);
+  border-radius:99px;font-size:10px;font-weight:800;color:var(--blue);
+  margin-left:4px;flex-shrink:0;
+}
+.cerca-city-badge.visible{display:flex;}
+
 .cerca-radius-row{
   display:flex;align-items:center;gap:6px;
   padding:10px 14px 0;flex-shrink:0;overflow-x:auto;scrollbar-width:none;
@@ -488,7 +499,7 @@ html,body{
 .cerca-f-chip{
   padding:5px 11px;border:1px solid var(--border);border-radius:99px;
   font-size:11px;font-weight:700;color:var(--text2);background:#fff;
-  cursor:pointer;white-space:nowrap;transition:all .18s;font-family:inherit;flex-shrink:0;
+  cursor:pointer;white-space:nowrap;transition:all .18px;font-family:inherit;flex-shrink:0;
 }
 .cerca-f-chip:hover{border-color:var(--blue);color:var(--blue);}
 .cerca-f-chip.active{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
@@ -661,8 +672,14 @@ html,body{
           </div>
           <svg class="chip-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
+        <!-- ── CAMBIO 2: Dropdown con "Mis premios" + separador + "Cerrar sesión" ── -->
         <div class="user-dropdown" id="user-dropdown">
-          <button class="user-dropdown-item" onclick="doLogout()">
+          <button class="user-dropdown-item" onclick="switchTab('prizes');toggleUserDropdown()" style="color:var(--green-dk);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;flex-shrink:0;color:var(--green);"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+            Mis premios
+          </button>
+          <div style="height:1px;background:var(--border);margin:3px 8px;"></div>
+          <button class="user-dropdown-item danger" onclick="doLogout()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;flex-shrink:0;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             Cerrar sesión
           </button>
@@ -750,12 +767,17 @@ html,body{
     <div class="cerca-search-wrap">
       <div class="cerca-search-bar">
         <svg class="cerca-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input id="cerca-search-input" type="text" placeholder="Buscar por nombre, tipo o dirección…" autocomplete="off">
+        <input id="cerca-search-input" type="text" placeholder="Buscar en toda la ciudad…" autocomplete="off">
         <button class="cerca-search-clear" id="cerca-search-clear" onclick="cercaClearSearch()">✕</button>
+        <!-- ── CAMBIO 3: badge que aparece cuando la búsqueda ignora el radio ── -->
+        <div class="cerca-city-badge" id="cerca-city-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:9px;height:9px"><circle cx="12" cy="12" r="10"/></svg>
+          Ciudad
+        </div>
       </div>
     </div>
 
-    <div class="cerca-radius-row">
+    <div class="cerca-radius-row" id="cerca-radius-row">
       <span class="cerca-radius-lbl">Radio:</span>
       <button class="cerca-r-btn" data-r="100" onclick="cercaSetRadius(100,this)">100m</button>
       <button class="cerca-r-btn" data-r="300" onclick="cercaSetRadius(300,this)">300m</button>
@@ -1463,7 +1485,6 @@ async function cercaFetchOverpass(lat,lng,radius){
       const dist=Math.round(distanceMeter(lat,lng,el.lat,el.lon));
       const type=osmInfo.tipo;
       const cat=cercaGuessCategory(name,type);
-      // Compartir estado si ya existe en placeIndex
       const existing=placeIndex.get(`osm_${el.id}`);
       return {
         id:`osm_${el.id}`, name, type, emoji:osmInfo.emoji,
@@ -1503,7 +1524,6 @@ async function cercaLoadPlaces(forceReload){
 
   try{
     const osmPlaces=await cercaFetchOverpass(lat,lng,cercaRadius);
-    // Enriquecer con datos del backend si los hay
     const sponsorMap=new Map();
     placeIndex.forEach((p,id)=>{ if(p.sponsor) sponsorMap.set(id,p.sponsor); });
     cercaAllPlaces=osmPlaces.map(p=>({ ...p, sponsor:sponsorMap.get(p.id)||p.sponsor||null }));
@@ -1542,14 +1562,88 @@ function cercaBuildDemoPlaces(lat,lng){
   }).filter(p=>p.dist<=cercaRadius);
 }
 
+/* ══════════════════════════════════════════════════════════════
+   CAMBIO 3: Búsqueda en Cerca que ignora el radio (toda la ciudad)
+   ══════════════════════════════════════════════════════════════ */
+let cercaCitySearchResults=[], cercaCitySearchInFlight=false;
+
+async function cercaFetchCitySearch(query, lat, lng){
+  // Busca en ~15km de radio (toda la ciudad) via Nominatim
+  const delta=0.14; // ~15km
+  const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=25&addressdetails=1&bounded=0&viewbox=${lng-delta},${lat-delta},${lng+delta},${lat+delta}&countrycodes=ar&dedupe=1`;
+  try{
+    const res=await fetch(url,{headers:{'Accept-Language':'es','User-Agent':'Qooentum/1.0'}});
+    if(!res.ok) throw new Error('Nominatim '+res.status);
+    const data=await res.json();
+    return data
+      .filter(r=>!['highway','boundary','landuse','natural','water','suburb','city','town','village'].includes(r.class))
+      .map(r=>{
+        const osmId=`osm_${r.osm_type}_${r.osm_id}`;
+        // Preferir datos ya en caché
+        const existing=placeIndex.get(osmId)||(places||[]).find(p=>Math.abs(p.lat-parseFloat(r.lat))<0.0003&&Math.abs(p.lng-parseFloat(r.lon))<0.0003);
+        const plat=parseFloat(r.lat), plng=parseFloat(r.lon);
+        const dist=Math.round(distanceMeter(lat,lng,plat,plng));
+        if(existing) return {...existing, dist};
+        const key=r.type||r.class||'general';
+        const info=OSM_TYPE_MAP[key]||{emoji:'🏪',tipo:r.type||'Lugar'};
+        const addr=r.display_name.split(',').slice(0,3).join(', ');
+        const name=r.name||r.display_name.split(',')[0];
+        const cat=cercaGuessCategory(name,info.tipo);
+        return {id:osmId,name,type:info.tipo,emoji:info.emoji,cat,addr,dist,lat:plat,lng:plng,open:true,verified:false,rating:(3.5+Math.random()*1.2).toFixed(1),reviewsN:Math.floor(Math.random()*80+5),status:0,reporters:0,sponsor:null};
+      })
+      .slice(0,30);
+  }catch(e){ console.warn('City search falló:',e); return []; }
+}
+
 function cercaApplyFilters(){
-  let places=[...cercaAllPlaces];
-  if(cercaSearchQ){ const q=cercaSearchQ.toLowerCase(); places=places.filter(p=>p.name.toLowerCase().includes(q)||p.type.toLowerCase().includes(q)||(p.addr||'').toLowerCase().includes(q)); }
-  if(cercaCat!=='all') places=places.filter(p=>p.cat===cercaCat);
-  if(cercaSortMode==='distance') places.sort((a,b)=>a.dist-b.dist);
-  else if(cercaSortMode==='status') places.sort((a,b)=>b.reporters-a.reporters||b.status-a.status);
-  else if(cercaSortMode==='rating') places.sort((a,b)=>parseFloat(b.rating)-parseFloat(a.rating));
-  cercaFiltered=places;
+  const hasBusqueda = cercaSearchQ && cercaSearchQ.length>=1;
+
+  // Mostrar/ocultar badge "Ciudad" y atenuación del selector de radio
+  const cityBadge=document.getElementById('cerca-city-badge');
+  const radiusRow=document.getElementById('cerca-radius-row');
+  if(cityBadge) cityBadge.classList.toggle('visible', hasBusqueda);
+  if(radiusRow) radiusRow.style.opacity = hasBusqueda ? '0.4' : '1';
+
+  if(hasBusqueda){
+    // Combinar resultados locales + búsqueda ciudad
+    const q=cercaSearchQ.toLowerCase();
+    const localMatches=cercaAllPlaces.filter(p=>
+      p.name.toLowerCase().includes(q)||
+      p.type.toLowerCase().includes(q)||
+      (p.addr||'').toLowerCase().includes(q)
+    );
+    // Merge sin duplicados
+    const combined=[...localMatches];
+    cercaCitySearchResults.forEach(r=>{ if(!combined.find(p=>p.id===r.id)) combined.push(r); });
+    let filtrados=combined;
+    if(cercaCat!=='all') filtrados=filtrados.filter(p=>p.cat===cercaCat);
+    filtrados.sort((a,b)=>a.dist-b.dist);
+    cercaFiltered=filtrados;
+    cercaRenderList();
+
+    // Disparar búsqueda en ciudad en background (debounced)
+    if(!cercaCitySearchInFlight){
+      cercaCitySearchInFlight=true;
+      const lat=userLat??CONFIG.DEFAULT_CENTER.lat, lng=userLng??CONFIG.DEFAULT_CENTER.lng;
+      cercaFetchCitySearch(cercaSearchQ, lat, lng).then(results=>{
+        cercaCitySearchInFlight=false;
+        if(cercaSearchQ){ // Sólo actualizar si el query sigue activo
+          cercaCitySearchResults=results;
+          cercaApplyFilters();
+        }
+      }).catch(()=>{ cercaCitySearchInFlight=false; });
+    }
+    return;
+  }
+
+  // Sin búsqueda: comportamiento normal con radio
+  cercaCitySearchResults=[];
+  let pl=[...cercaAllPlaces];
+  if(cercaCat!=='all') pl=pl.filter(p=>p.cat===cercaCat);
+  if(cercaSortMode==='distance') pl.sort((a,b)=>a.dist-b.dist);
+  else if(cercaSortMode==='status') pl.sort((a,b)=>b.reporters-a.reporters||b.status-a.status);
+  else if(cercaSortMode==='rating') pl.sort((a,b)=>parseFloat(b.rating)-parseFloat(a.rating));
+  cercaFiltered=pl;
   cercaRenderList();
 }
 
@@ -1604,7 +1698,6 @@ function cercaRenderList(){
       if(e.target.classList.contains('nc-report-btn')) return;
       const p=cercaFiltered[+card.dataset.ncIdx];
       if(!p) return;
-      // Buscar en placeIndex para tener el objeto completo con status actualizado
       const enriched=placeIndex.get(p.id)||p;
       openPlacePopup({...p,...enriched});
     });
@@ -1641,6 +1734,8 @@ function cercaCycleSort(){
 function cercaClearSearch(){
   document.getElementById('cerca-search-input').value='';
   document.getElementById('cerca-search-clear').classList.remove('visible');
+  cercaCitySearchResults=[];
+  cercaCitySearchInFlight=false;
   cercaSearchQ=''; cercaApplyFilters();
 }
 
@@ -1850,9 +1945,8 @@ function switchTab(tab){
   });
   if(tab==='map'&&leafletMap) setTimeout(()=>leafletMap.invalidateSize(),50);
   if(tab==='cerca'){
-    // Cargar solo la primera vez o si cambió la ubicación
     if(!cercaLoaded) cercaLoadPlaces();
-    else cercaApplyFilters(); // Refrescar estados desde placeIndex
+    else cercaApplyFilters();
   }
   if(tab==='ranking'){buildRanking();ensureRankingLoaded().then(buildRanking);}
   if(tab==='prizes'){buildPrizes();ensurePrizesLoaded().then(buildPrizes);}
@@ -1861,13 +1955,26 @@ function switchTab(tab){
 /* ─── INTERVALS ─── */
 setInterval(()=>{ tickCooldownUI(); }, 1000);
 setInterval(()=>{ pruneOldTiles(); persistCache(); }, 60*60*1000);
-// Sync de estados del panel Cerca cada 20s si está visible
+
+/* ════════════════════════════════════════════════════════════
+   CAMBIO 1: Refresh automático de estados cada 3 segundos
+   (solo cuando el panel Cerca está visible)
+   ════════════════════════════════════════════════════════════ */
 setInterval(()=>{
-  if(document.getElementById('panel-cerca').classList.contains('visible')&&cercaAllPlaces.length){
-    cercaAllPlaces=cercaAllPlaces.map(p=>{ const updated=placeIndex.get(p.id); return updated?{...p,status:updated.status,reporters:updated.reporters}:p; });
-    cercaApplyFilters();
+  if(document.getElementById('panel-cerca').classList.contains('visible') && cercaAllPlaces.length){
+    // Actualizar estados desde placeIndex (que el backend sincroniza cada 15s)
+    let changed=false;
+    cercaAllPlaces=cercaAllPlaces.map(p=>{
+      const updated=placeIndex.get(p.id);
+      if(updated && (updated.status!==p.status || updated.reporters!==p.reporters)){
+        changed=true;
+        return {...p, status:updated.status, reporters:updated.reporters};
+      }
+      return p;
+    });
+    if(changed) cercaApplyFilters();
   }
-},20000);
+}, 3000); // ← 3 segundos
 
 /* ─── INIT ─── */
 window.addEventListener('DOMContentLoaded',()=>{
