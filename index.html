@@ -798,6 +798,7 @@ const SEED_PRIZES = [
 let userPts = 0;
 let currentUser = null;
 let places = [];         // todos los lugares en memoria
+let placeIndex = new Map(); // id → place object  (O(1) lookup)
 let nearbyPlaces = [];
 let rankingData = [];
 let prizesData = SEED_PRIZES.map(p=>({...p}));
@@ -865,9 +866,12 @@ function loadCache() {
     if (!data || !data.tiles) return;
     tileCache = data.tiles || {};
     placeStore = data.places || {};
-    // Reconstruir places[] en memoria desde placeStore
+    // Reconstruir places[] y placeIndex desde placeStore
     Object.values(placeStore).forEach(p => {
-      if (!places.find(x => x.id === p.id)) places.push(p);
+      if (!placeIndex.has(p.id)) {
+        placeIndex.set(p.id, p);
+        places.push(p);
+      }
     });
   } catch(e) { console.warn('Cache load failed:', e); }
 }
@@ -911,7 +915,15 @@ function mergePlacesIntoCache(newPlaces, tileKey) {
   newPlaces.forEach(p => {
     placeStore[p.id] = p;
     addedIds.push(p.id);
-    if (!places.find(x => x.id === p.id)) places.push(p);
+    // O(1) — antes era .find() O(n) por cada place
+    if (!placeIndex.has(p.id)) {
+      placeIndex.set(p.id, p);
+      places.push(p); // mantener el array por compatibilidad con código existente
+    } else {
+      // Actualizar el objeto existente en lugar de duplicarlo
+      const existing = placeIndex.get(p.id);
+      Object.assign(existing, p);
+    }
   });
   if (tileKey) markTileLoaded(tileKey, addedIds);
 }
@@ -1078,27 +1090,26 @@ function osmNodeToPlace(node) {
 async function loadOverpassForTiles(tileKeys) {
   if (!tileKeys.length) return [];
 
-  // Una única query con union de bboxes — Overpass lo maneja bien
-  const bboxClauses = tileKeys.map(key => {
+  // Una única bbox que engloba todos los tiles pedidos
+  // Es más eficiente que N pares de cláusulas node+shop por tile
+  let minLat = Infinity, minLng = Infinity, maxLat = -Infinity, maxLng = -Infinity;
+  tileKeys.forEach(key => {
     const [s, w, n, e] = tileToBbox(key);
-    return `(${s},${w},${n},${e})`;
+    if (s < minLat) minLat = s;
+    if (w < minLng) minLng = w;
+    if (n > maxLat) maxLat = n;
+    if (e > maxLng) maxLng = e;
   });
-  const bboxUnion = bboxClauses.join('');
 
-  // Construimos la query con bbox por cada tile (union)
-  // Overpass admite múltiples filtros en el mismo statement
   const amenityFilter = 'supermarket|pharmacy|bank|atm|fast_food|restaurant|cafe|bakery|hospital|clinic|doctors|dentist|post_office|fuel|marketplace';
   const shopFilter    = 'supermarket|convenience|pharmacy|bakery|butcher|laundry|dry_cleaning|hardware|clothes|shoes|electronics|optician|beauty|hairdresser|toy|sports|stationery|greengrocer|florist|newsagent|kiosk|general';
 
-  // Generamos bloques por tile para mantener el scope separado
-  const blocks = tileKeys.map(key => {
-    const [s, w, n, e] = tileToBbox(key);
-    return `
-      node["amenity"~"^(${amenityFilter})$"](${s},${w},${n},${e});
-      node["shop"~"^(${shopFilter})$"](${s},${w},${n},${e});`;
-  }).join('');
-
-  const query = `[out:json][timeout:15];(${blocks});out body;`.trim();
+  // Una sola query con dos filtros sobre la bbox combinada
+  // Antes: 2 × N bloques (N = cantidad de tiles). Ahora: siempre 2 bloques.
+  const query = `[out:json][timeout:15];(
+    node["amenity"~"^(${amenityFilter})$"](${minLat},${minLng},${maxLat},${maxLng});
+    node["shop"~"^(${shopFilter})$"](${minLat},${minLng},${maxLat},${maxLng});
+  );out body;`.trim();
 
   try {
     const res = await fetch('https://overpass-api.de/api/interpreter', {
@@ -1133,16 +1144,38 @@ async function ensurePlacesLoadedAt(lat, lng) {
 
   const missingKeys = allKeys.filter(k => !isTileCached(k));
 
-  if (missingKeys.length === 0) {
-    // Todo en caché: solo actualizar el estado del backend (ligero)
-    await syncBackendStatus(lat, lng);
-    rebuildNearby(lat, lng);
-    buildMapMarkers(nearbyPlaces);
+  // ── FASE 1: render inmediato con lo que ya está en caché ──
+  // Aunque falten tiles, mostramos todo lo disponible YA.
+  // El usuario ve el mapa cargado en milisegundos, no segundos.
+  rebuildNearby(lat, lng);
+  if (nearbyPlaces.length || places.length) {
+    buildMapMarkers(nearbyPlaces.length ? nearbyPlaces : places);
     updateCrowdBar(calcCrowdPct());
+  }
+
+  // Si todo está en caché, solo sincronizar estado del backend (ligero)
+  if (missingKeys.length === 0) {
+    syncBackendStatus(lat, lng).then(() => {
+      rebuildNearby(lat, lng);
+      buildMapMarkers(nearbyPlaces);
+      updateCrowdBar(calcCrowdPct());
+    });
+    // Checkin con lo que ya hay
+    if (!mapInitialLoaded) {
+      mapInitialLoaded = true;
+      if (!checkinShown && nearbyPlaces.length > 0) {
+        checkinShown = true;
+        setTimeout(() => showCheckinModal(lat, lng), 800);
+      }
+    }
     return;
   }
 
-  // Pedir Overpass y backend en paralelo para los tiles que faltan
+  // ── FASE 2: cargar tiles faltantes en background ──
+  // No bloqueamos el render: la UI ya está visible desde la Fase 1.
+  // Overpass y backend corren en paralelo; cuando terminan, actualizamos.
+  if (!mapInitialLoaded) mapInitialLoaded = true;
+
   const [osmPlaces, backendResult] = await Promise.all([
     loadOverpassForTiles(missingKeys),
     BACKEND_READY
@@ -1154,11 +1187,12 @@ async function ensurePlacesLoadedAt(lat, lng) {
   const backendPlaces = (backendResult && Array.isArray(backendResult.places))
     ? backendResult.places : [];
 
-  // Los backend sobreescriben el OSM si tienen el mismo id (tienen datos vivos)
-  const backendById = {};
-  backendPlaces.forEach(p => { backendById[p.id] = p; });
-
-  const merged = osmPlaces.map(p => backendById[p.id] ? { ...p, ...backendById[p.id] } : p);
+  // Merge: backend sobreescribe OSM donde coinciden (tiene estado real)
+  const backendById = new Map(backendPlaces.map(p => [p.id, p]));
+  const merged = osmPlaces.map(p => {
+    const bp = backendById.get(p.id);
+    return bp ? { ...p, ...bp } : p;
+  });
   const onlyBackend = backendPlaces.filter(p => !osmPlaces.find(o => o.id === p.id));
   const allNew = [...merged, ...onlyBackend];
 
@@ -1171,20 +1205,14 @@ async function ensurePlacesLoadedAt(lat, lng) {
 
   persistCache(); // flush a localStorage
 
-  if (!mapInitialLoaded) {
-    mapInitialLoaded = true;
-    // Primera carga: mostrar checkin si corresponde
-    rebuildNearby(lat, lng);
-    buildMapMarkers(nearbyPlaces);
-    updateCrowdBar(calcCrowdPct());
-    if (!checkinShown && nearbyPlaces.length > 0) {
-      checkinShown = true;
-      setTimeout(() => showCheckinModal(lat, lng), 800);
-    }
-  } else {
-    rebuildNearby(lat, lng);
-    buildMapMarkers(nearbyPlaces);
-    updateCrowdBar(calcCrowdPct());
+  // ── FASE 3: actualizar mapa con los datos nuevos ──
+  rebuildNearby(lat, lng);
+  buildMapMarkers(nearbyPlaces);
+  updateCrowdBar(calcCrowdPct());
+
+  if (!checkinShown && nearbyPlaces.length > 0) {
+    checkinShown = true;
+    setTimeout(() => showCheckinModal(lat, lng), 800);
   }
 }
 
@@ -1194,7 +1222,7 @@ async function syncBackendStatus(lat, lng) {
   const result = await apiGet('sync_places', { lat, lng, radius: 300, status_only: 1 });
   if (!result || !Array.isArray(result.places)) return;
   result.places.forEach(bp => {
-    const p = places.find(x => x.id === bp.id);
+    const p = placeIndex.get(bp.id); // O(1)
     if (p) {
       p.status = bp.status ?? p.status;
       p.reporters = bp.reporters ?? p.reporters;
@@ -1223,9 +1251,13 @@ function getAdjacentTileKeys(lat, lng) {
 }
 
 function rebuildNearby(lat, lng) {
-  nearbyPlaces = places.filter(p =>
-    distanceMeter(lat, lng, p.lat, p.lng) <= (CONFIG.TILE_DEG * 111320 * 1.2)
-  );
+  const maxDistM = CONFIG.TILE_DEG * 111320 * 1.2;
+  nearbyPlaces = [];
+  placeIndex.forEach(p => {
+    if (distanceMeter(lat, lng, p.lat, p.lng) <= maxDistM) {
+      nearbyPlaces.push(p);
+    }
+  });
 }
 
 function mergePlacesLegacy(backendPlaces, osmPlaces) {
@@ -1930,18 +1962,34 @@ function buildMapMarkers(placesToShow) {
   const zoom = leafletMap.getZoom();
 
   if (zoom >= CLUSTER_ZOOM_THRESHOLD) {
-    // ── Zoom alto: markers individuales ──
+    // ── Zoom alto: markers individuales con diff ──
     clearClusterMarkers();
 
-    const newIds = new Set(placesToShow.map(p => p.id));
+    const newIdSet = new Set(placesToShow.map(p => p.id));
+
+    // Quitar markers que ya no están en la lista
     Object.keys(leafletMarkers).forEach(id => {
-      if (!newIds.has(id)) { leafletMarkers[id].remove(); delete leafletMarkers[id]; }
+      if (!newIdSet.has(id)) {
+        leafletMarkers[id].remove();
+        delete leafletMarkers[id];
+      }
     });
+
+    // Agregar o actualizar solo los que cambiaron
     placesToShow.forEach(p => {
       if (leafletMarkers[p.id]) {
-        leafletMarkers[p.id].setIcon(makeIcon(p));
+        // Solo actualizar el icono si el estado cambió
+        const marker = leafletMarkers[p.id];
+        if (marker._lastStatus !== p.status || marker._lastReporters !== p.reporters) {
+          marker.setIcon(makeIcon(p));
+          marker._lastStatus = p.status;
+          marker._lastReporters = p.reporters;
+        }
       } else {
+        // Marker nuevo
         const marker = L.marker([p.lat, p.lng], { icon: makeIcon(p) }).addTo(leafletMap);
+        marker._lastStatus = p.status;
+        marker._lastReporters = p.reporters;
         marker.on('click', () => {
           if (pickModeActive) { exitPickMode(); openPlacePopup(p); }
           else { openPlacePopup(p); }
