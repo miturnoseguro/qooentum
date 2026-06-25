@@ -225,24 +225,11 @@ html,body{
 
 /* ── FOLLOW-MODE INDICATOR pill ── */
 .follow-pill{
-  position:absolute;
-  top:64px;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:998;
-  background:rgba(0,196,140,.92);
-  color:#fff;
-  border-radius:99px;
-  padding:5px 14px;
-  font-size:11px;font-weight:800;
-  display:none;
-  align-items:center;gap:6px;
-  pointer-events:none;
-  box-shadow:0 3px 12px rgba(0,196,140,.35);
-  white-space:nowrap;
-  backdrop-filter:blur(8px);
-  letter-spacing:.1px;
-  animation:adSlideIn .3s cubic-bezier(.34,1.56,.64,1);
+  position:absolute;top:64px;left:50%;transform:translateX(-50%);z-index:998;
+  background:rgba(0,196,140,.92);color:#fff;border-radius:99px;padding:5px 14px;
+  font-size:11px;font-weight:800;display:none;align-items:center;gap:6px;
+  pointer-events:none;box-shadow:0 3px 12px rgba(0,196,140,.35);white-space:nowrap;
+  backdrop-filter:blur(8px);letter-spacing:.1px;animation:adSlideIn .3s cubic-bezier(.34,1.56,.64,1);
 }
 .follow-pill.show{display:flex;}
 .follow-dot{width:6px;height:6px;border-radius:50%;background:#fff;opacity:.8;animation:gpsPulse .9s ease-in-out infinite;}
@@ -251,21 +238,12 @@ html,body{
 .map-refresh-btn{
   position:absolute;
   bottom: calc(76px + max(20px, calc(var(--sab) + 12px)));
-  left:50%;
-  transform:translateX(-50%);
-  z-index:600;
-  background:#fff;
-  border:1.5px solid var(--border);
-  border-radius:99px;
-  padding:9px 20px;
-  font-size:12px;font-weight:800;
-  color:var(--green-dk);
-  display:flex;align-items:center;gap:8px;
-  cursor:pointer;
+  left:50%;transform:translateX(-50%);z-index:600;
+  background:#fff;border:1.5px solid var(--border);border-radius:99px;
+  padding:9px 20px;font-size:12px;font-weight:800;color:var(--green-dk);
+  display:flex;align-items:center;gap:8px;cursor:pointer;
   transition:all .2s cubic-bezier(.34,1.56,.64,1);
-  box-shadow:var(--shadow-float);
-  font-family:inherit;
-  white-space:nowrap;
+  box-shadow:var(--shadow-float);font-family:inherit;white-space:nowrap;
 }
 .map-refresh-btn:hover{transform:translateX(-50%) translateY(-2px) scale(1.04);box-shadow:0 8px 24px rgba(0,196,140,.2);border-color:var(--green);}
 .map-refresh-btn:active{transform:translateX(-50%) scale(.97);}
@@ -277,18 +255,9 @@ html,body{
 .fc-card-wrap.is-active{filter:drop-shadow(0 6px 20px rgba(0,196,140,.38));}
 .fc-card{width:175px;background:rgba(255,255,255,.98);border:1.5px solid var(--border);border-radius:13px;padding:9px 10px 8px;font-family:'Inter',system-ui,sans-serif;text-align:left;backdrop-filter:blur(8px);}
 .fc-card-wrap.is-active .fc-card{border-color:var(--green);border-width:2px;box-shadow:0 0 0 3px rgba(0,196,140,.14);}
-
-/* ── SPONSOR CARD VARIANTS ── */
 .fc-card-wrap.is-sponsor .fc-card{border-width:2px;}
-.fc-card-wrap.is-sponsor.tier-premium .fc-card{
-  border-color: var(--sponsor-color, #6366F1);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sponsor-color, #6366F1) 18%, transparent);
-  background: linear-gradient(160deg, #fff 60%, color-mix(in srgb, var(--sponsor-color, #6366F1) 5%, #fff));
-}
-.fc-card-wrap.is-sponsor.tier-basic .fc-card{
-  border-color: color-mix(in srgb, var(--sponsor-color, #6366F1) 60%, #CBD5E1);
-}
-
+.fc-card-wrap.is-sponsor.tier-premium .fc-card{border-color:var(--sponsor-color,#6366F1);box-shadow:0 0 0 3px color-mix(in srgb,var(--sponsor-color,#6366F1) 18%,transparent);background:linear-gradient(160deg,#fff 60%,color-mix(in srgb,var(--sponsor-color,#6366F1) 5%,#fff));}
+.fc-card-wrap.is-sponsor.tier-basic .fc-card{border-color:color-mix(in srgb,var(--sponsor-color,#6366F1) 60%,#CBD5E1);}
 .fc-card-head{display:flex;gap:7px;align-items:center;}
 .fc-card-logo{width:30px;height:30px;border-radius:9px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;position:relative;overflow:hidden;}
 .fc-card-logo img{width:100%;height:100%;object-fit:contain;}
@@ -302,17 +271,7 @@ html,body{
 .fc-card-status{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:8px;margin-top:7px;}
 .fc-card-status .s-dot-sm{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:rgba(255,255,255,.5);}
 .fc-card-status .s-label-sm{font-size:10px;font-weight:700;color:#fff;line-height:1.2;}
-
-/* ── SPONSOR BADGE en la card del mapa ── */
-.fc-sponsor-badge{
-  display:flex;align-items:center;gap:3px;
-  font-size:9px;font-weight:800;letter-spacing:.2px;
-  padding:2px 6px;border-radius:99px;
-  color:#fff;
-  margin-top:4px;
-  width:fit-content;
-}
-
+.fc-sponsor-badge{display:flex;align-items:center;gap:3px;font-size:9px;font-weight:800;letter-spacing:.2px;padding:2px 6px;border-radius:99px;color:#fff;margin-top:4px;width:fit-content;}
 .fc-tail{width:2px;height:6px;background:#CBD5E1;}
 .fc-base{width:6px;height:6px;border-radius:50%;background:#CBD5E1;}
 
@@ -320,20 +279,11 @@ html,body{
 .bottom-nav{
   position:absolute;
   bottom: max(20px, calc(var(--sab) + 12px));
-  left:50%;
-  transform:translateX(-50%);
-  z-index:600;
-  display:flex;
-  align-items:center;
-  gap:4px;
-  background:rgba(255,255,255,.96);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
-  border:1px solid var(--border);
-  border-radius:99px;
-  padding:6px 6px;
-  box-shadow:var(--shadow-float);
-  animation:navAppear .4s cubic-bezier(.34,1.56,.64,1);
+  left:50%;transform:translateX(-50%);z-index:600;
+  display:flex;align-items:center;gap:4px;
+  background:rgba(255,255,255,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--border);border-radius:99px;padding:6px 6px;
+  box-shadow:var(--shadow-float);animation:navAppear .4s cubic-bezier(.34,1.56,.64,1);
 }
 @keyframes navAppear{from{opacity:0;transform:translateX(-50%) translateY(16px) scale(.92)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
 .nav-btn{display:flex;align-items:center;gap:7px;padding:9px 18px;border:none;background:transparent;cursor:pointer;font-size:13px;font-weight:700;color:var(--text3);border-radius:99px;transition:all .22s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;font-family:inherit;letter-spacing:-.1px;position:relative;}
@@ -404,49 +354,17 @@ html,body{
 
 /* ── TOAST ── */
 .toast{
-  position:fixed;
-  bottom: calc(90px + var(--sab));
-  left:50%;
-  transform:translateX(-50%) translateY(20px);
-  background:var(--text);
-  color:#fff;
-  border-radius:99px;
-  padding:10px 22px;
-  font-size:13px;
-  font-weight:700;
-  opacity:0;
-  transition:opacity .28s,transform .28s cubic-bezier(.34,1.56,.64,1);
-  pointer-events:none;
-  z-index:9999;
-  white-space:nowrap;
-  box-shadow:var(--shadow-lg);
-  display:flex;
-  align-items:center;
-  gap:6px;
+  position:fixed;bottom: calc(90px + var(--sab));left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--text);color:#fff;border-radius:99px;padding:10px 22px;font-size:13px;font-weight:700;
+  opacity:0;transition:opacity .28s,transform .28s cubic-bezier(.34,1.56,.64,1);pointer-events:none;
+  z-index:9999;white-space:nowrap;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:6px;
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-/* ── TOAST WITH ACTION ── */
-.toast-action {
-  position:fixed;
-  bottom: calc(90px + var(--sab));
-  left:50%;
-  transform:translateX(-50%) translateY(20px);
-  background:var(--text);
-  color:#fff;
-  border-radius:16px;
-  padding:12px 16px 12px 20px;
-  font-size:13px;
-  font-weight:700;
-  opacity:0;
-  transition:opacity .28s,transform .28s cubic-bezier(.34,1.56,.64,1);
-  pointer-events:none;
-  z-index:9999;
-  box-shadow:var(--shadow-lg);
-  display:flex;
-  align-items:center;
-  gap:12px;
-  max-width:340px;
+.toast-action{
+  position:fixed;bottom: calc(90px + var(--sab));left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--text);color:#fff;border-radius:16px;padding:12px 16px 12px 20px;font-size:13px;font-weight:700;
+  opacity:0;transition:opacity .28s,transform .28s cubic-bezier(.34,1.56,.64,1);pointer-events:none;
+  z-index:9999;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:12px;max-width:340px;
 }
 .toast-action.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:all;}
 .toast-action-btn{background:var(--green);color:#fff;border:none;border-radius:99px;padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0;}
@@ -462,11 +380,9 @@ html,body{
 /* ── INSTALL PROMPT ── */
 .install-banner{
   position:absolute;top:68px;left:14px;z-index:999;
-  background:rgba(15,23,42,.92);backdrop-filter:blur(12px);
-  border:1px solid rgba(255,255,255,.12);border-radius:14px;
-  padding:10px 12px;display:flex;align-items:center;gap:10px;
-  box-shadow:var(--shadow-lg);max-width:260px;
-  animation:adSlideIn .5s cubic-bezier(.34,1.56,.64,1);
+  background:rgba(15,23,42,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:10px;
+  box-shadow:var(--shadow-lg);max-width:260px;animation:adSlideIn .5s cubic-bezier(.34,1.56,.64,1);
 }
 .install-banner img{width:34px;height:34px;border-radius:9px;flex-shrink:0;}
 .install-banner-body{flex:1;min-width:0;}
@@ -480,14 +396,225 @@ html,body{
   position:absolute;top:68px;left:50%;transform:translateX(-50%);z-index:997;
   background:linear-gradient(135deg,#1E293B,#0F172A);border:1.5px solid var(--green);border-radius:99px;
   padding:9px 20px;font-size:12.5px;font-weight:800;color:#fff;
-  display:none;align-items:center;gap:8px;
-  box-shadow:0 6px 24px rgba(0,196,140,.25);white-space:nowrap;pointer-events:none;
+  display:none;align-items:center;gap:8px;box-shadow:0 6px 24px rgba(0,196,140,.25);white-space:nowrap;pointer-events:none;
   animation:adSlideIn .3s cubic-bezier(.34,1.56,.64,1);
 }
 .pick-mode-banner.show{display:flex;}
 .pick-mode-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:gpsPulse .9s ease-in-out infinite;box-shadow:0 0 0 3px rgba(0,196,140,.3);}
-
 @keyframes adSlideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── CHECK-IN MODAL ── */
+.checkin-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:5000;display:flex;align-items:flex-end;justify-content:center;padding: 0 0 max(var(--sab), 20px);animation:fadeIn .22s ease;}
+.checkin-card{width:100%;max-width:480px;background:var(--surface);border-radius:24px 24px 20px 20px;overflow:hidden;box-shadow:var(--shadow-lg);animation:checkinSlideUp .38s cubic-bezier(.34,1.56,.64,1);}
+@keyframes checkinSlideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.checkin-header{padding:20px 20px 14px;background:#fff;border-bottom:1px solid rgba(0,196,140,.15);text-align:center;}
+.checkin-header-emoji{font-size:26px;margin-bottom:6px;}
+.checkin-header-title{font-size:15.5px;font-weight:900;color:var(--text);letter-spacing:-.3px;}
+.checkin-header-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+.checkin-body{padding:16px 16px 20px;}
+.checkin-tabs{display:flex;gap:8px;margin-bottom:14px;}
+.checkin-tab{flex:1;min-width:0;background:var(--surface);border:2px solid var(--border);border-radius:16px;padding:12px 8px 11px;cursor:pointer;text-align:center;transition:all .2s cubic-bezier(.34,1.56,.64,1);font-family:inherit;position:relative;overflow:hidden;}
+.checkin-tab:hover{border-color:var(--green);transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,196,140,.2);}
+.checkin-tab.near{border-color:rgba(0,196,140,.4);background:linear-gradient(160deg,#fff,#f0fdf9);}
+.checkin-tab-logo{font-size:22px;line-height:1;position:relative;z-index:1;width:36px;height:36px;margin:0 auto;display:flex;align-items:center;justify-content:center;border-radius:10px;overflow:hidden;background:var(--surface2);border:1px solid var(--border);}
+.checkin-tab-logo img{width:100%;height:100%;object-fit:contain;}
+.checkin-tab-logo span{font-size:18px;}
+.checkin-tab-name{font-size:11px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:5px;line-height:1.2;position:relative;z-index:1;}
+.checkin-tab-dist{font-size:10px;font-weight:700;color:var(--green-dk);margin-top:3px;position:relative;z-index:1;}
+.checkin-tab.far .checkin-tab-dist{color:var(--text3);}
+.checkin-tab.far{opacity:.75;}
+.checkin-tab.other-tab{border-style:dashed;border-color:var(--border2);background:var(--surface2);}
+.checkin-tab.other-tab:hover{border-color:var(--blue);background:var(--blue-lt);}
+.checkin-skip-main{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:14px;padding:13px 18px;font-size:13.5px;font-weight:800;color:var(--text2);cursor:pointer;font-family:inherit;transition:all .2s cubic-bezier(.34,1.56,.64,1);letter-spacing:-.1px;margin-top:2px;}
+.checkin-skip-main:hover{background:#fff;border-color:var(--text2);color:var(--text);transform:translateY(-1px);box-shadow:0 4px 12px rgba(15,23,42,.1);}
+.checkin-skip-hint{text-align:center;font-size:11px;color:var(--text3);margin-top:8px;font-weight:500;}
+
+/* ── CLUSTER CARDS ── */
+.cluster-card{display:flex;flex-direction:column;align-items:center;cursor:pointer;filter:drop-shadow(0 3px 10px rgba(15,23,42,.18));transition:transform .18s cubic-bezier(.34,1.56,.64,1),filter .18s;}
+.cluster-card:hover{transform:scale(1.07) translateY(-2px);filter:drop-shadow(0 7px 18px rgba(15,23,42,.25));}
+.cluster-bubble{background:rgba(255,255,255,.97);border:2px solid var(--green);border-radius:16px;padding:8px 14px;display:flex;align-items:center;gap:8px;font-family:'Inter',system-ui,sans-serif;min-width:130px;box-shadow:0 0 0 3px rgba(0,196,140,.12);}
+.cluster-count{font-size:22px;font-weight:900;color:var(--green-dk);line-height:1;}
+.cluster-label{font-size:11px;font-weight:700;color:var(--text2);line-height:1.3;}
+.cluster-label strong{display:block;font-size:12px;color:var(--text);font-weight:800;}
+.cluster-tail{width:2px;height:6px;background:#CBD5E1;}
+.cluster-base{width:6px;height:6px;border-radius:50%;background:#CBD5E1;}
+.cluster-bubble.density-low{border-color:var(--green);}
+.cluster-bubble.density-low .cluster-count{color:var(--green-dk);}
+.cluster-bubble.density-med{border-color:var(--yellow);}
+.cluster-bubble.density-med .cluster-count{color:#B45309;}
+.cluster-bubble.density-high{border-color:var(--orange);}
+.cluster-bubble.density-high .cluster-count{color:#C2410C;}
+.cluster-bubble.density-max{border-color:var(--red);}
+.cluster-bubble.density-max .cluster-count{color:#B91C1C;}
+
+/* ════════════════════════════════════════
+   PANEL CERCA — estilos
+   ════════════════════════════════════════ */
+#panel-cerca{position:relative;}
+
+.cerca-search-wrap{padding:12px 14px 0;flex-shrink:0;}
+.cerca-search-bar{
+  display:flex;align-items:center;gap:8px;
+  background:#fff;border:1.5px solid var(--border);border-radius:99px;
+  padding:9px 14px;transition:border-color .2s,box-shadow .2s;
+}
+.cerca-search-bar:focus-within{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,196,140,.1);}
+.cerca-search-bar input{flex:1;border:none;outline:none;font-size:13.5px;color:var(--text);background:transparent;font-family:inherit;}
+.cerca-search-bar input::placeholder{color:var(--text3);}
+.cerca-search-icon{width:15px;height:15px;color:var(--text3);flex-shrink:0;}
+.cerca-search-bar:focus-within .cerca-search-icon{color:var(--green);}
+.cerca-search-clear{width:20px;height:20px;background:var(--surface2);border:none;border-radius:50%;display:none;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);font-size:12px;flex-shrink:0;}
+.cerca-search-clear.visible{display:flex;}
+
+.cerca-radius-row{
+  display:flex;align-items:center;gap:6px;
+  padding:10px 14px 0;flex-shrink:0;overflow-x:auto;scrollbar-width:none;
+}
+.cerca-radius-row::-webkit-scrollbar{display:none;}
+.cerca-radius-lbl{font-size:11px;font-weight:700;color:var(--text3);white-space:nowrap;flex-shrink:0;}
+.cerca-r-btn{
+  padding:5px 12px;border:1.5px solid var(--border);border-radius:99px;
+  font-size:11.5px;font-weight:700;color:var(--text2);background:#fff;cursor:pointer;
+  white-space:nowrap;transition:all .18s;font-family:inherit;flex-shrink:0;
+}
+.cerca-r-btn:hover{border-color:var(--green);color:var(--green-dk);}
+.cerca-r-btn.active{background:var(--green);border-color:var(--green);color:#fff;}
+
+.cerca-filter-row{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 14px 0;flex-shrink:0;overflow-x:auto;scrollbar-width:none;
+}
+.cerca-filter-row::-webkit-scrollbar{display:none;}
+.cerca-f-chip{
+  padding:5px 11px;border:1px solid var(--border);border-radius:99px;
+  font-size:11px;font-weight:700;color:var(--text2);background:#fff;
+  cursor:pointer;white-space:nowrap;transition:all .18s;font-family:inherit;flex-shrink:0;
+}
+.cerca-f-chip:hover{border-color:var(--blue);color:var(--blue);}
+.cerca-f-chip.active{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
+
+.cerca-stats-bar{
+  display:flex;align-items:center;gap:4px;
+  padding:7px 14px 8px;flex-shrink:0;
+}
+.cerca-count{font-size:12px;color:var(--green);font-weight:800;}
+.cerca-count-lbl{font-size:12px;color:var(--text3);font-weight:500;}
+.cerca-sort-btn{
+  margin-left:auto;display:flex;align-items:center;gap:4px;
+  background:none;border:1px solid var(--border);border-radius:99px;
+  padding:4px 10px;font-size:11px;font-weight:700;color:var(--text2);
+  cursor:pointer;font-family:inherit;transition:all .18s;
+}
+.cerca-sort-btn:hover{border-color:var(--border2);color:var(--text);}
+
+.cerca-list{
+  flex:1;overflow-y:auto;
+  padding:8px 12px calc(90px + max(20px, var(--sab)));
+  display:flex;flex-direction:column;gap:9px;
+  background:var(--bg);
+}
+.cerca-list::-webkit-scrollbar{width:3px;}
+.cerca-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px;}
+
+/* ── Cards del panel Cerca ── */
+.nc-card{
+  background:#fff;border:1px solid var(--border);border-radius:14px;
+  padding:13px 13px 11px;cursor:pointer;
+  transition:border-color .18s,box-shadow .18s,transform .18s;
+  display:flex;gap:11px;align-items:flex-start;
+  animation:ncCardIn .22s ease both;
+}
+@keyframes ncCardIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.nc-card:hover{border-color:var(--green);box-shadow:0 4px 16px rgba(0,196,140,.11);transform:translateY(-1px);}
+.nc-card.is-sponsor{
+  border-width:2px;
+  border-image: linear-gradient(135deg,var(--sp-color,#6366F1),color-mix(in srgb,var(--sp-color,#6366F1) 55%,#CBD5E1)) 1;
+  border-radius:14px;
+  border-style:solid;
+}
+
+.nc-logo{
+  width:46px;height:46px;border-radius:12px;
+  background:var(--surface2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:23px;flex-shrink:0;overflow:hidden;position:relative;
+}
+.nc-logo img{width:100%;height:100%;object-fit:contain;}
+.nc-ver{
+  position:absolute;bottom:-3px;right:-3px;
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid #fff;display:flex;align-items:center;justify-content:center;
+  font-size:7px;color:#fff;font-weight:900;line-height:1;
+}
+
+.nc-body{flex:1;min-width:0;}
+.nc-top{display:flex;align-items:flex-start;gap:6px;margin-bottom:2px;}
+.nc-name{font-size:13.5px;font-weight:800;color:var(--text);line-height:1.2;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.nc-badge-open{font-size:9px;font-weight:800;padding:2px 7px;border-radius:99px;flex-shrink:0;margin-top:2px;}
+.nc-badge-open.open{background:var(--green-lt);color:var(--green-dk);}
+.nc-badge-open.closed{background:var(--red-lt);color:var(--red);}
+
+.nc-meta{display:flex;align-items:center;gap:5px;margin-bottom:8px;flex-wrap:wrap;}
+.nc-type{font-size:10.5px;color:var(--text3);font-weight:600;}
+.nc-dot{width:3px;height:3px;border-radius:50%;background:var(--border2);}
+.nc-dist{font-size:10.5px;color:var(--text2);font-weight:700;}
+.nc-addr{font-size:10.5px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;}
+
+.nc-status{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 9px;border-radius:8px;
+}
+.nc-sdot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.5);flex-shrink:0;}
+.nc-slabel{font-size:10px;font-weight:700;color:#fff;}
+.nc-ssub{font-size:10px;color:rgba(255,255,255,.72);margin-left:auto;}
+
+.nc-sponsor-badge{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:9px;font-weight:800;padding:2px 7px;border-radius:99px;
+  color:#fff;margin-top:5px;
+}
+
+.nc-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;padding-top:1px;}
+.nc-rating{display:flex;align-items:center;gap:3px;font-size:12px;font-weight:800;color:var(--text);}
+.nc-star{color:#F59E0B;}
+.nc-rn{font-size:10px;color:var(--text3);font-weight:500;}
+.nc-report-btn{
+  background:var(--green-lt);border:1.5px solid var(--green);border-radius:99px;
+  padding:6px 12px;font-size:11px;font-weight:800;color:var(--green-dk);
+  cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .18s;
+}
+.nc-report-btn:hover{background:var(--green);color:#fff;}
+
+/* ── Skeleton loader ── */
+.nc-skeleton{
+  background:#fff;border:1px solid var(--border);border-radius:14px;
+  padding:13px;display:flex;gap:11px;
+}
+.nc-skel-logo{width:46px;height:46px;border-radius:12px;flex-shrink:0;}
+.nc-skel-body{flex:1;display:flex;flex-direction:column;gap:7px;}
+.nc-skel-line{height:10px;border-radius:5px;}
+.nc-skel-block{height:28px;border-radius:8px;}
+.skel-anim{
+  background:linear-gradient(90deg,#F1F5F9 25%,#E2E8F0 50%,#F1F5F9 75%);
+  background-size:200%;
+  animation:skelShim .9s ease-in-out infinite;
+}
+@keyframes skelShim{from{background-position:200% 0}to{background-position:-200% 0}}
+
+.nc-empty{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;padding:60px 24px;text-align:center;
+}
+.nc-empty-icon{font-size:38px;}
+.nc-empty-title{font-size:14px;font-weight:800;color:var(--text2);}
+.nc-empty-sub{font-size:12.5px;color:var(--text3);max-width:230px;line-height:1.5;}
+
+.nc-error-banner{
+  margin:12px;padding:12px 14px;
+  background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;
+  font-size:12px;color:#92400E;font-weight:600;
+  display:flex;gap:9px;align-items:flex-start;flex-shrink:0;
+}
 
 /* ── MOBILE ── */
 @media(max-width:680px){
@@ -508,68 +635,8 @@ html,body{
   .map-float-controls{top:14px;right:14px;}
   .map-search-input{font-size:16px;}
   .map-refresh-btn{bottom: calc(72px + max(16px, calc(var(--sab) + 10px)));}
+  .nc-addr{max-width:100px;}
 }
-
-/* ── CHECK-IN MODAL ── */
-.checkin-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:5000;display:flex;align-items:flex-end;justify-content:center;padding: 0 0 max(var(--sab), 20px);animation:fadeIn .22s ease;}
-.checkin-card{width:100%;max-width:480px;background:var(--surface);border-radius:24px 24px 20px 20px;overflow:hidden;box-shadow:var(--shadow-lg);animation:checkinSlideUp .38s cubic-bezier(.34,1.56,.64,1);}
-@keyframes checkinSlideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
-.checkin-header{padding:20px 20px 14px;background:#fff;border-bottom:1px solid rgba(0,196,140,.15);text-align:center;color:white;}
-.checkin-header-emoji{font-size:26px;margin-bottom:6px;}
-.checkin-header-title{font-size:15.5px;font-weight:900;color:var(--text);letter-spacing:-.3px;}
-.checkin-header-sub{font-size:12px;color:var(--text2);margin-top:3px;}
-.checkin-body{padding:16px 16px 20px;}
-.checkin-tabs{display:flex;gap:8px;margin-bottom:14px;}
-.checkin-tab{flex:1;min-width:0;background:var(--surface);border:2px solid var(--border);border-radius:16px;padding:12px 8px 11px;cursor:pointer;text-align:center;transition:all .2s cubic-bezier(.34,1.56,.64,1);font-family:inherit;position:relative;overflow:hidden;}
-.checkin-tab::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--green),var(--green-dk));opacity:0;transition:opacity .18s;border-radius:14px;}
-.checkin-tab:hover{border-color:var(--green);transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,196,140,.2);}
-.checkin-tab:hover::before{opacity:.06;}
-.checkin-tab.near{border-color:rgba(0,196,140,.4);background:linear-gradient(160deg,#fff,#f0fdf9);}
-.checkin-tab-logo{font-size:22px;line-height:1;position:relative;z-index:1;width:36px;height:36px;margin:0 auto;display:flex;align-items:center;justify-content:center;border-radius:10px;overflow:hidden;background:var(--surface2);border:1px solid var(--border);}
-.checkin-tab-logo img{width:100%;height:100%;object-fit:contain;}
-.checkin-tab-logo span{font-size:18px;}
-.checkin-tab-name{font-size:11px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:5px;line-height:1.2;position:relative;z-index:1;}
-.checkin-tab-dist{font-size:10px;font-weight:700;color:var(--green-dk);margin-top:3px;position:relative;z-index:1;}
-.checkin-tab.far .checkin-tab-dist{color:var(--text3);}
-.checkin-tab.far{opacity:.75;}
-.checkin-tab.other-tab{border-style:dashed;border-color:var(--border2);background:var(--surface2);}
-.checkin-tab.other-tab:hover{border-color:var(--blue);background:var(--blue-lt);}
-.checkin-tab.other-tab .checkin-tab-dist{color:var(--text3);}
-.checkin-skip-main{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:14px;padding:13px 18px;font-size:13.5px;font-weight:800;color:var(--text2);cursor:pointer;font-family:inherit;transition:all .2s cubic-bezier(.34,1.56,.64,1);letter-spacing:-.1px;margin-top:2px;}
-.checkin-skip-main:hover{background:#fff;border-color:var(--text2);color:var(--text);transform:translateY(-1px);box-shadow:0 4px 12px rgba(15,23,42,.1);}
-.checkin-skip-hint{text-align:center;font-size:11px;color:var(--text3);margin-top:8px;font-weight:500;}
-
-/* ── CLUSTER CARDS ── */
-.cluster-card{
-  display:flex;flex-direction:column;align-items:center;
-  cursor:pointer;
-  filter:drop-shadow(0 3px 10px rgba(15,23,42,.18));
-  transition:transform .18s cubic-bezier(.34,1.56,.64,1),filter .18s;
-}
-.cluster-card:hover{transform:scale(1.07) translateY(-2px);filter:drop-shadow(0 7px 18px rgba(15,23,42,.25));}
-.cluster-bubble{
-  background:rgba(255,255,255,.97);
-  border:2px solid var(--green);
-  border-radius:16px;
-  padding:8px 14px;
-  display:flex;align-items:center;gap:8px;
-  font-family:'Inter',system-ui,sans-serif;
-  min-width:130px;
-  box-shadow:0 0 0 3px rgba(0,196,140,.12);
-}
-.cluster-count{font-size:22px;font-weight:900;color:var(--green-dk);line-height:1;}
-.cluster-label{font-size:11px;font-weight:700;color:var(--text2);line-height:1.3;}
-.cluster-label strong{display:block;font-size:12px;color:var(--text);font-weight:800;}
-.cluster-tail{width:2px;height:6px;background:#CBD5E1;}
-.cluster-base{width:6px;height:6px;border-radius:50%;background:#CBD5E1;}
-.cluster-bubble.density-low{border-color:var(--green);}
-.cluster-bubble.density-low .cluster-count{color:var(--green-dk);}
-.cluster-bubble.density-med{border-color:var(--yellow);}
-.cluster-bubble.density-med .cluster-count{color:#B45309;}
-.cluster-bubble.density-high{border-color:var(--orange);}
-.cluster-bubble.density-high .cluster-count{color:#C2410C;}
-.cluster-bubble.density-max{border-color:var(--red);}
-.cluster-bubble.density-max .cluster-count{color:#B91C1C;}
 </style>
 </head>
 <body>
@@ -596,9 +663,7 @@ html,body{
         </div>
         <div class="user-dropdown" id="user-dropdown">
           <button class="user-dropdown-item" onclick="doLogout()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;flex-shrink:0;">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;flex-shrink:0;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             Cerrar sesión
           </button>
         </div>
@@ -611,6 +676,7 @@ html,body{
     </div>
   </header>
 
+  <!-- ═══════════ PANEL MAPA ═══════════ -->
   <div id="panel-map" class="panel visible" style="position:relative;">
     <div class="map-pane">
       <div id="leaflet-map"></div>
@@ -618,7 +684,7 @@ html,body{
       <div class="map-search-wrap" id="map-search-wrap">
         <div class="map-search-bar">
           <svg class="map-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input class="map-search-input" id="map-search-input" type="text" placeholder="Buscar lugar por nombre y dirección para ver cuánta gente hay" autocomplete="off" spellcheck="false">
+          <input class="map-search-input" id="map-search-input" type="text" placeholder="Buscar comercio o dirección…" autocomplete="off" spellcheck="false">
           <button class="map-search-clear" id="map-search-clear" onclick="clearSearch()">✕</button>
           <div class="gps-float-btn" id="gps-btn" onclick="onGpsBtnClick()" title="Centrar / seguir mi ubicación" style="width:34px;height:34px;border-radius:9px;flex-shrink:0;box-shadow:none;border-color:var(--border);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 3"/></svg>
@@ -652,22 +718,96 @@ html,body{
         <button class="install-banner-close" onclick="document.getElementById('install-banner').style.display='none'">✕</button>
       </div>
     </div>
+
     <nav class="bottom-nav" id="bottom-nav">
-      <button class="nav-btn" id="nav-prizes" onclick="switchTab('prizes')">
+      <button class="nav-btn" id="nav-prizes-map" onclick="switchTab('prizes')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
         Premios
       </button>
-      <button class="nav-btn is-main active" id="nav-map" onclick="switchTab('map')">
+      <button class="nav-btn is-main active" id="nav-map-map" onclick="switchTab('map')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
         Mapa
       </button>
-      <button class="nav-btn" id="nav-ranking" onclick="switchTab('ranking')">
+      <button class="nav-btn" id="nav-cerca-map" onclick="switchTab('cerca')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M11 8v3l2 2"/></svg>
+        Cerca
+      </button>
+      <button class="nav-btn" id="nav-ranking-map" onclick="switchTab('ranking')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 4 12 2 7 4"/><path d="M5 8.5A13 13 0 0 0 12 22a13 13 0 0 0 7-13.5V8l-7-3-7 3z"/></svg>
         Ranking
       </button>
     </nav>
   </div>
 
+  <!-- ═══════════ PANEL CERCA ═══════════ -->
+  <div id="panel-cerca" class="panel" style="position:relative;">
+    <div class="panel-header">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><circle cx="11" cy="11" r="8"/><path d="M11 8v3l2 2"/></svg>
+      Cerca mío
+      <span class="panel-header-sub" id="cerca-updated-lbl"></span>
+    </div>
+
+    <div class="cerca-search-wrap">
+      <div class="cerca-search-bar">
+        <svg class="cerca-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="cerca-search-input" type="text" placeholder="Buscar por nombre, tipo o dirección…" autocomplete="off">
+        <button class="cerca-search-clear" id="cerca-search-clear" onclick="cercaClearSearch()">✕</button>
+      </div>
+    </div>
+
+    <div class="cerca-radius-row">
+      <span class="cerca-radius-lbl">Radio:</span>
+      <button class="cerca-r-btn" data-r="100" onclick="cercaSetRadius(100,this)">100m</button>
+      <button class="cerca-r-btn" data-r="300" onclick="cercaSetRadius(300,this)">300m</button>
+      <button class="cerca-r-btn active" data-r="500" onclick="cercaSetRadius(500,this)">500m</button>
+      <button class="cerca-r-btn" data-r="1000" onclick="cercaSetRadius(1000,this)">1 km</button>
+    </div>
+
+    <div class="cerca-filter-row">
+      <button class="cerca-f-chip active" data-cat="all" onclick="cercaSetCat('all',this)">Todo</button>
+      <button class="cerca-f-chip" data-cat="food" onclick="cercaSetCat('food',this)">🍔 Comida</button>
+      <button class="cerca-f-chip" data-cat="health" onclick="cercaSetCat('health',this)">💊 Salud</button>
+      <button class="cerca-f-chip" data-cat="supermarket" onclick="cercaSetCat('supermarket',this)">🛒 Súper</button>
+      <button class="cerca-f-chip" data-cat="bank" onclick="cercaSetCat('bank',this)">🏦 Banco</button>
+      <button class="cerca-f-chip" data-cat="government" onclick="cercaSetCat('government',this)">🏛️ Gobierno</button>
+    </div>
+
+    <div class="cerca-stats-bar">
+      <span class="cerca-count" id="cerca-count">—</span>
+      <span class="cerca-count-lbl" id="cerca-count-lbl">&nbsp;lugares encontrados</span>
+      <button class="cerca-sort-btn" id="cerca-sort-btn" onclick="cercaCycleSort()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="9" y2="18"/></svg>
+        <span id="cerca-sort-lbl">Distancia</span>
+      </button>
+    </div>
+
+    <div id="cerca-error-banner" class="nc-error-banner" style="display:none">
+      ⚠️ No se pudo conectar con OpenStreetMap. Mostrando datos de ejemplo. Activá tu ubicación para resultados reales.
+    </div>
+
+    <div class="cerca-list" id="cerca-list"></div>
+
+    <nav class="bottom-nav" id="bottom-nav-cerca">
+      <button class="nav-btn" onclick="switchTab('prizes')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+        Premios
+      </button>
+      <button class="nav-btn is-main" onclick="switchTab('map')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+        Mapa
+      </button>
+      <button class="nav-btn active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M11 8v3l2 2"/></svg>
+        Cerca
+      </button>
+      <button class="nav-btn" onclick="switchTab('ranking')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 4 12 2 7 4"/><path d="M5 8.5A13 13 0 0 0 12 22a13 13 0 0 0 7-13.5V8l-7-3-7 3z"/></svg>
+        Ranking
+      </button>
+    </nav>
+  </div>
+
+  <!-- ═══════════ PANEL RANKING ═══════════ -->
   <div id="panel-ranking" class="panel" style="position:relative;">
     <div class="panel-header">
       <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><polyline points="17 4 12 2 7 4"/><path d="M5 8.5A13 13 0 0 0 12 22a13 13 0 0 0 7-13.5V8l-7-3-7 3z"/></svg>
@@ -678,10 +818,12 @@ html,body{
     <nav class="bottom-nav" id="bottom-nav-ranking">
       <button class="nav-btn" onclick="switchTab('prizes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>Premios</button>
       <button class="nav-btn is-main" onclick="switchTab('map')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>Mapa</button>
+      <button class="nav-btn" onclick="switchTab('cerca')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M11 8v3l2 2"/></svg>Cerca</button>
       <button class="nav-btn active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 4 12 2 7 4"/><path d="M5 8.5A13 13 0 0 0 12 22a13 13 0 0 0 7-13.5V8l-7-3-7 3z"/></svg>Ranking</button>
     </nav>
   </div>
 
+  <!-- ═══════════ PANEL PREMIOS ═══════════ -->
   <div id="panel-prizes" class="panel" style="position:relative;">
     <div class="panel-header">
       <svg viewBox="0 0 24 24" fill="none" stroke="#00C48C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
@@ -703,6 +845,7 @@ html,body{
     <nav class="bottom-nav" id="bottom-nav-prizes">
       <button class="nav-btn active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>Premios</button>
       <button class="nav-btn is-main" onclick="switchTab('map')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>Mapa</button>
+      <button class="nav-btn" onclick="switchTab('cerca')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M11 8v3l2 2"/></svg>Cerca</button>
       <button class="nav-btn" onclick="switchTab('ranking')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 4 12 2 7 4"/><path d="M5 8.5A13 13 0 0 0 12 22a13 13 0 0 0 7-13.5V8l-7-3-7 3z"/></svg>Ranking</button>
     </nav>
   </div>
@@ -745,14 +888,14 @@ const DEVICE_KEY = 'qooentum_device_email';
 const COOLDOWNS_STORAGE_KEY = 'qooentum_cooldowns';
 const PLACE_CACHE_KEY = 'qooentum_place_cache_v2';
 
-/* ─────────────── DATA ─────────────── */
+/* ─── DATA ─── */
 const STATUS_CFG = [
   {label:'Poca gente',     sub:'Entrá tranquilo',  color:'#00C48C'},
   {label:'Bastante gente', sub:'Algo de espera',   color:'#F59E0B'},
   {label:'Mucha gente',    sub:'Fila larga',       color:'#F97316'},
   {label:'Colapsado',      sub:'¡No vengas ahora!',color:'#EF4444'},
 ];
-const NO_REPORT_STATUS = { label:'Sin reportes hoy', sub:'Sé el primero en reportar', color:'#b2b2b2' };
+const NO_REPORT_STATUS = { label:'Sin reportes hoy', sub:'Sé el primero', color:'#b2b2b2' };
 const WAIT  = ['Sin espera','~5 min','~15 min','+30 min'];
 const TREND = ['↘ Baja','→ Estable','↗ Sube','↗ Sube'];
 const VOTE_PTS = [10,10,15,20];
@@ -812,668 +955,275 @@ const SEED_PRIZES = [
   {id:'p8',emoji:'✈️',name:'Voucher de viaje',         pts:5000,cat:'Turismo',      partner:'Despegar'},
 ];
 
-/* ─────────────── STATE ─────────────── */
-let userPts = 0;
-let currentUser = null;
-let places = [];
-let placeIndex = new Map();
-let nearbyPlaces = [];
-let rankingData = [];
+/* ─── STATE ─── */
+let userPts = 0, currentUser = null;
+let places = [], placeIndex = new Map(), nearbyPlaces = [], rankingData = [];
 let prizesData = SEED_PRIZES.map(p=>({...p}));
 let leafletMap = null, leafletMarkers = {};
-let isLoggedIn = false;
-let voteCount = 0;
-let pendingVote = null;
-let placeCooldowns = {};
-let gpsWatchId = null;
-let userMarker = null;
-let mapInitialLoaded = false;
-let userLat = null, userLng = null;
-let checkinShown = false;
-let pickModeActive = false;
-let searchTimer = null;
-let searchQuery = '';
-let tileCache = {};
-let placeStore = {};
-let followMode = false;
-let lastFollowLat = null, lastFollowLng = null;
+let isLoggedIn = false, voteCount = 0, pendingVote = null;
+let placeCooldowns = {}, gpsWatchId = null, userMarker = null;
+let mapInitialLoaded = false, userLat = null, userLng = null;
+let checkinShown = false, pickModeActive = false;
+let searchTimer = null, searchQuery = '';
+let tileCache = {}, placeStore = {};
+let followMode = false, lastFollowLat = null, lastFollowLng = null;
 
-/* ════════════════════════════════════════════════════════════
-   SINCRONIZACIÓN EN TIEMPO REAL
-   ════════════════════════════════════════════════════════════ */
+/* ─── SYNC EN TIEMPO REAL ─── */
 let occupancySyncInterval = null;
 
 async function syncOccupancyStatus() {
   if (!BACKEND_READY || !places.length) return;
   try {
-    const lat = userLat ?? CONFIG.DEFAULT_CENTER.lat;
-    const lng = userLng ?? CONFIG.DEFAULT_CENTER.lng;
-    const sorted = places
-      .map(p => ({ ...p, _dist: distanceMeter(lat, lng, p.lat, p.lng) }))
-      .sort((a, b) => a._dist - b._dist)
-      .slice(0, 30);
+    const lat = userLat ?? CONFIG.DEFAULT_CENTER.lat, lng = userLng ?? CONFIG.DEFAULT_CENTER.lng;
+    const sorted = places.map(p=>({...p,_dist:distanceMeter(lat,lng,p.lat,p.lng)})).sort((a,b)=>a._dist-b._dist).slice(0,30);
     if (!sorted.length) return;
-    const result = await apiGet('sync_places', {
-      lat, lng, radius: 1000, status_only: 1,
-      place_ids: sorted.map(p => p.id).join(','),
-    });
+    const result = await apiGet('sync_places', { lat, lng, radius: 1000, status_only: 1, place_ids: sorted.map(p=>p.id).join(',') });
     if (!result || !Array.isArray(result.places)) return;
-    let needsMapRefresh = false;
+    let needsRefresh = false;
     result.places.forEach(bp => {
       const p = placeIndex.get(bp.id);
       if (!p) return;
-      const oldStatus = p.status, oldReporters = p.reporters;
-      p.status = bp.status ?? p.status;
-      p.reporters = bp.reporters ?? p.reporters;
-      if (oldStatus !== p.status || oldReporters !== p.reporters) {
-        needsMapRefresh = true;
-        placeStore[p.id] = p;
-      }
+      if (p.status !== bp.status || p.reporters !== bp.reporters) { needsRefresh = true; }
+      p.status = bp.status ?? p.status; p.reporters = bp.reporters ?? p.reporters;
+      placeStore[p.id] = p;
     });
-    if (needsMapRefresh) {
+    if (needsRefresh) {
       buildMapMarkers(nearbyPlaces.length ? nearbyPlaces : places);
       updateCrowdBar(calcCrowdPct());
-      if (currentPopupPlace) {
-        const updated = placeIndex.get(currentPopupPlace.id);
-        if (updated) { Object.assign(currentPopupPlace, updated); renderPopup(currentPopupPlace, isLoggedIn, currentUser); }
-      }
+      if (currentPopupPlace) { const u = placeIndex.get(currentPopupPlace.id); if (u) { Object.assign(currentPopupPlace,u); renderPopup(currentPopupPlace,isLoggedIn,currentUser); } }
     }
     persistCache();
-  } catch(e) { console.warn('syncOccupancyStatus error:', e); }
+  } catch(e) { console.warn('syncOccupancyStatus error:',e); }
 }
 
-function startOccupancySync() {
-  syncOccupancyStatus();
-  if (occupancySyncInterval) clearInterval(occupancySyncInterval);
-  occupancySyncInterval = setInterval(() => syncOccupancyStatus(), 15000);
-}
+function startOccupancySync() { syncOccupancyStatus(); if (occupancySyncInterval) clearInterval(occupancySyncInterval); occupancySyncInterval = setInterval(()=>syncOccupancyStatus(), 15000); }
+function stopOccupancySync() { if (occupancySyncInterval) { clearInterval(occupancySyncInterval); occupancySyncInterval = null; } }
+function maybeStartOccupancySync() { if (isLoggedIn && !occupancySyncInterval) startOccupancySync(); else if (!isLoggedIn && occupancySyncInterval) stopOccupancySync(); }
 
-function stopOccupancySync() {
-  if (occupancySyncInterval) { clearInterval(occupancySyncInterval); occupancySyncInterval = null; }
-}
+function getLevelInfo(pts) { const level=Math.floor(pts/XP_PER_LEVEL)+1, xpIntoLevel=pts%XP_PER_LEVEL; return {level,xpIntoLevel,pct:Math.round((xpIntoLevel/XP_PER_LEVEL)*100)}; }
+function titleForLevel(level) { return LEVEL_TITLES[Math.min(level-1,LEVEL_TITLES.length-1)]; }
 
-function maybeStartOccupancySync() {
-  if (isLoggedIn && !occupancySyncInterval) startOccupancySync();
-  else if (!isLoggedIn && occupancySyncInterval) stopOccupancySync();
+/* ─── CACHÉ ─── */
+function latLngToTileKey(lat,lng) { return `${Math.floor(lat/CONFIG.TILE_DEG)}:${Math.floor(lng/CONFIG.TILE_DEG)}`; }
+function persistCache() { try { localStorage.setItem(PLACE_CACHE_KEY, JSON.stringify({tiles:tileCache,places:placeStore,savedAt:Date.now()})); } catch(e) { pruneOldTiles(); try { localStorage.setItem(PLACE_CACHE_KEY, JSON.stringify({tiles:tileCache,places:placeStore,savedAt:Date.now()})); } catch(e2) {} } }
+function loadCache() { try { const raw=localStorage.getItem(PLACE_CACHE_KEY); if (!raw) return; const data=JSON.parse(raw); if (!data||!data.tiles) return; tileCache=data.tiles||{}; placeStore=data.places||{}; Object.values(placeStore).forEach(p=>{ if (!placeIndex.has(p.id)) { placeIndex.set(p.id,p); places.push(p); } }); } catch(e) {} }
+function pruneOldTiles() { const now=Date.now(); Object.keys(tileCache).forEach(k=>{ if (now-tileCache[k].ts>CONFIG.PLACE_CACHE_TTL_MS) delete tileCache[k]; }); const allIds=new Set(); Object.values(tileCache).forEach(t=>(t.placeIds||[]).forEach(id=>allIds.add(id))); Object.keys(placeStore).forEach(id=>{ if (!allIds.has(id)) delete placeStore[id]; }); }
+function markTileLoaded(tileKey,ids) { tileCache[tileKey]={ts:Date.now(),placeIds:ids}; }
+function isTileCached(tileKey) { const t=tileCache[tileKey]; return t&&(Date.now()-t.ts)<CONFIG.PLACE_CACHE_TTL_MS; }
+function getRelevantTileKeys(lat,lng) { return [latLngToTileKey(lat,lng)]; }
+function mergePlacesIntoCache(newPlaces,tileKey) {
+  const addedIds=[];
+  newPlaces.forEach(p=>{ placeStore[p.id]=p; addedIds.push(p.id); if (!placeIndex.has(p.id)) { placeIndex.set(p.id,p); places.push(p); } else { Object.assign(placeIndex.get(p.id),p); } });
+  if (tileKey) markTileLoaded(tileKey,addedIds);
 }
+function tileToBbox(tileKey) { const [tLat,tLng]=tileKey.split(':').map(Number); return [tLat*CONFIG.TILE_DEG-CONFIG.BBOX_PAD,tLng*CONFIG.TILE_DEG-CONFIG.BBOX_PAD,(tLat+1)*CONFIG.TILE_DEG+CONFIG.BBOX_PAD,(tLng+1)*CONFIG.TILE_DEG+CONFIG.BBOX_PAD]; }
 
-function getLevelInfo(pts) {
-  const level = Math.floor(pts / XP_PER_LEVEL) + 1;
-  const xpIntoLevel = pts % XP_PER_LEVEL;
-  return { level, xpIntoLevel, pct: Math.round((xpIntoLevel / XP_PER_LEVEL) * 100) };
-}
-function titleForLevel(level) { return LEVEL_TITLES[Math.min(level-1, LEVEL_TITLES.length-1)]; }
+/* ─── COOLDOWN ─── */
+function loadCooldownsFromStorage() { try { const raw=localStorage.getItem(COOLDOWNS_STORAGE_KEY); if (!raw) return; const data=JSON.parse(raw); const now=Date.now(); Object.keys(data).forEach(pid=>{ const ts=data[pid]; if (ts&&ts>now) placeCooldowns[pid]=new Date(ts); }); } catch(e) {} }
+function saveCooldownsToStorage() { try { const now=Date.now(); const toSave={}; Object.keys(placeCooldowns).forEach(pid=>{ const ts=placeCooldowns[pid] instanceof Date?placeCooldowns[pid].getTime():0; if (ts>now) toSave[pid]=ts; }); localStorage.setItem(COOLDOWNS_STORAGE_KEY,JSON.stringify(toSave)); } catch(e) {} }
+function applyPlaceCooldown(pid,isoOrMs) { if (!pid) return; if (isoOrMs) placeCooldowns[pid]=typeof isoOrMs==='number'?new Date(isoOrMs):new Date(isoOrMs); else delete placeCooldowns[pid]; saveCooldownsToStorage(); }
+function applyLocalCooldown(pid) { placeCooldowns[pid]=new Date(Date.now()+CONFIG.VOTE_COOLDOWN_MS); saveCooldownsToStorage(); }
+function applyCooldownInfo(map) { if (!map) return; Object.keys(map).forEach(pid=>{ if (map[pid]) placeCooldowns[pid]=new Date(map[pid]); }); saveCooldownsToStorage(); }
+function getVoteCooldownRemainingMs(pid) { const next=placeCooldowns[pid]; if (!next) return 0; return Math.max(0,next.getTime()-Date.now()); }
+function formatCooldownRemaining(ms) { const totalMin=Math.ceil(ms/60000), h=Math.floor(totalMin/60), m=totalMin%60; if (h<=0) return `${m} min`; if (m<=0) return `${h} h`; return `${h} h ${m} min`; }
+function tickCooldownUI() { if (!currentPopupPlace) return; const ms=getVoteCooldownRemainingMs(currentPopupPlace.id); if (ms<=0&&currentPopupPlace._wasOnCooldown) { currentPopupPlace._wasOnCooldown=false; renderPopup(currentPopupPlace,isLoggedIn,currentUser); } }
 
-/* ─────────────── CACHÉ DE LUGARES ─────────────── */
-function latLngToTileKey(lat, lng) {
-  return `${Math.floor(lat / CONFIG.TILE_DEG)}:${Math.floor(lng / CONFIG.TILE_DEG)}`;
-}
+function distanceMeter(lat1,lng1,lat2,lng2) { const R=6371000, toRad=d=>d*Math.PI/180, dLat=toRad(lat2-lat1), dLng=toRad(lng2-lng1), a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2; return 2*R*Math.asin(Math.sqrt(a)); }
 
-function persistCache() {
-  try {
-    localStorage.setItem(PLACE_CACHE_KEY, JSON.stringify({ tiles: tileCache, places: placeStore, savedAt: Date.now() }));
-  } catch(e) {
-    pruneOldTiles();
-    try { localStorage.setItem(PLACE_CACHE_KEY, JSON.stringify({ tiles: tileCache, places: placeStore, savedAt: Date.now() })); } catch(e2) {}
-  }
-}
+/* ─── BACKEND API ─── */
+async function apiGet(action,params={}) { if (!BACKEND_READY) return null; const qs=new URLSearchParams({action,...params}).toString(); try { const res=await fetch(`${CONFIG.APPS_SCRIPT_URL}?${qs}`); const data=await res.json(); if (!data.ok) throw new Error(data.error||'Error de backend'); return data.result; } catch(err) { console.warn('apiGet falló:',action,err); return null; } }
+async function apiPost(action,payload={}) { if (!BACKEND_READY) return null; try { const res=await fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify({action,...payload})}); const data=await res.json(); if (!data.ok) throw new Error(data.error||'Error de backend'); return data.result; } catch(err) { console.warn('apiPost falló:',action,err); showToast('⚠️ No se pudo conectar con el servidor'); return null; } }
+async function apiPostVote(payload) { if (!BACKEND_READY) return {ok:false,network:false,result:null}; try { const res=await fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'vote',...payload})}); const data=await res.json(); if (!data.ok) { const msg=String(data.error||''); if (msg.startsWith('COOLDOWN:')) return {ok:false,network:false,cooldown:true,nextVoteAt:msg.slice('COOLDOWN:'.length)}; throw new Error(msg||'Error de backend'); } return {ok:true,network:true,result:data.result}; } catch(err) { console.warn('apiPost falló: vote',err); return {ok:false,network:false,result:null}; } }
 
-function loadCache() {
-  try {
-    const raw = localStorage.getItem(PLACE_CACHE_KEY);
-    if (!raw) return;
-    const data = JSON.parse(raw);
-    if (!data || !data.tiles) return;
-    tileCache = data.tiles || {};
-    placeStore = data.places || {};
-    Object.values(placeStore).forEach(p => {
-      if (!placeIndex.has(p.id)) { placeIndex.set(p.id, p); places.push(p); }
-    });
-  } catch(e) {}
-}
-
-function pruneOldTiles() {
-  const now = Date.now();
-  Object.keys(tileCache).forEach(key => {
-    if (now - tileCache[key].ts > CONFIG.PLACE_CACHE_TTL_MS) delete tileCache[key];
-  });
-  const allIds = new Set();
-  Object.values(tileCache).forEach(t => (t.placeIds || []).forEach(id => allIds.add(id)));
-  Object.keys(placeStore).forEach(id => { if (!allIds.has(id)) delete placeStore[id]; });
-}
-
-function markTileLoaded(tileKey, ids) { tileCache[tileKey] = { ts: Date.now(), placeIds: ids }; }
-function isTileCached(tileKey) {
-  const t = tileCache[tileKey];
-  return t && (Date.now() - t.ts) < CONFIG.PLACE_CACHE_TTL_MS;
-}
-function getRelevantTileKeys(lat, lng) { return [latLngToTileKey(lat, lng)]; }
-
-function mergePlacesIntoCache(newPlaces, tileKey) {
-  const addedIds = [];
-  newPlaces.forEach(p => {
-    placeStore[p.id] = p;
-    addedIds.push(p.id);
-    if (!placeIndex.has(p.id)) { placeIndex.set(p.id, p); places.push(p); }
-    else { const existing = placeIndex.get(p.id); Object.assign(existing, p); }
-  });
-  if (tileKey) markTileLoaded(tileKey, addedIds);
-}
-
-function tileToBbox(tileKey) {
-  const [tLat, tLng] = tileKey.split(':').map(Number);
-  return [
-    tLat * CONFIG.TILE_DEG - CONFIG.BBOX_PAD,
-    tLng * CONFIG.TILE_DEG - CONFIG.BBOX_PAD,
-    (tLat + 1) * CONFIG.TILE_DEG + CONFIG.BBOX_PAD,
-    (tLng + 1) * CONFIG.TILE_DEG + CONFIG.BBOX_PAD,
-  ];
-}
-
-/* ─────────────── COOLDOWN ─────────────── */
-function loadCooldownsFromStorage() {
-  try {
-    const raw = localStorage.getItem(COOLDOWNS_STORAGE_KEY);
-    if (!raw) return;
-    const data = JSON.parse(raw);
-    const now = Date.now();
-    Object.keys(data).forEach(pid => { const ts = data[pid]; if (ts && ts > now) placeCooldowns[pid] = new Date(ts); });
-  } catch(e) {}
-}
-
-function saveCooldownsToStorage() {
-  try {
-    const now = Date.now();
-    const toSave = {};
-    Object.keys(placeCooldowns).forEach(pid => {
-      const ts = placeCooldowns[pid] instanceof Date ? placeCooldowns[pid].getTime() : 0;
-      if (ts > now) toSave[pid] = ts;
-    });
-    localStorage.setItem(COOLDOWNS_STORAGE_KEY, JSON.stringify(toSave));
-  } catch(e) {}
-}
-
-function applyPlaceCooldown(pid, isoOrMs) {
-  if (!pid) return;
-  if (isoOrMs) { placeCooldowns[pid] = typeof isoOrMs === 'number' ? new Date(isoOrMs) : new Date(isoOrMs); }
-  else { delete placeCooldowns[pid]; }
-  saveCooldownsToStorage();
-}
-
-function applyLocalCooldown(pid) {
-  placeCooldowns[pid] = new Date(Date.now() + CONFIG.VOTE_COOLDOWN_MS);
-  saveCooldownsToStorage();
-}
-
-function applyCooldownInfo(map) {
-  if (!map) return;
-  Object.keys(map).forEach(pid => { if (map[pid]) placeCooldowns[pid] = new Date(map[pid]); });
-  saveCooldownsToStorage();
-}
-
-function getVoteCooldownRemainingMs(pid) {
-  const next = placeCooldowns[pid];
-  if (!next) return 0;
-  return Math.max(0, next.getTime() - Date.now());
-}
-
-function formatCooldownRemaining(ms) {
-  const totalMin = Math.ceil(ms / 60000);
-  const h = Math.floor(totalMin / 60), m = totalMin % 60;
-  if (h <= 0) return `${m} min`;
-  if (m <= 0) return `${h} h`;
-  return `${h} h ${m} min`;
-}
-
-function tickCooldownUI() {
-  if (!currentPopupPlace) return;
-  const ms = getVoteCooldownRemainingMs(currentPopupPlace.id);
-  if (ms <= 0 && currentPopupPlace._wasOnCooldown) {
-    currentPopupPlace._wasOnCooldown = false;
-    renderPopup(currentPopupPlace, isLoggedIn, currentUser);
-  }
-}
-
-function distanceMeter(lat1, lng1, lat2, lng2) {
-  const R = 6371000;
-  const toRad = d => d * Math.PI / 180;
-  const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
-  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;
-  return 2 * R * Math.asin(Math.sqrt(a));
-}
-
-/* ─────────────── BACKEND API ─────────────── */
-async function apiGet(action, params = {}) {
-  if (!BACKEND_READY) return null;
-  const qs = new URLSearchParams({ action, ...params }).toString();
-  try {
-    const res = await fetch(`${CONFIG.APPS_SCRIPT_URL}?${qs}`);
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.error || 'Error de backend');
-    return data.result;
-  } catch (err) { console.warn('apiGet falló:', action, err); return null; }
-}
-
-async function apiPost(action, payload = {}) {
-  if (!BACKEND_READY) return null;
-  try {
-    const res = await fetch(CONFIG.APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action, ...payload }) });
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.error || 'Error de backend');
-    return data.result;
-  } catch (err) { console.warn('apiPost falló:', action, err); showToast('⚠️ No se pudo conectar con el servidor'); return null; }
-}
-
-async function apiPostVote(payload) {
-  if (!BACKEND_READY) return { ok: false, network: false, result: null };
-  try {
-    const res = await fetch(CONFIG.APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'vote', ...payload }) });
-    const data = await res.json();
-    if (!data.ok) {
-      const msg = String(data.error || '');
-      if (msg.startsWith('COOLDOWN:')) return { ok: false, network: false, cooldown: true, nextVoteAt: msg.slice('COOLDOWN:'.length) };
-      throw new Error(msg || 'Error de backend');
-    }
-    return { ok: true, network: true, result: data.result };
-  } catch (err) { console.warn('apiPost falló: vote', err); return { ok: false, network: false, result: null }; }
-}
-
-/* ════════════════════════════════════════════════════════════
-   OVERPASS API
-   ════════════════════════════════════════════════════════════ */
+/* ─── OVERPASS API ─── */
 function osmNodeToPlace(node) {
-  const tags = node.tags || {};
-  const key = tags.amenity || tags.shop || tags.office || 'general';
-  const info = OSM_TYPE_MAP[key] || { emoji: '🏪', tipo: 'Comercio' };
-  const name = tags.name || tags['name:es'] || info.tipo;
-  const addr = [tags['addr:street'], tags['addr:housenumber']].filter(Boolean).join(' ') || 'Sin dirección';
-  return {
-    id: `osm_${node.id}`,
-    name, type: info.tipo, logo: info.emoji,
-    lat: node.lat, lng: node.lon, addr,
-    status: 0, reporters: 0,
-    rating: (3.5 + Math.random() * 1.4).toFixed(1),
-    reviewsN: Math.floor(Math.random() * 200 + 10),
-    open: true, verified: false, fromOSM: true,
-  };
+  const tags=node.tags||{};
+  const key=tags.amenity||tags.shop||tags.office||'general';
+  const info=OSM_TYPE_MAP[key]||{emoji:'🏪',tipo:'Comercio'};
+  const name=tags.name||tags['name:es']||info.tipo;
+  const addr=[tags['addr:street'],tags['addr:housenumber']].filter(Boolean).join(' ')||'Sin dirección';
+  return { id:`osm_${node.id}`, name, type:info.tipo, logo:info.emoji, lat:node.lat, lng:node.lon, addr, status:0, reporters:0, rating:(3.5+Math.random()*1.4).toFixed(1), reviewsN:Math.floor(Math.random()*200+10), open:true, verified:false, fromOSM:true };
 }
 
 async function loadOverpassForTiles(tileKeys) {
   if (!tileKeys.length) return [];
-  let minLat = Infinity, minLng = Infinity, maxLat = -Infinity, maxLng = -Infinity;
-  tileKeys.forEach(key => {
-    const [s, w, n, e] = tileToBbox(key);
-    if (s < minLat) minLat = s; if (w < minLng) minLng = w;
-    if (n > maxLat) maxLat = n; if (e > maxLng) maxLng = e;
-  });
-  const amenityFilter = 'supermarket|pharmacy|bank|atm|fast_food|restaurant|cafe|bakery|hospital|clinic|doctors|dentist|post_office|fuel|marketplace';
-  const shopFilter    = 'supermarket|convenience|pharmacy|bakery|butcher|laundry|dry_cleaning|hardware|clothes|shoes|electronics|optician|beauty|hairdresser|toy|sports|stationery|greengrocer|florist|newsagent|kiosk|general';
-  const query = `[out:json][timeout:15];(
-    node["amenity"~"^(${amenityFilter})$"](${minLat},${minLng},${maxLat},${maxLng});
-    node["shop"~"^(${shopFilter})$"](${minLat},${minLng},${maxLat},${maxLng});
-  );out body;`.trim();
+  let minLat=Infinity,minLng=Infinity,maxLat=-Infinity,maxLng=-Infinity;
+  tileKeys.forEach(key=>{ const [s,w,n,e]=tileToBbox(key); if (s<minLat) minLat=s; if (w<minLng) minLng=w; if (n>maxLat) maxLat=n; if (e>maxLng) maxLng=e; });
+  const amenityFilter='supermarket|pharmacy|bank|atm|fast_food|restaurant|cafe|bakery|hospital|clinic|doctors|dentist|post_office|fuel|marketplace';
+  const shopFilter='supermarket|convenience|pharmacy|bakery|butcher|laundry|dry_cleaning|hardware|clothes|shoes|electronics|optician|beauty|hairdresser|toy|sports|stationery|greengrocer|florist|newsagent|kiosk|general';
+  const query=`[out:json][timeout:15];(node["amenity"~"^(${amenityFilter})$"](${minLat},${minLng},${maxLat},${maxLng});node["shop"~"^(${shopFilter})$"](${minLat},${minLng},${maxLat},${maxLng}););out body;`.trim();
   try {
-    const res = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST', body: 'data=' + encodeURIComponent(query),
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    });
-    if (!res.ok) throw new Error('Overpass HTTP ' + res.status);
-    const data = await res.json();
-    return (data.elements || []).filter(n => n.type === 'node' && n.tags && n.tags.name).map(osmNodeToPlace);
-  } catch (e) { console.warn('Overpass falló:', e); return []; }
+    const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(query),headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+    if (!res.ok) throw new Error('Overpass HTTP '+res.status);
+    const data=await res.json();
+    return (data.elements||[]).filter(n=>n.type==='node'&&n.tags&&n.tags.name).map(osmNodeToPlace);
+  } catch(e) { console.warn('Overpass falló:',e); return []; }
 }
 
-async function ensurePlacesLoadedAt(lat, lng) {
-  const tileKey = latLngToTileKey(lat, lng);
-  const adjacentKeys = getAdjacentTileKeys(lat, lng);
-  const allKeys = [tileKey, ...adjacentKeys];
-  const missingKeys = allKeys.filter(k => !isTileCached(k));
-
-  rebuildNearby(lat, lng);
-  if (nearbyPlaces.length || places.length) { buildMapMarkers(nearbyPlaces.length ? nearbyPlaces : places); updateCrowdBar(calcCrowdPct()); }
-
-  if (missingKeys.length === 0) {
-    syncBackendStatus(lat, lng).then(() => {
-      rebuildNearby(lat, lng);
-      buildMapMarkers(nearbyPlaces);
-      updateCrowdBar(calcCrowdPct());
-    });
-    if (!mapInitialLoaded) {
-      mapInitialLoaded = true;
-      if (!checkinShown && nearbyPlaces.length > 0) { checkinShown = true; setTimeout(() => showCheckinModal(lat, lng), 800); }
-    }
+async function ensurePlacesLoadedAt(lat,lng) {
+  const tileKey=latLngToTileKey(lat,lng);
+  const adjacentKeys=getAdjacentTileKeys(lat,lng);
+  const allKeys=[tileKey,...adjacentKeys];
+  const missingKeys=allKeys.filter(k=>!isTileCached(k));
+  rebuildNearby(lat,lng);
+  if (nearbyPlaces.length||places.length) { buildMapMarkers(nearbyPlaces.length?nearbyPlaces:places); updateCrowdBar(calcCrowdPct()); }
+  if (missingKeys.length===0) {
+    syncBackendStatus(lat,lng).then(()=>{ rebuildNearby(lat,lng); buildMapMarkers(nearbyPlaces); updateCrowdBar(calcCrowdPct()); });
+    if (!mapInitialLoaded) { mapInitialLoaded=true; if (!checkinShown&&nearbyPlaces.length>0) { checkinShown=true; setTimeout(()=>showCheckinModal(lat,lng),800); } }
     return;
   }
-
-  if (!mapInitialLoaded) mapInitialLoaded = true;
-
-  const [osmPlaces, backendResult] = await Promise.all([
-    loadOverpassForTiles(missingKeys),
-    BACKEND_READY ? apiGet('sync_places', { lat, lng, radius: Math.round(CONFIG.TILE_DEG * 111320 * 1.5) }) : Promise.resolve(null),
-  ]);
-
-  const backendPlaces = (backendResult && Array.isArray(backendResult.places)) ? backendResult.places : [];
-  const backendById = new Map(backendPlaces.map(p => [p.id, p]));
-  const merged = osmPlaces.map(p => { const bp = backendById.get(p.id); return bp ? { ...p, ...bp } : p; });
-  const onlyBackend = backendPlaces.filter(p => !osmPlaces.find(o => o.id === p.id));
-  const allNew = [...merged, ...onlyBackend];
-
-  missingKeys.forEach(key => {
-    const [s, w, n, e] = tileToBbox(key);
-    const forThisTile = allNew.filter(p => p.lat >= s && p.lat <= n && p.lng >= w && p.lng <= e);
-    mergePlacesIntoCache(forThisTile, key);
-  });
-
-  persistCache();
-  rebuildNearby(lat, lng);
-  buildMapMarkers(nearbyPlaces);
-  updateCrowdBar(calcCrowdPct());
-
-  if (!checkinShown && nearbyPlaces.length > 0) { checkinShown = true; setTimeout(() => showCheckinModal(lat, lng), 800); }
+  if (!mapInitialLoaded) mapInitialLoaded=true;
+  const [osmPlaces,backendResult]=await Promise.all([loadOverpassForTiles(missingKeys), BACKEND_READY?apiGet('sync_places',{lat,lng,radius:Math.round(CONFIG.TILE_DEG*111320*1.5)}):Promise.resolve(null)]);
+  const backendPlaces=(backendResult&&Array.isArray(backendResult.places))?backendResult.places:[];
+  const backendById=new Map(backendPlaces.map(p=>[p.id,p]));
+  const merged=osmPlaces.map(p=>{ const bp=backendById.get(p.id); return bp?{...p,...bp}:p; });
+  const onlyBackend=backendPlaces.filter(p=>!osmPlaces.find(o=>o.id===p.id));
+  const allNew=[...merged,...onlyBackend];
+  missingKeys.forEach(key=>{ const [s,w,n,e]=tileToBbox(key); const forThisTile=allNew.filter(p=>p.lat>=s&&p.lat<=n&&p.lng>=w&&p.lng<=e); mergePlacesIntoCache(forThisTile,key); });
+  persistCache(); rebuildNearby(lat,lng); buildMapMarkers(nearbyPlaces); updateCrowdBar(calcCrowdPct());
+  if (!checkinShown&&nearbyPlaces.length>0) { checkinShown=true; setTimeout(()=>showCheckinModal(lat,lng),800); }
 }
 
-async function syncBackendStatus(lat, lng) {
+async function syncBackendStatus(lat,lng) {
   if (!BACKEND_READY) return;
-  const result = await apiGet('sync_places', { lat, lng, radius: 300, status_only: 1 });
-  if (!result || !Array.isArray(result.places)) return;
-  result.places.forEach(bp => {
-    const p = placeIndex.get(bp.id);
-    if (p) { p.status = bp.status ?? p.status; p.reporters = bp.reporters ?? p.reporters; placeStore[p.id] = p; }
-  });
+  const result=await apiGet('sync_places',{lat,lng,radius:300,status_only:1});
+  if (!result||!Array.isArray(result.places)) return;
+  result.places.forEach(bp=>{ const p=placeIndex.get(bp.id); if (p) { p.status=bp.status??p.status; p.reporters=bp.reporters??p.reporters; placeStore[p.id]=p; } });
   persistCache();
 }
 
-function getAdjacentTileKeys(lat, lng) {
-  const d = CONFIG.TILE_DEG;
-  const relLat = (lat / d) - Math.floor(lat / d), relLng = (lng / d) - Math.floor(lng / d);
-  const keys = [];
-  if (relLat < 0.3) keys.push(latLngToTileKey(lat - d, lng));
-  if (relLat > 0.7) keys.push(latLngToTileKey(lat + d, lng));
-  if (relLng < 0.3) keys.push(latLngToTileKey(lat, lng - d));
-  if (relLng > 0.7) keys.push(latLngToTileKey(lat, lng + d));
+function getAdjacentTileKeys(lat,lng) {
+  const d=CONFIG.TILE_DEG, relLat=(lat/d)-Math.floor(lat/d), relLng=(lng/d)-Math.floor(lng/d), keys=[];
+  if (relLat<0.3) keys.push(latLngToTileKey(lat-d,lng));
+  if (relLat>0.7) keys.push(latLngToTileKey(lat+d,lng));
+  if (relLng<0.3) keys.push(latLngToTileKey(lat,lng-d));
+  if (relLng>0.7) keys.push(latLngToTileKey(lat,lng+d));
   return keys;
 }
 
-function rebuildNearby(lat, lng) {
-  const maxDistM = CONFIG.TILE_DEG * 111320 * 1.2;
-  nearbyPlaces = [];
-  placeIndex.forEach(p => { if (distanceMeter(lat, lng, p.lat, p.lng) <= maxDistM) nearbyPlaces.push(p); });
+function rebuildNearby(lat,lng) {
+  const maxDistM=CONFIG.TILE_DEG*111320*1.2;
+  nearbyPlaces=[];
+  placeIndex.forEach(p=>{ if (distanceMeter(lat,lng,p.lat,p.lng)<=maxDistM) nearbyPlaces.push(p); });
 }
 
-/* ─────────────── SEARCH ─────────────── */
+/* ─── SEARCH (mapa) ─── */
 async function searchPlacesByQuery(query) {
-  if (!query || query.length < 2) return [];
-  const q = query.toLowerCase();
-  const localMatches = places.filter(p =>
-    p.name.toLowerCase().includes(q) || p.addr.toLowerCase().includes(q) || p.type.toLowerCase().includes(q)
-  ).slice(0, 5);
-  if (localMatches.length >= 3) return localMatches;
+  if (!query||query.length<2) return [];
+  const q=query.toLowerCase();
+  const localMatches=places.filter(p=>p.name.toLowerCase().includes(q)||p.addr.toLowerCase().includes(q)||p.type.toLowerCase().includes(q)).slice(0,5);
+  if (localMatches.length>=3) return localMatches;
   try {
-    const viewboxLat = userLat || CONFIG.DEFAULT_CENTER.lat, viewboxLng = userLng || CONFIG.DEFAULT_CENTER.lng;
-    const delta = 0.05;
-    const viewbox = `${viewboxLng-delta},${viewboxLat-delta},${viewboxLng+delta},${viewboxLat+delta}`;
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=6&addressdetails=1&bounded=0&viewbox=${viewbox}&countrycodes=ar&dedupe=1`;
-    const res = await fetch(url, { headers: { 'Accept-Language': 'es', 'User-Agent': 'Qooentum/1.0' } });
+    const viewboxLat=userLat||CONFIG.DEFAULT_CENTER.lat, viewboxLng=userLng||CONFIG.DEFAULT_CENTER.lng, delta=0.05;
+    const viewbox=`${viewboxLng-delta},${viewboxLat-delta},${viewboxLng+delta},${viewboxLat+delta}`;
+    const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=6&addressdetails=1&bounded=0&viewbox=${viewbox}&countrycodes=ar&dedupe=1`;
+    const res=await fetch(url,{headers:{'Accept-Language':'es','User-Agent':'Qooentum/1.0'}});
     if (!res.ok) throw new Error('Nominatim error');
-    const data = await res.json();
-    const relevant = data.filter(r => !['highway','boundary','landuse','natural','water'].includes(r.class));
-    return relevant.map(r => {
-      const osmId = `osm_${r.osm_type}_${r.osm_id}`;
-      const existing = places.find(p => p.id === osmId || (Math.abs(p.lat - parseFloat(r.lat)) < 0.0002 && Math.abs(p.lng - parseFloat(r.lon)) < 0.0002));
-      if (existing) return existing;
-      const key = r.type || r.class || 'general';
-      const info = OSM_TYPE_MAP[key] || { emoji: '🏪', tipo: r.type || 'Lugar' };
-      const addr = r.display_name.split(',').slice(0,3).join(', ');
-      return {
-        id: osmId, name: r.name || r.display_name.split(',')[0],
-        type: info.tipo, logo: info.emoji,
-        lat: parseFloat(r.lat), lng: parseFloat(r.lon), addr,
-        status: 0, reporters: 0,
-        rating: (3.5 + Math.random() * 1.2).toFixed(1),
-        reviewsN: Math.floor(Math.random() * 80 + 5),
-        open: true, verified: false, fromOSM: true, fromSearch: true,
-      };
-    }).slice(0, 6);
-  } catch(e) { console.warn('Search falló:', e); return localMatches; }
+    const data=await res.json();
+    const relevant=data.filter(r=>!['highway','boundary','landuse','natural','water'].includes(r.class));
+    return relevant.map(r=>{ const osmId=`osm_${r.osm_type}_${r.osm_id}`; const existing=places.find(p=>p.id===osmId||(Math.abs(p.lat-parseFloat(r.lat))<0.0002&&Math.abs(p.lng-parseFloat(r.lon))<0.0002)); if (existing) return existing; const key=r.type||r.class||'general'; const info=OSM_TYPE_MAP[key]||{emoji:'🏪',tipo:r.type||'Lugar'}; const addr=r.display_name.split(',').slice(0,3).join(', '); return {id:osmId,name:r.name||r.display_name.split(',')[0],type:info.tipo,logo:info.emoji,lat:parseFloat(r.lat),lng:parseFloat(r.lon),addr,status:0,reporters:0,rating:(3.5+Math.random()*1.2).toFixed(1),reviewsN:Math.floor(Math.random()*80+5),open:true,verified:false,fromOSM:true,fromSearch:true}; }).slice(0,6);
+  } catch(e) { console.warn('Search falló:',e); return localMatches; }
 }
 
-/* ─────────────── SEARCH UI ─────────────── */
-const searchInput = () => document.getElementById('map-search-input');
-const searchDropdown = () => document.getElementById('search-results-dropdown');
-const searchClear = () => document.getElementById('map-search-clear');
+const searchInput=()=>document.getElementById('map-search-input');
+const searchDropdown=()=>document.getElementById('search-results-dropdown');
+const searchClear=()=>document.getElementById('map-search-clear');
 
 function initSearch() {
-  const input = searchInput();
-  input.addEventListener('input', onSearchInput);
-  input.addEventListener('focus', () => { if (input.value.length > 1) searchDropdown().classList.add('open'); });
-  document.addEventListener('click', e => {
-    if (!document.getElementById('map-search-wrap').contains(e.target)) searchDropdown().classList.remove('open');
-  });
+  const input=searchInput();
+  input.addEventListener('input',onSearchInput);
+  input.addEventListener('focus',()=>{ if (input.value.length>1) searchDropdown().classList.add('open'); });
+  document.addEventListener('click',e=>{ if (!document.getElementById('map-search-wrap').contains(e.target)) searchDropdown().classList.remove('open'); });
 }
 
 function onSearchInput(e) {
-  const val = e.target.value.trim();
-  searchClear().classList.toggle('visible', val.length > 0);
-  if (val.length < 2) { searchDropdown().classList.remove('open'); return; }
+  const val=e.target.value.trim();
+  searchClear().classList.toggle('visible',val.length>0);
+  if (val.length<2) { searchDropdown().classList.remove('open'); return; }
   clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => runSearch(val), 380);
+  searchTimer=setTimeout(()=>runSearch(val),380);
 }
 
 async function runSearch(query) {
-  const dropdown = searchDropdown();
-  dropdown.innerHTML = `<div class="search-loading"><div class="search-spinner"></div>Buscando lugares…</div>`;
+  const dropdown=searchDropdown();
+  dropdown.innerHTML=`<div class="search-loading"><div class="search-spinner"></div>Buscando lugares…</div>`;
   dropdown.classList.add('open');
-  const results = await searchPlacesByQuery(query);
-  if (!results.length) {
-    dropdown.innerHTML = `<div class="search-empty">😕 No encontramos "${query}" cerca de vos.<br>Probá con otro nombre o dirección.</div>`;
-    return;
-  }
-  dropdown.innerHTML = results.map((p, i) => {
-    const dist = (userLat !== null)
-      ? (() => { const d = Math.round(distanceMeter(userLat, userLng, p.lat, p.lng)); return d < 1000 ? `${d}m` : `${(d/1000).toFixed(1)}km`; })()
-      : '';
-    const sc = (!p.reporters || p.reporters === 0) ? NO_REPORT_STATUS : STATUS_CFG[p.status];
-    const logoHtml = (p.sponsor && p.sponsor.logo_url)
-      ? `<img src="${p.sponsor.logo_url}" alt="${p.name}">`
-      : p.logo;
-    return `<div class="search-result-item" data-idx="${i}">
-      <div class="search-result-logo">${logoHtml}</div>
-      <div class="search-result-info">
-        <div class="search-result-name">${p.name}${p.sponsor ? ` <span style="font-size:10px;font-weight:800;color:${p.sponsor.badge_color||'#6366F1'}">✓</span>` : ''}</div>
-        <div class="search-result-sub">${p.type}${p.addr !== 'Sin dirección' ? ' · ' + p.addr.split(',')[0] : ''}${dist ? ' · ' + dist : ''}</div>
-      </div>
-      <div class="search-result-status" style="background:${sc.color}">${sc.label}</div>
-    </div>`;
+  const results=await searchPlacesByQuery(query);
+  if (!results.length) { dropdown.innerHTML=`<div class="search-empty">😕 No encontramos "${query}" cerca de vos.</div>`; return; }
+  dropdown.innerHTML=results.map((p,i)=>{
+    const dist=(userLat!==null)?`${(()=>{ const d=Math.round(distanceMeter(userLat,userLng,p.lat,p.lng)); return d<1000?`${d}m`:`${(d/1000).toFixed(1)}km`; })()}`:'';
+    const sc=(!p.reporters||p.reporters===0)?NO_REPORT_STATUS:STATUS_CFG[p.status];
+    const logoHtml=(p.sponsor&&p.sponsor.logo_url)?`<img src="${p.sponsor.logo_url}" alt="${p.name}">`:p.logo;
+    return `<div class="search-result-item" data-idx="${i}"><div class="search-result-logo">${logoHtml}</div><div class="search-result-info"><div class="search-result-name">${p.name}</div><div class="search-result-sub">${p.type}${p.addr!=='Sin dirección'?' · '+p.addr.split(',')[0]:''}${dist?' · '+dist:''}</div></div><div class="search-result-status" style="background:${sc.color}">${sc.label}</div></div>`;
   }).join('');
-  dropdown.querySelectorAll('.search-result-item').forEach((el, i) => {
-    el.addEventListener('click', () => { searchDropdown().classList.remove('open'); searchInput().blur(); openSearchResultPopup(results[i]); });
-  });
+  dropdown.querySelectorAll('.search-result-item').forEach((el,i)=>{ el.addEventListener('click',()=>{ searchDropdown().classList.remove('open'); searchInput().blur(); openSearchResultPopup(results[i]); }); });
 }
 
-function clearSearch() {
-  searchInput().value = '';
-  searchClear().classList.remove('visible');
-  searchDropdown().classList.remove('open');
-  searchQuery = '';
-}
+function clearSearch() { searchInput().value=''; searchClear().classList.remove('visible'); searchDropdown().classList.remove('open'); searchQuery=''; }
+function openSearchResultPopup(place) { const existing=places.find(p=>p.id===place.id); if (!existing) places.push(place); place._fromSearch=true; openPlacePopup(place); }
 
-function openSearchResultPopup(place) {
-  const existing = places.find(p => p.id === place.id);
-  if (!existing) places.push(place);
-  place._fromSearch = true;
-  openPlacePopup(place);
-}
-
-/* ═══════════════════════════════════════════════════════════
-   REACT POPUP — con soporte completo de sponsors
-   ═══════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════
+   REACT POPUP
+   ════════════════════════════════════════════════════════════ */
 const { useState, useEffect, useRef } = React;
 
 const PLACE_PHOTOS = {
-  default: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80',
-  'Supermercado': 'https://images.unsplash.com/photo-1604719312566-8912e9c8a213?w=800&q=80',
-  'Farmacia': 'https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=800&q=80',
-  'Banco / Cajeros': 'https://images.unsplash.com/photo-1601597111158-2fceff292cdc?w=800&q=80',
-  'Panadería': 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&q=80',
-  'Comida rápida': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80',
-  'Restaurante': 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80',
-  'Hospital': 'https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?w=800&q=80',
+  default:'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80',
+  'Supermercado':'https://images.unsplash.com/photo-1604719312566-8912e9c8a213?w=800&q=80',
+  'Farmacia':'https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=800&q=80',
+  'Banco / Cajeros':'https://images.unsplash.com/photo-1601597111158-2fceff292cdc?w=800&q=80',
+  'Panadería':'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&q=80',
+  'Comida rápida':'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80',
+  'Restaurante':'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80',
+  'Hospital':'https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?w=800&q=80',
 };
 
-/**
- * Devuelve la foto a mostrar en el header del popup.
- * Prioridad: sponsor.photo_url > place.photo > foto por tipo > default.
- */
-function getPhoto(place) {
-  if (place.sponsor && place.sponsor.photo_url) return place.sponsor.photo_url;
-  return place.photo || PLACE_PHOTOS[place.type] || PLACE_PHOTOS.default;
-}
+function getPhoto(place) { if (place.sponsor&&place.sponsor.photo_url) return place.sponsor.photo_url; return place.photo||PLACE_PHOTOS[place.type]||PLACE_PHOTOS.default; }
+function getLogoEl(place) { if (place.sponsor&&place.sponsor.logo_url) return React.createElement('img',{src:place.sponsor.logo_url,alt:place.name,style:{width:'100%',height:'100%',objectFit:'contain',borderRadius:10}}); return place.logo; }
+function canReportThisPlace(place) { if (userLat===null||userLng===null) return false; return distanceMeter(userLat,userLng,place.lat,place.lng)<=CONFIG.REPORT_RADIUS_M; }
 
-/**
- * Devuelve el elemento de logo a mostrar en el popup.
- * Prioridad: sponsor.logo_url (imagen) > emoji del lugar.
- */
-function getLogoEl(place) {
-  if (place.sponsor && place.sponsor.logo_url) {
-    return React.createElement('img', {
-      src: place.sponsor.logo_url,
-      alt: place.name,
-      style: { width:'100%', height:'100%', objectFit:'contain', borderRadius:10 }
-    });
-  }
-  return place.logo;
-}
+function PlacePopup({place,onClose,onVoteSubmit,cooldownRemainingMs,isSearchResult,isLoggedIn,currentUser}) {
+  const [visible,setVisible]=useState(false);
+  const [cardVisible,setCardVisible]=useState(false);
+  const [selectedVote,setSelectedVote]=useState(null);
+  const [submitted,setSubmitted]=useState(false);
+  const [imgLoaded,setImgLoaded]=useState(false);
+  const [cooldownMs,setCooldownMs]=useState(cooldownRemainingMs||0);
+  const overlayRef=useRef(null);
+  const onCooldown=cooldownMs>0&&!submitted;
+  const nearby=canReportThisPlace(place);
+  const hasGps=userLat!==null&&userLng!==null;
+  const distToPlace=hasGps?Math.round(distanceMeter(userLat,userLng,place.lat,place.lng)):null;
+  const sponsor=place.sponsor||null;
+  const sponsorColor=sponsor?(sponsor.badge_color||'#6366F1'):null;
 
-function canReportThisPlace(place) {
-  if (userLat === null || userLng === null) return false;
-  return distanceMeter(userLat, userLng, place.lat, place.lng) <= CONFIG.REPORT_RADIUS_M;
-}
+  useEffect(()=>{ requestAnimationFrame(()=>{ setVisible(true); setTimeout(()=>setCardVisible(true),40); }); },[]);
+  useEffect(()=>{ if (cooldownMs<=0) return; const id=setInterval(()=>setCooldownMs(ms=>Math.max(0,ms-1000)),1000); return ()=>clearInterval(id); },[cooldownMs>0]);
 
-function PlacePopup({ place, onClose, onVoteSubmit, cooldownRemainingMs, isSearchResult, isLoggedIn, currentUser }) {
-  const [visible, setVisible] = useState(false);
-  const [cardVisible, setCardVisible] = useState(false);
-  const [selectedVote, setSelectedVote] = useState(null);
-  const [submitted, setSubmitted] = useState(false);
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const [cooldownMs, setCooldownMs] = useState(cooldownRemainingMs || 0);
-  const overlayRef = useRef(null);
-  const onCooldown = cooldownMs > 0 && !submitted;
-  const nearby = canReportThisPlace(place);
-  const hasGps = userLat !== null && userLng !== null;
-  const distToPlace = hasGps ? Math.round(distanceMeter(userLat, userLng, place.lat, place.lng)) : null;
-  const sponsor = place.sponsor || null;
-  const sponsorColor = sponsor ? (sponsor.badge_color || '#6366F1') : null;
+  function handleClose(){ setCardVisible(false); setVisible(false); setTimeout(onClose,320); }
+  function handleOverlayClick(e){ if (e.target===overlayRef.current) handleClose(); }
+  function handleVote(idx){ if (submitted||onCooldown) return; if (!isLoggedIn){showToastAction('🔑 Iniciá sesión para reportar y ganar puntos');return;} if (!nearby) return; setSelectedVote(idx); }
+  function handleSubmit(){ if (selectedVote===null||submitted||onCooldown||!nearby) return; if (!isLoggedIn){showToastAction('🔑 Iniciá sesión para reportar y ganar puntos');return;} setSubmitted(true); setTimeout(()=>{ onVoteSubmit(place.id,selectedVote); setTimeout(handleClose,900); },600); }
 
-  useEffect(() => {
-    requestAnimationFrame(() => { setVisible(true); setTimeout(() => setCardVisible(true), 40); });
-  }, []);
+  const s=(!place.reporters||place.reporters===0)?NO_REPORT_STATUS:STATUS_CFG[place.status];
+  const photo=getPhoto(place);
 
-  useEffect(() => {
-    if (cooldownMs <= 0) return;
-    const id = setInterval(() => setCooldownMs(ms => Math.max(0, ms - 1000)), 1000);
-    return () => clearInterval(id);
-  }, [cooldownMs > 0]);
+  const overlayStyle={position:'fixed',inset:0,background:`rgba(15,23,42,${visible?'.62':'0'})`,backdropFilter:`blur(${visible?'6px':'0px'})`,WebkitBackdropFilter:`blur(${visible?'6px':'0px'})`,display:'flex',alignItems:'center',justifyContent:'center',transition:'background 0.3s ease, backdrop-filter 0.3s ease',zIndex:10000,padding:'20px'};
+  const cardStyle={width:'100%',maxWidth:'370px',background:'#fff',borderRadius:'22px',overflow:'hidden',boxShadow:sponsor?`0 24px 64px rgba(15,23,42,.28), 0 0 0 2px ${sponsorColor}40`:'0 24px 64px rgba(15,23,42,.28), 0 8px 24px rgba(15,23,42,.14)',transform:cardVisible?'translateY(0) scale(1)':'translateY(40px) scale(0.93)',opacity:cardVisible?1:0,transition:'transform 0.38s cubic-bezier(0.34,1.56,0.64,1), opacity 0.28s ease',maxHeight:'calc(100dvh - 40px)',display:'flex',flexDirection:'column'};
 
-  function handleClose() { setCardVisible(false); setVisible(false); setTimeout(onClose, 320); }
-  function handleOverlayClick(e) { if (e.target === overlayRef.current) handleClose(); }
-  function handleVote(idx) {
-    if (submitted || onCooldown) return;
-    if (!isLoggedIn) { showToastAction('🔑 Iniciá sesión para reportar y ganar puntos'); return; }
-    if (!nearby) return;
-    setSelectedVote(idx);
-  }
-  function handleSubmit() {
-    if (selectedVote === null || submitted || onCooldown || !nearby) return;
-    if (!isLoggedIn) { showToastAction('🔑 Iniciá sesión para reportar y ganar puntos'); return; }
-    setSubmitted(true);
-    setTimeout(() => { onVoteSubmit(place.id, selectedVote); setTimeout(handleClose, 900); }, 600);
-  }
-
-  const s = (!place.reporters || place.reporters === 0) ? NO_REPORT_STATUS : STATUS_CFG[place.status];
-  const photo = getPhoto(place);
-
-  const overlayStyle = {
-    position:'fixed', inset:0,
-    background:`rgba(15,23,42,${visible?'.62':'0'})`,
-    backdropFilter:`blur(${visible?'6px':'0px'})`,
-    WebkitBackdropFilter:`blur(${visible?'6px':'0px'})`,
-    display:'flex', alignItems:'center', justifyContent:'center',
-    transition:'background 0.3s ease, backdrop-filter 0.3s ease',
-    zIndex:10000, padding:'20px',
-  };
-  const cardStyle = {
-    width:'100%', maxWidth:'370px', background:'#fff', borderRadius:'22px', overflow:'hidden',
-    boxShadow: sponsor
-      ? `0 24px 64px rgba(15,23,42,.28), 0 0 0 2px ${sponsorColor}40`
-      : '0 24px 64px rgba(15,23,42,.28), 0 8px 24px rgba(15,23,42,.14)',
-    transform:cardVisible?'translateY(0) scale(1)':'translateY(40px) scale(0.93)',
-    opacity:cardVisible?1:0,
-    transition:'transform 0.38s cubic-bezier(0.34,1.56,0.64,1), opacity 0.28s ease',
-    maxHeight:'calc(100dvh - 40px)', display:'flex', flexDirection:'column',
-  };
-
-  // ── Bloque informativo de sponsor ──
-  const sponsorBlock = sponsor && React.createElement('div', {
-    style: {
-      display:'flex', alignItems:'center', gap:12,
-      background:`linear-gradient(135deg, ${sponsorColor}12, ${sponsorColor}06)`,
-      border:`1px solid ${sponsorColor}30`,
-      borderRadius:12, padding:'11px 14px', marginBottom:12,
-    }
-  },
-    sponsor.logo_url && React.createElement('img', {
-      src: sponsor.logo_url,
-      alt: place.name,
-      style:{ width:38, height:38, objectFit:'contain', borderRadius:9, flexShrink:0, background:'#fff', padding:2, border:`1px solid ${sponsorColor}25` }
-    }),
-    React.createElement('div', { style:{ flex:1, minWidth:0 } },
-      React.createElement('div', { style:{ fontSize:12, fontWeight:800, color:'#0F172A' } }, place.name),
-      sponsor.promo && React.createElement('div', {
-        style:{ fontSize:11, color:sponsorColor, fontWeight:700, marginTop:2 }
-      }, '🏷️ ' + sponsor.promo),
-      sponsor.website && React.createElement('a', {
-        href: sponsor.website, target:'_blank', rel:'noopener',
-        style:{ fontSize:10, color:sponsorColor, opacity:.75, marginTop:2, display:'block', textDecoration:'none', fontWeight:600 }
-      }, '🌐 ' + sponsor.website.replace(/^https?:\/\//, ''))
+  const sponsorBlock=sponsor&&React.createElement('div',{style:{display:'flex',alignItems:'center',gap:12,background:`linear-gradient(135deg, ${sponsorColor}12, ${sponsorColor}06)`,border:`1px solid ${sponsorColor}30`,borderRadius:12,padding:'11px 14px',marginBottom:12}},
+    sponsor.logo_url&&React.createElement('img',{src:sponsor.logo_url,alt:place.name,style:{width:38,height:38,objectFit:'contain',borderRadius:9,flexShrink:0,background:'#fff',padding:2,border:`1px solid ${sponsorColor}25`}}),
+    React.createElement('div',{style:{flex:1,minWidth:0}},
+      React.createElement('div',{style:{fontSize:12,fontWeight:800,color:'#0F172A'}},place.name),
+      sponsor.promo&&React.createElement('div',{style:{fontSize:11,color:sponsorColor,fontWeight:700,marginTop:2}},'🏷️ '+sponsor.promo),
+      sponsor.website&&React.createElement('a',{href:sponsor.website,target:'_blank',rel:'noopener',style:{fontSize:10,color:sponsorColor,opacity:.75,marginTop:2,display:'block',textDecoration:'none',fontWeight:600}},'🌐 '+sponsor.website.replace(/^https?:\/\//,''))
     ),
-    React.createElement('div', {
-      style:{
-        background:sponsorColor, color:'#fff',
-        fontSize:9, fontWeight:900, padding:'3px 9px', borderRadius:99,
-        display:'flex', alignItems:'center', gap:3,
-        letterSpacing:'.3px', whiteSpace:'nowrap', flexShrink:0,
-        boxShadow:`0 2px 8px ${sponsorColor}55`,
-      }
-    }, '✓ ' + (sponsor.badge_text || 'Verificado'))
+    React.createElement('div',{style:{background:sponsorColor,color:'#fff',fontSize:9,fontWeight:900,padding:'3px 9px',borderRadius:99,display:'flex',alignItems:'center',gap:3,letterSpacing:'.3px',whiteSpace:'nowrap',flexShrink:0,boxShadow:`0 2px 8px ${sponsorColor}55`}},'✓ '+(sponsor.badge_text||'Verificado'))
   );
 
-  const tooFarBlock = hasGps && !nearby && !onCooldown && React.createElement('div',{style:{display:'flex',alignItems:'center',gap:10,background:'#F1F5F9',border:'1px solid #E2E8F0',borderRadius:12,padding:'12px 14px',marginBottom:12}},
-    React.createElement('span',{style:{fontSize:20,flexShrink:0}},'📍'),
-    React.createElement('div',null,
-      React.createElement('p',{style:{margin:0,fontSize:13,fontWeight:800,color:'#0F172A'}},`Estás a ${distToPlace}m de este comercio`),
-      React.createElement('p',{style:{margin:'2px 0 0',fontSize:12,color:'#64748B'}},'Necesitás estar a menos de ' + CONFIG.REPORT_RADIUS_M + 'm para reportar. Entrá al local y volvé a intentar.')
-    )
-  );
-  const noGpsBlock = !hasGps && !onCooldown && React.createElement('div',{style:{display:'flex',alignItems:'center',gap:10,background:'#EEF2FF',border:'1px solid #C7D2FE',borderRadius:12,padding:'12px 14px',marginBottom:12}},
-    React.createElement('span',{style:{fontSize:20,flexShrink:0}},'🛰️'),
-    React.createElement('div',null,
-      React.createElement('p',{style:{margin:0,fontSize:13,fontWeight:800,color:'#3730A3'}},'Activá tu ubicación para reportar'),
-      React.createElement('p',{style:{margin:'2px 0 0',fontSize:12,color:'#4338CA'}},'Solo podés reportar si estás físicamente dentro del comercio.')
-    )
-  );
-  const notLoggedBlock = !isLoggedIn && !onCooldown && React.createElement('div',{style:{display:'flex',alignItems:'center',gap:10,background:'#F0FDF9',border:'1px solid #A8EDD8',borderRadius:12,padding:'12px 14px',marginBottom:12}},
-    React.createElement('span',{style:{fontSize:20,flexShrink:0}},'🔑'),
-    React.createElement('div',{style:{flex:1}},
-      React.createElement('p',{style:{margin:0,fontSize:13,fontWeight:800,color:'#007A59'}},'Iniciá sesión para reportar'),
-      React.createElement('p',{style:{margin:'2px 0 0',fontSize:12,color:'#047857'}},'Ganás puntos por cada reporte y podés canjear premios.')
-    ),
-    React.createElement('button',{onClick:()=>doGoogleLogin(document.getElementById('login-topbar-btn')),style:{background:'linear-gradient(135deg,#00C48C,#009E72)',color:'#fff',border:'none',borderRadius:99,padding:'8px 14px',fontSize:12,fontWeight:800,cursor:'pointer',whiteSpace:'nowrap',fontFamily:'inherit'}},'Ingresar')
-  );
-  const searchBadge = isSearchResult && React.createElement('div',{style:{display:'inline-flex',alignItems:'center',gap:5,background:'linear-gradient(135deg,#6366F1,#4F46E5)',color:'#fff',fontSize:10,fontWeight:800,padding:'3px 9px',borderRadius:99,letterSpacing:'.3px',textTransform:'uppercase',marginBottom:10}},
-    React.createElement('svg',{viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2.5,strokeLinecap:'round',strokeLinejoin:'round',style:{width:11,height:11}},
-      React.createElement('circle',{cx:11,cy:11,r:8}),React.createElement('line',{x1:21,y1:21,x2:16.65,y2:16.65})
-    ),' Resultado de búsqueda'
-  );
+  const tooFarBlock=hasGps&&!nearby&&!onCooldown&&React.createElement('div',{style:{display:'flex',alignItems:'center',gap:10,background:'#F1F5F9',border:'1px solid #E2E8F0',borderRadius:12,padding:'12px 14px',marginBottom:12}},React.createElement('span',{style:{fontSize:20,flexShrink:0}},'📍'),React.createElement('div',null,React.createElement('p',{style:{margin:0,fontSize:13,fontWeight:800,color:'#0F172A'}},`Estás a ${distToPlace}m de este comercio`),React.createElement('p',{style:{margin:'2px 0 0',fontSize:12,color:'#64748B'}},'Necesitás estar a menos de '+CONFIG.REPORT_RADIUS_M+'m para reportar.')));
+  const noGpsBlock=!hasGps&&!onCooldown&&React.createElement('div',{style:{display:'flex',alignItems:'center',gap:10,background:'#EEF2FF',border:'1px solid #C7D2FE',borderRadius:12,padding:'12px 14px',marginBottom:12}},React.createElement('span',{style:{fontSize:20,flexShrink:0}},'🛰️'),React.createElement('div',null,React.createElement('p',{style:{margin:0,fontSize:13,fontWeight:800,color:'#3730A3'}},'Activá tu ubicación para reportar'),React.createElement('p',{style:{margin:'2px 0 0',fontSize:12,color:'#4338CA'}},'Solo podés reportar si estás físicamente dentro del comercio.')));
+  const notLoggedBlock=!isLoggedIn&&!onCooldown&&React.createElement('div',{style:{display:'flex',alignItems:'center',gap:10,background:'#F0FDF9',border:'1px solid #A8EDD8',borderRadius:12,padding:'12px 14px',marginBottom:12}},React.createElement('span',{style:{fontSize:20,flexShrink:0}},'🔑'),React.createElement('div',{style:{flex:1}},React.createElement('p',{style:{margin:0,fontSize:13,fontWeight:800,color:'#007A59'}},'Iniciá sesión para reportar'),React.createElement('p',{style:{margin:'2px 0 0',fontSize:12,color:'#047857'}},'Ganás puntos por cada reporte.')),React.createElement('button',{onClick:()=>doGoogleLogin(document.getElementById('login-topbar-btn')),style:{background:'linear-gradient(135deg,#00C48C,#009E72)',color:'#fff',border:'none',borderRadius:99,padding:'8px 14px',fontSize:12,fontWeight:800,cursor:'pointer',whiteSpace:'nowrap',fontFamily:'inherit'}},'Ingresar'));
 
   return React.createElement('div',{ref:overlayRef,style:overlayStyle,onClick:handleOverlayClick},
     React.createElement('div',{style:cardStyle},
@@ -1482,868 +1232,650 @@ function PlacePopup({ place, onClose, onVoteSubmit, cooldownRemainingMs, isSearc
           React.createElement('img',{src:photo,alt:place.name,onLoad:()=>setImgLoaded(true),style:{width:'100%',height:'100%',objectFit:'cover',display:'block',opacity:imgLoaded?1:0,transition:'opacity 0.4s ease'}}),
           React.createElement('div',{style:{position:'absolute',inset:0,background:'linear-gradient(to bottom, rgba(0,0,0,0) 30%, rgba(0,0,0,0.68) 100%)'}}),
           React.createElement('button',{onClick:handleClose,style:{position:'absolute',top:12,right:12,width:32,height:32,borderRadius:'50%',background:'rgba(0,0,0,0.42)',border:'none',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontSize:18,lineHeight:1,backdropFilter:'blur(8px)'}},'✕'),
-          React.createElement('div',{style:{position:'absolute',top:12,left:12,background:s.color,borderRadius:99,padding:'4px 10px',display:'flex',alignItems:'center',gap:5}},
-            React.createElement('span',{style:{width:6,height:6,borderRadius:'50%',background:'rgba(255,255,255,0.55)',display:'inline-block',flexShrink:0}}),
-            React.createElement('span',{style:{fontSize:11,fontWeight:800,color:'#fff'}},s.label)
-          ),
-          // ── Badge de sponsor en la foto (top-right, junto al botón cerrar) ──
-          sponsor && React.createElement('div',{style:{
-            position:'absolute', top:12, right:52,
-            background:sponsorColor, borderRadius:99,
-            padding:'3px 9px', display:'flex', alignItems:'center', gap:4,
-            boxShadow:`0 2px 8px ${sponsorColor}55`,
-          }},
-            React.createElement('span',{style:{width:5,height:5,borderRadius:'50%',background:'rgba(255,255,255,.7)',display:'inline-block'}}),
-            React.createElement('span',{style:{fontSize:10,fontWeight:900,color:'#fff',letterSpacing:'.2px'}},
-              sponsor.badge_text || 'Verificado'
-            )
-          ),
+          React.createElement('div',{style:{position:'absolute',top:12,left:12,background:s.color,borderRadius:99,padding:'4px 10px',display:'flex',alignItems:'center',gap:5}},React.createElement('span',{style:{width:6,height:6,borderRadius:'50%',background:'rgba(255,255,255,0.55)',display:'inline-block',flexShrink:0}}),React.createElement('span',{style:{fontSize:11,fontWeight:800,color:'#fff'}},s.label)),
+          sponsor&&React.createElement('div',{style:{position:'absolute',top:12,right:52,background:sponsorColor,borderRadius:99,padding:'3px 9px',display:'flex',alignItems:'center',gap:4,boxShadow:`0 2px 8px ${sponsorColor}55`}},React.createElement('span',{style:{width:5,height:5,borderRadius:'50%',background:'rgba(255,255,255,.7)',display:'inline-block'}}),React.createElement('span',{style:{fontSize:10,fontWeight:900,color:'#fff',letterSpacing:'.2px'}},sponsor.badge_text||'Verificado')),
           React.createElement('div',{style:{position:'absolute',bottom:13,left:14,right:14,display:'flex',alignItems:'flex-end',gap:10}},
-            React.createElement('div',{style:{position:'relative',flexShrink:0}},
-              React.createElement('div',{style:{width:48,height:48,borderRadius:14,background:'#fff',border:'2.5px solid rgba(255,255,255,0.9)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,overflow:'hidden'}},
-                getLogoEl(place)
-              ),
-              place.verified && React.createElement('div',{style:{
-                position:'absolute',bottom:-3,right:-3,width:17,height:17,
-                background: sponsorColor || '#6366F1',
-                borderRadius:'50%',border:'2px solid #fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:8,color:'#fff',fontWeight:900
-              }},'✓')
-            ),
-            React.createElement('div',{style:{flex:1,minWidth:0}},
-              React.createElement('p',{style:{margin:0,fontSize:16,fontWeight:800,color:'#fff',lineHeight:1.2,textShadow:'0 1px 6px rgba(0,0,0,0.5)'}},place.name),
-              React.createElement('p',{style:{margin:'3px 0 0',fontSize:12,color:'rgba(255,255,255,0.82)',textShadow:'0 1px 4px rgba(0,0,0,0.4)'}},place.type+' · '+place.addr)
-            ),
-            React.createElement('div',{style:{display:'flex',alignItems:'center',gap:4,background:'rgba(255,255,255,0.18)',backdropFilter:'blur(8px)',border:'0.5px solid rgba(255,255,255,0.3)',borderRadius:99,padding:'4px 9px',flexShrink:0}},
-              React.createElement('span',{style:{color:'#F59E0B',fontSize:12}},'★'),
-              React.createElement('span',{style:{fontSize:12,fontWeight:800,color:'#fff'}},place.rating),
-              React.createElement('span',{style:{fontSize:11,color:'rgba(255,255,255,0.7)'}},' · '+place.reviewsN)
-            )
+            React.createElement('div',{style:{position:'relative',flexShrink:0}},React.createElement('div',{style:{width:48,height:48,borderRadius:14,background:'#fff',border:'2.5px solid rgba(255,255,255,0.9)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,overflow:'hidden'}},getLogoEl(place)),place.verified&&React.createElement('div',{style:{position:'absolute',bottom:-3,right:-3,width:17,height:17,background:sponsorColor||'#6366F1',borderRadius:'50%',border:'2px solid #fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:8,color:'#fff',fontWeight:900}},'✓')),
+            React.createElement('div',{style:{flex:1,minWidth:0}},React.createElement('p',{style:{margin:0,fontSize:16,fontWeight:800,color:'#fff',lineHeight:1.2,textShadow:'0 1px 6px rgba(0,0,0,0.5)'}},place.name),React.createElement('p',{style:{margin:'3px 0 0',fontSize:12,color:'rgba(255,255,255,0.82)',textShadow:'0 1px 4px rgba(0,0,0,0.4)'}},place.type+' · '+place.addr)),
+            React.createElement('div',{style:{display:'flex',alignItems:'center',gap:4,background:'rgba(255,255,255,0.18)',backdropFilter:'blur(8px)',border:'0.5px solid rgba(255,255,255,0.3)',borderRadius:99,padding:'4px 9px',flexShrink:0}},React.createElement('span',{style:{color:'#F59E0B',fontSize:12}},'★'),React.createElement('span',{style:{fontSize:12,fontWeight:800,color:'#fff'}},place.rating),React.createElement('span',{style:{fontSize:11,color:'rgba(255,255,255,0.7)'}},' · '+place.reviewsN))
           )
         ),
         React.createElement('div',{style:{padding:'15px 15px 18px'}},
-          searchBadge,
-          React.createElement('div',{style:{display:'flex',gap:8,marginBottom:16}},
-            ...[{val:place.reporters,lbl:'Reportes'},{val:WAIT[place.status],lbl:'Espera'},{val:TREND[place.status],lbl:'Tendencia'}].map(({val,lbl})=>
-              React.createElement('div',{key:lbl,style:{flex:1,background:'#F1F5F9',borderRadius:10,padding:'9px 10px',textAlign:'center'}},
-                React.createElement('p',{style:{margin:0,fontSize:17,fontWeight:900,color:'#0F172A',letterSpacing:'-0.5px'}},val),
-                React.createElement('p',{style:{margin:'2px 0 0',fontSize:10,color:'#64748B',textTransform:'uppercase',letterSpacing:'0.5px',fontWeight:600}},lbl)
-              )
-            )
-          ),
-          sponsorBlock,
-          notLoggedBlock, tooFarBlock, noGpsBlock,
-          isLoggedIn && nearby && !onCooldown && React.createElement('div',{style:{display:'flex',alignItems:'center',gap:7,marginBottom:12,padding:'8px 11px',background:'#E8FBF5',borderRadius:10,border:'1px solid #A8EDD8'}},
-            React.createElement('span',{style:{fontSize:14}},'✅'),
-            React.createElement('span',{style:{fontSize:12,fontWeight:700,color:'#007A59'}},`Estás a ${distToPlace ?? '?'}m · podés reportar`)
-          ),
-          !onCooldown && isLoggedIn && nearby && React.createElement('p',{style:{margin:'0 0 10px',fontSize:11,fontWeight:700,color:'#94A3B8',textTransform:'uppercase',letterSpacing:'0.8px'}},'¿Cómo está ahora?'),
-          onCooldown && React.createElement('div',{style:{display:'flex',alignItems:'center',gap:10,background:'#FFFBEB',border:'1px solid #FDE68A',borderRadius:12,padding:'12px 14px',marginBottom:4}},
-            React.createElement('span',{style:{fontSize:20,flexShrink:0}},'⏳'),
-            React.createElement('div',null,
-              React.createElement('p',{style:{margin:0,fontSize:13,fontWeight:800,color:'#92400E'}},`Ya reportaste ${place.name} hace poco`),
-              React.createElement('p',{style:{margin:'2px 0 0',fontSize:12,color:'#92400E'}},`Podés volver a reportar en ${formatCooldownRemaining(cooldownMs)}`),
-              React.createElement('p',{style:{margin:'4px 0 0',fontSize:11,color:'#92400E',opacity:.8}},'Cada comercio se puede reportar una vez cada 8 horas')
-            )
-          ),
-          !submitted && isLoggedIn && nearby && !onCooldown && React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:12}},
-            ...[{idx:0,label:'Poca gente',pts:'+10',color:'#00C48C'},{idx:1,label:'Bastante',pts:'+10',color:'#F59E0B'},{idx:2,label:'Mucha gente',pts:'+15',color:'#F97316'},{idx:3,label:'Colapsado',pts:'+20',color:'#EF4444'}].map(({idx,label,pts,color})=>{
-              const isSel=selectedVote===idx;
-              return React.createElement('button',{key:idx,onClick:()=>handleVote(idx),style:{border:isSel?`2px solid ${color}`:'1.5px solid #E2E8F0',borderRadius:10,background:isSel?color:'#fff',padding:'11px 10px',cursor:'pointer',display:'flex',alignItems:'center',gap:7,fontSize:12,fontWeight:700,color:isSel?'#fff':'#0F172A',textAlign:'left',fontFamily:'inherit',transition:'all 0.18s cubic-bezier(0.34,1.56,0.64,1)',transform:isSel?'translateY(-1px)':'none',boxShadow:isSel?`0 4px 12px ${color}44`:'none'}},
-                React.createElement('span',{style:{width:9,height:9,borderRadius:'50%',background:isSel?'rgba(255,255,255,0.55)':color,display:'inline-block',flexShrink:0}}),
-                label,
-                React.createElement('span',{style:{marginLeft:'auto',fontSize:10,fontWeight:800,color:'#fff',background:color,padding:'2px 7px',borderRadius:99}},pts)
-              );
-            })
-          ),
-          submitted && React.createElement('div',{style:{display:'flex',alignItems:'center',gap:10,background:'#E8FBF5',border:'1px solid #A8EDD8',borderRadius:12,padding:'13px 14px',marginBottom:12}},
-            React.createElement('span',{style:{fontSize:22}},'✅'),
-            React.createElement('div',null,
-              React.createElement('p',{style:{margin:0,fontSize:14,fontWeight:800,color:'#007A59'}},'¡Reporte enviado!'),
-              React.createElement('p',{style:{margin:'2px 0 0',fontSize:12,color:'#047857'}},`+${VOTE_PTS[selectedVote]||10} puntos sumados a tu cuenta`)
-            )
-          ),
-          !submitted && isLoggedIn && nearby && !onCooldown && React.createElement('button',{onClick:handleSubmit,disabled:selectedVote===null,style:{width:'100%',background:selectedVote!==null?`linear-gradient(135deg, ${STATUS_CFG[selectedVote].color}, ${STATUS_CFG[selectedVote].color}cc)`:'#E2E8F0',color:selectedVote!==null?'#fff':'#94A3B8',border:'none',borderRadius:12,padding:'14px',fontSize:14,fontWeight:800,cursor:selectedVote!==null?'pointer':'not-allowed',display:'flex',alignItems:'center',justifyContent:'center',gap:8,fontFamily:'inherit',transition:'all 0.22s cubic-bezier(0.34,1.56,0.64,1)',boxShadow:selectedVote!==null?`0 6px 20px ${STATUS_CFG[selectedVote].color}44`:'none',transform:selectedVote!==null?'translateY(-1px)':'none'}},
-            React.createElement('svg',{viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2.5,strokeLinecap:'round',strokeLinejoin:'round',style:{width:15,height:15}},
-              React.createElement('line',{x1:22,y1:2,x2:11,y2:13}),React.createElement('polygon',{points:'22 2 15 22 11 13 2 9 22 2'})
-            ),'Reportar estado'
-          ),
-          !submitted && React.createElement('p',{style:{margin:'10px 0 0',fontSize:11,color:'#94A3B8',display:'flex',alignItems:'center',gap:5,fontWeight:500}},
-            React.createElement('svg',{viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2,strokeLinecap:'round',strokeLinejoin:'round',style:{width:12,height:12,flexShrink:0}},
-              React.createElement('path',{d:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'}),
-              React.createElement('circle',{cx:9,cy:7,r:4}),
-              React.createElement('path',{d:'M23 21v-2a4 4 0 0 0-3-3.87'}),
-              React.createElement('path',{d:'M16 3.13a4 4 0 0 1 0 7.75'})
-            ),`${place.reporters} reportes en las últimas 2h`
-          )
+          React.createElement('div',{style:{display:'flex',gap:8,marginBottom:16}},...[{val:place.reporters,lbl:'Reportes'},{val:WAIT[place.status],lbl:'Espera'},{val:TREND[place.status],lbl:'Tendencia'}].map(({val,lbl})=>React.createElement('div',{key:lbl,style:{flex:1,background:'#F1F5F9',borderRadius:10,padding:'9px 10px',textAlign:'center'}},React.createElement('p',{style:{margin:0,fontSize:17,fontWeight:900,color:'#0F172A',letterSpacing:'-0.5px'}},val),React.createElement('p',{style:{margin:'2px 0 0',fontSize:10,color:'#64748B',textTransform:'uppercase',letterSpacing:'0.5px',fontWeight:600}},lbl)))),
+          sponsorBlock, notLoggedBlock, tooFarBlock, noGpsBlock,
+          isLoggedIn&&nearby&&!onCooldown&&React.createElement('div',{style:{display:'flex',alignItems:'center',gap:7,marginBottom:12,padding:'8px 11px',background:'#E8FBF5',borderRadius:10,border:'1px solid #A8EDD8'}},React.createElement('span',{style:{fontSize:14}},'✅'),React.createElement('span',{style:{fontSize:12,fontWeight:700,color:'#007A59'}},`Estás a ${distToPlace??'?'}m · podés reportar`)),
+          !onCooldown&&isLoggedIn&&nearby&&React.createElement('p',{style:{margin:'0 0 10px',fontSize:11,fontWeight:700,color:'#94A3B8',textTransform:'uppercase',letterSpacing:'0.8px'}},'¿Cómo está ahora?'),
+          onCooldown&&React.createElement('div',{style:{display:'flex',alignItems:'center',gap:10,background:'#FFFBEB',border:'1px solid #FDE68A',borderRadius:12,padding:'12px 14px',marginBottom:4}},React.createElement('span',{style:{fontSize:20,flexShrink:0}},'⏳'),React.createElement('div',null,React.createElement('p',{style:{margin:0,fontSize:13,fontWeight:800,color:'#92400E'}},`Ya reportaste ${place.name} hace poco`),React.createElement('p',{style:{margin:'2px 0 0',fontSize:12,color:'#92400E'}},`Podés volver a reportar en ${formatCooldownRemaining(cooldownMs)}`))),
+          !submitted&&isLoggedIn&&nearby&&!onCooldown&&React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:12}},...[{idx:0,label:'Poca gente',pts:'+10',color:'#00C48C'},{idx:1,label:'Bastante',pts:'+10',color:'#F59E0B'},{idx:2,label:'Mucha gente',pts:'+15',color:'#F97316'},{idx:3,label:'Colapsado',pts:'+20',color:'#EF4444'}].map(({idx,label,pts,color})=>{
+            const isSel=selectedVote===idx;
+            return React.createElement('button',{key:idx,onClick:()=>handleVote(idx),style:{border:isSel?`2px solid ${color}`:'1.5px solid #E2E8F0',borderRadius:10,background:isSel?color:'#fff',padding:'11px 10px',cursor:'pointer',display:'flex',alignItems:'center',gap:7,fontSize:12,fontWeight:700,color:isSel?'#fff':'#0F172A',textAlign:'left',fontFamily:'inherit',transition:'all 0.18s cubic-bezier(0.34,1.56,0.64,1)',transform:isSel?'translateY(-1px)':'none',boxShadow:isSel?`0 4px 12px ${color}44`:'none'}},React.createElement('span',{style:{width:9,height:9,borderRadius:'50%',background:isSel?'rgba(255,255,255,0.55)':color,display:'inline-block',flexShrink:0}}),label,React.createElement('span',{style:{marginLeft:'auto',fontSize:10,fontWeight:800,color:'#fff',background:color,padding:'2px 7px',borderRadius:99}},pts));
+          })),
+          submitted&&React.createElement('div',{style:{display:'flex',alignItems:'center',gap:10,background:'#E8FBF5',border:'1px solid #A8EDD8',borderRadius:12,padding:'13px 14px',marginBottom:12}},React.createElement('span',{style:{fontSize:22}},'✅'),React.createElement('div',null,React.createElement('p',{style:{margin:0,fontSize:14,fontWeight:800,color:'#007A59'}},'¡Reporte enviado!'),React.createElement('p',{style:{margin:'2px 0 0',fontSize:12,color:'#047857'}},`+${VOTE_PTS[selectedVote]||10} puntos sumados a tu cuenta`))),
+          !submitted&&isLoggedIn&&nearby&&!onCooldown&&React.createElement('button',{onClick:handleSubmit,disabled:selectedVote===null,style:{width:'100%',background:selectedVote!==null?`linear-gradient(135deg, ${STATUS_CFG[selectedVote].color}, ${STATUS_CFG[selectedVote].color}cc)`:'#E2E8F0',color:selectedVote!==null?'#fff':'#94A3B8',border:'none',borderRadius:12,padding:'14px',fontSize:14,fontWeight:800,cursor:selectedVote!==null?'pointer':'not-allowed',display:'flex',alignItems:'center',justifyContent:'center',gap:8,fontFamily:'inherit',transition:'all 0.22s cubic-bezier(0.34,1.56,0.64,1)',boxShadow:selectedVote!==null?`0 6px 20px ${STATUS_CFG[selectedVote].color}44`:'none',transform:selectedVote!==null?'translateY(-1px)':'none'}},React.createElement('svg',{viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2.5,strokeLinecap:'round',strokeLinejoin:'round',style:{width:15,height:15}},React.createElement('line',{x1:22,y1:2,x2:11,y2:13}),React.createElement('polygon',{points:'22 2 15 22 11 13 2 9 22 2'})),'Reportar estado'),
+          !submitted&&React.createElement('p',{style:{margin:'10px 0 0',fontSize:11,color:'#94A3B8',display:'flex',alignItems:'center',gap:5,fontWeight:500}},React.createElement('svg',{viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2,strokeLinecap:'round',strokeLinejoin:'round',style:{width:12,height:12,flexShrink:0}},React.createElement('path',{d:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'}),React.createElement('circle',{cx:9,cy:7,r:4}),React.createElement('path',{d:'M23 21v-2a4 4 0 0 0-3-3.87'}),React.createElement('path',{d:'M16 3.13a4 4 0 0 1 0 7.75'})),`${place.reporters} reportes en las últimas 2h`)
         )
       )
     )
   );
 }
 
-/* ─────────────── POPUP MANAGER ─────────────── */
-let popupRoot = null;
-let currentPopupPlace = null;
+let popupRoot=null, currentPopupPlace=null;
+function openPlacePopup(place) { currentPopupPlace=place; currentPopupPlace._wasOnCooldown=getVoteCooldownRemainingMs(place.id)>0; const container=document.getElementById('react-popup-root'); container.classList.add('active'); if (!popupRoot) popupRoot=ReactDOM.createRoot(container); renderPopup(place,isLoggedIn,currentUser); }
+function renderPopup(place,loggedIn,user) { popupRoot.render(React.createElement(PlacePopup,{place,onClose:closePopup,onVoteSubmit:handlePopupVoteSubmit,cooldownRemainingMs:getVoteCooldownRemainingMs(place.id),isSearchResult:!!place._fromSearch,isLoggedIn:loggedIn,currentUser:user})); }
+function closePopup() { const container=document.getElementById('react-popup-root'); container.classList.remove('active'); if (popupRoot) popupRoot.render(null); currentPopupPlace=null; }
 
-function openPlacePopup(place) {
-  currentPopupPlace = place;
-  currentPopupPlace._wasOnCooldown = getVoteCooldownRemainingMs(place.id) > 0;
-  const container = document.getElementById('react-popup-root');
-  container.classList.add('active');
-  if (!popupRoot) popupRoot = ReactDOM.createRoot(container);
-  renderPopup(place, isLoggedIn, currentUser);
+async function handlePopupVoteSubmit(placeId,voteIdx) {
+  const p=places.find(x=>x.id===placeId); if (!p) return;
+  if (!isLoggedIn){showToastAction('🔑 Iniciá sesión para ganar puntos');return;}
+  if (getVoteCooldownRemainingMs(placeId)>0){showToast(`⏳ Ya reportaste ${p.name} · próximo en ${formatCooldownRemaining(getVoteCooldownRemainingMs(placeId))}`);return;}
+  if (!canReportThisPlace(p)){showToast(`📍 Tenés que estar dentro del comercio para reportar`);return;}
+  applyLocalCooldown(placeId); p.status=voteIdx; p.reporters+=1; voteCount++;
+  placeStore[p.id]=p; refreshMarkerIcon(p.id); updateCrowdBar(calcCrowdPct());
+  await submitVoteToBackend(p,voteIdx);
 }
 
-function renderPopup(place, loggedIn, user) {
-  popupRoot.render(React.createElement(PlacePopup, {
-    place, onClose: closePopup,
-    onVoteSubmit: handlePopupVoteSubmit,
-    cooldownRemainingMs: getVoteCooldownRemainingMs(place.id),
-    isSearchResult: !!place._fromSearch,
-    isLoggedIn: loggedIn, currentUser: user,
-  }));
+async function submitVoteToBackend(p,voteIdx) {
+  const pts=VOTE_PTS[voteIdx];
+  const res=await apiPostVote({place:{id:p.id,name:p.name,type:p.type,addr:p.addr,lat:p.lat,lng:p.lng,logo:p.logo,rating:p.rating,reviewsN:p.reviewsN,verified:!!p.verified,open:p.open!==false},status:voteIdx,email:currentUser.email});
+  if (res.cooldown){applyPlaceCooldown(p.id,res.nextVoteAt);p.reporters=Math.max(0,p.reporters-1);refreshMarkerIcon(p.id);updateCrowdBar(calcCrowdPct());if(currentPopupPlace&&currentPopupPlace.id===p.id)renderPopup(p,isLoggedIn,currentUser);showToast(`⏳ Ya reportaste ${p.name}`);return;}
+  if (res.ok&&res.result&&typeof res.result.points==='number'){userPts=res.result.points;updateUserHUD();flashPoints();if(res.result.cooldown)applyPlaceCooldown(res.result.cooldown.placeId,res.result.cooldown.nextVoteAt);showToast(`🎉 +${pts} puntos ganados`);}
+  else if (res.ok){addPoints(pts);showToast(`🎉 +${pts} ganados`);}
+  else{showToast('⚠️ No se pudo conectar con el servidor');}
 }
 
-function closePopup() {
-  const container = document.getElementById('react-popup-root');
-  container.classList.remove('active');
-  if (popupRoot) popupRoot.render(null);
-  currentPopupPlace = null;
-}
+function flashPoints(){ const el=document.getElementById('my-pts'); if(el){el.style.animation='none';el.offsetHeight;el.style.animation='ptsFlash .45s cubic-bezier(.34,1.56,.64,1)';} }
 
-async function handlePopupVoteSubmit(placeId, voteIdx) {
-  const p = places.find(x => x.id === placeId);
-  if (!p) return;
-  if (!isLoggedIn) { showToastAction('🔑 Iniciá sesión para ganar puntos por tu reporte'); return; }
-  if (getVoteCooldownRemainingMs(placeId) > 0) {
-    showToast(`⏳ Ya reportaste ${p.name} · próximo en ${formatCooldownRemaining(getVoteCooldownRemainingMs(placeId))}`);
-    return;
-  }
-  if (!canReportThisPlace(p)) {
-    showToast(`📍 Tenés que estar dentro del comercio para reportar (máx. ${CONFIG.REPORT_RADIUS_M}m)`);
-    return;
-  }
-  applyLocalCooldown(placeId);
-  p.status = voteIdx; p.reporters += 1; voteCount++;
-  placeStore[p.id] = p;
-  refreshMarkerIcon(p.id);
-  updateCrowdBar(calcCrowdPct());
-  await submitVoteToBackend(p, voteIdx);
-}
+/* ─── MAP GPS + FOLLOW ─── */
+function addPoints(amount){ const prevLevel=getLevelInfo(userPts).level; userPts+=amount; updateUserHUD(); flashPoints(); const newLevel=getLevelInfo(userPts).level; if(newLevel>prevLevel) setTimeout(()=>levelUpCelebration(newLevel),400); }
 
-async function submitVoteToBackend(p, voteIdx) {
-  const pts = VOTE_PTS[voteIdx];
-  const res = await apiPostVote({
-    place: { id:p.id, name:p.name, type:p.type, addr:p.addr, lat:p.lat, lng:p.lng, logo:p.logo, rating:p.rating, reviewsN:p.reviewsN, verified:!!p.verified, open:p.open!==false },
-    status: voteIdx, email: currentUser.email,
-  });
-  if (res.cooldown) {
-    applyPlaceCooldown(p.id, res.nextVoteAt);
-    p.reporters = Math.max(0, p.reporters - 1);
-    refreshMarkerIcon(p.id); updateCrowdBar(calcCrowdPct());
-    if (currentPopupPlace && currentPopupPlace.id === p.id) renderPopup(p, isLoggedIn, currentUser);
-    showToast(`⏳ Ya reportaste ${p.name} · próximo en ${formatCooldownRemaining(getVoteCooldownRemainingMs(p.id))}`);
-    return;
-  }
-  if (res.ok && res.result && typeof res.result.points === 'number') {
-    userPts = res.result.points; updateUserHUD(); flashPoints();
-    if (res.result.cooldown) applyPlaceCooldown(res.result.cooldown.placeId, res.result.cooldown.nextVoteAt);
-    showToast(`🎉 +${pts} puntos ganados`);
-  } else if (res.ok) {
-    addPoints(pts); showToast(`🎉 +${pts} ganados`);
-  } else {
-    showToast('⚠️ No se pudo conectar con el servidor');
+function updateUserMarker(lat,lng) {
+  if (!leafletMap) return;
+  if (userMarker) userMarker.setLatLng([lat,lng]);
+  else {
+    const userIcon=L.divIcon({html:`<div style="width:18px;height:18px;border-radius:50%;background:#6366F1;border:3px solid #fff;box-shadow:0 0 0 3px rgba(99,102,241,.4);"></div>`,className:'',iconAnchor:[9,9]});
+    userMarker=L.marker([lat,lng],{icon:userIcon,zIndexOffset:1000}).addTo(leafletMap);
   }
 }
 
-function flashPoints() {
-  const ptsEl = document.getElementById('my-pts');
-  if (ptsEl) { ptsEl.style.animation='none'; ptsEl.offsetHeight; ptsEl.style.animation='ptsFlash .45s cubic-bezier(.34,1.56,.64,1)'; }
+function updateGpsBtnUI(){ const btn=document.getElementById('gps-btn'),pill=document.getElementById('follow-pill'); if(!btn) return; btn.classList.remove('pulsing','active','following'); if(followMode){btn.classList.add('following');pill.classList.add('show');}else if(userLat!==null){btn.classList.add('active');pill.classList.remove('show');}else{pill.classList.remove('show');} }
+
+function onGpsBtnClick(){
+  if(followMode){followMode=false;updateGpsBtnUI();showToast('📍 Modo seguimiento desactivado');return;}
+  if(userLat!==null){followMode=true;updateGpsBtnUI();leafletMap.setView([userLat,userLng],CONFIG.FOLLOW_ZOOM,{animate:true,duration:0.6});showToast('📍 Siguiendo tu posición');return;}
+  const btn=document.getElementById('gps-btn'); btn.classList.add('pulsing');
+  if(!navigator.geolocation){showToast('⚠️ Tu navegador no soporta GPS');btn.classList.remove('pulsing');return;}
+  navigator.geolocation.getCurrentPosition(pos=>{followMode=true;onGpsSuccess(pos);startGpsWatch();},err=>{btn.classList.remove('pulsing');showToast(err.code===1?'🔒 Permiso de ubicación denegado':'⚠️ No se pudo obtener tu ubicación');},{enableHighAccuracy:true,timeout:10000});
+}
+
+function onMapDragStart(){ if(followMode){followMode=false;updateGpsBtnUI();showToast('👆 Arrastraste el mapa · tocá 📍 para seguir de nuevo');} }
+
+function initMap(){
+  leafletMap=L.map('leaflet-map',{center:[CONFIG.DEFAULT_CENTER.lat,CONFIG.DEFAULT_CENTER.lng],zoom:16,zoomControl:false});
+  L.control.zoom({position:'bottomright'}).addTo(leafletMap);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',subdomains:'abcd',maxZoom:20}).addTo(leafletMap);
+  leafletMap.on('dragstart',onMapDragStart);
+  leafletMap.on('zoomend',()=>{ const toShow=nearbyPlaces.length?nearbyPlaces:places; if(toShow.length) buildMapMarkers(toShow); });
+  startGpsWatch(); initSearch();
+}
+
+let lastLoadTileKey=null;
+
+function startGpsWatch(){
+  if(!navigator.geolocation) return;
+  if(gpsWatchId!==null) navigator.geolocation.clearWatch(gpsWatchId);
+  gpsWatchId=navigator.geolocation.watchPosition(pos=>onGpsSuccess(pos),err=>{if(!mapInitialLoaded){const{lat,lng}=CONFIG.DEFAULT_CENTER;ensurePlacesLoadedAt(lat,lng);mapInitialLoaded=true;}},{enableHighAccuracy:true,timeout:10000,maximumAge:3000});
+}
+
+function onGpsSuccess(pos){
+  const{latitude:lat,longitude:lng}=pos.coords;
+  const isFirst=userLat===null;
+  userLat=lat; userLng=lng;
+  updateUserMarker(lat,lng);
+  if(followMode){const moved=lastFollowLat!==null?distanceMeter(lastFollowLat,lastFollowLng,lat,lng):Infinity;if(moved>=CONFIG.FOLLOW_MIN_MOVE_M){lastFollowLat=lat;lastFollowLng=lng;if(isFirst)leafletMap.setView([lat,lng],CONFIG.FOLLOW_ZOOM,{animate:true,duration:0.5});else leafletMap.panTo([lat,lng],{animate:true,duration:0.4,easeLinearity:0.5});}}
+  if(isFirst){if(!followMode)leafletMap.setView([lat,lng],CONFIG.FOLLOW_ZOOM);updateGpsBtnUI();ensurePlacesLoadedAt(lat,lng);lastLoadTileKey=latLngToTileKey(lat,lng);}
+  else{const currentTileKey=latLngToTileKey(lat,lng);if(currentTileKey!==lastLoadTileKey){lastLoadTileKey=currentTileKey;ensurePlacesLoadedAt(lat,lng);}}
+  if(!checkinShown&&places.length>0){checkinShown=true;setTimeout(()=>showCheckinModal(lat,lng),1200);}
+}
+
+/* ─── MARKERS ─── */
+function makeStatusChipHTML(place){ const s=(!place.reporters||place.reporters===0)?NO_REPORT_STATUS:STATUS_CFG[place.status]; return `<div class="fc-card-status" style="background:${s.color}"><div class="s-dot-sm"></div><div class="s-label-sm">${s.label}</div></div>`; }
+function makeLogoHTML(place){ if(place.sponsor&&place.sponsor.logo_url) return `<img src="${place.sponsor.logo_url}" alt="${place.name}" style="width:100%;height:100%;object-fit:contain;border-radius:7px;">`; return place.logo; }
+
+function makeIcon(place){
+  const sponsor=place.sponsor, sponsorColor=sponsor?(sponsor.badge_color||'#6366F1'):null;
+  const verBadge=place.verified?`<div class="fc-card-verified" style="background:${sponsorColor||'#6366F1'}">✓</div>`:'';
+  const sponsorBadge=sponsor?`<div class="fc-sponsor-badge" style="background:${sponsorColor}">✓ ${sponsor.badge_text||'Verificado'}</div>`:'';
+  const sponsorClass=sponsor?`is-sponsor tier-${sponsor.tier||'basic'}`:'';
+  const sponsorStyle=sponsor?`style="--sponsor-color:${sponsorColor}"`:'';
+  return L.divIcon({html:`<div class="fc-card-wrap ${sponsorClass}" ${sponsorStyle}><div class="fc-card"><div class="fc-card-head"><div class="fc-card-logo">${makeLogoHTML(place)}${verBadge}</div><div class="fc-card-info"><div class="fc-card-name">${place.name}</div><div class="fc-card-type">${place.type}</div></div><span class="fc-card-open ${place.open?'open':'closed'}">${place.open?'Abierto':'Cerrado'}</span></div>${makeStatusChipHTML(place)}${sponsorBadge}</div><div class="fc-tail"></div><div class="fc-base"></div></div>`,className:'',iconAnchor:[0,172],popupAnchor:[0,-172]});
+}
+
+const CLUSTER_ZOOM_THRESHOLD=20;
+function getClusterGridDeg(zoom){ if(zoom>=15) return 0.0015; if(zoom>=13) return 0.005; return 0.015; }
+function densityClass(count){ if(count<=5) return 'density-low'; if(count<=15) return 'density-med'; if(count<=40) return 'density-high'; return 'density-max'; }
+function computeClusters(placesToCluster,gridDeg){ const cells={}; placesToCluster.forEach(p=>{ const cx=Math.floor(p.lat/gridDeg),cy=Math.floor(p.lng/gridDeg),key=`${cx}:${cy}`; if(!cells[key]) cells[key]={lat:(cx+0.5)*gridDeg,lng:(cy+0.5)*gridDeg,places:[]}; cells[key].places.push(p); }); return Object.values(cells).map(c=>({lat:c.lat,lng:c.lng,count:c.places.length,places:c.places,avgStatus:c.places.reduce((s,p)=>s+(p.reporters>0?p.status:0),0)/c.places.length,totalReporters:c.places.reduce((s,p)=>s+(p.reporters||0),0)})); }
+function makeClusterIcon(cluster){ const dc=densityClass(cluster.count),label=cluster.count===1?'1 lugar':`${cluster.count} lugares`,subtitle=cluster.totalReporters>0?`${cluster.totalReporters} reportes activos`:'Sin reportes aún'; return L.divIcon({html:`<div class="cluster-card"><div class="cluster-bubble ${dc}"><div class="cluster-count">${cluster.count}</div><div class="cluster-label"><strong>${label}</strong>${subtitle}</div></div><div class="cluster-tail"></div><div class="cluster-base"></div></div>`,className:'',iconAnchor:[65,62]}); }
+
+let clusterMarkers={};
+function clearClusterMarkers(){ Object.values(clusterMarkers).forEach(m=>m.remove()); clusterMarkers={}; }
+function clearIndividualMarkers(){ Object.keys(leafletMarkers).forEach(id=>{ leafletMarkers[id].remove(); delete leafletMarkers[id]; }); }
+
+function buildMapMarkers(placesToShow){
+  placesToShow=placesToShow||nearbyPlaces;
+  if(!leafletMap||!placesToShow.length) return;
+  const zoom=leafletMap.getZoom();
+  if(zoom>=CLUSTER_ZOOM_THRESHOLD){
+    clearClusterMarkers();
+    const newIdSet=new Set(placesToShow.map(p=>p.id));
+    Object.keys(leafletMarkers).forEach(id=>{ if(!newIdSet.has(id)){leafletMarkers[id].remove();delete leafletMarkers[id];} });
+    placesToShow.forEach(p=>{
+      if(leafletMarkers[p.id]){ const marker=leafletMarkers[p.id]; if(marker._lastStatus!==p.status||marker._lastReporters!==p.reporters){marker.setIcon(makeIcon(p));marker._lastStatus=p.status;marker._lastReporters=p.reporters;} }
+      else{ const marker=L.marker([p.lat,p.lng],{icon:makeIcon(p)}).addTo(leafletMap); marker._lastStatus=p.status;marker._lastReporters=p.reporters; marker.on('click',()=>{if(pickModeActive){exitPickMode();openPlacePopup(p);}else{openPlacePopup(p);}}); leafletMarkers[p.id]=marker; }
+    });
+  }else{
+    clearIndividualMarkers();
+    const gridDeg=getClusterGridDeg(zoom),clusters=computeClusters(placesToShow,gridDeg);
+    clearClusterMarkers();
+    clusters.forEach((cluster,idx)=>{ const marker=L.marker([cluster.lat,cluster.lng],{icon:makeClusterIcon(cluster)}).addTo(leafletMap); marker.on('click',()=>{const targetZoom=Math.min(leafletMap.getZoom()+3,CLUSTER_ZOOM_THRESHOLD+1);leafletMap.setView([cluster.lat,cluster.lng],targetZoom,{animate:true,duration:0.5});}); clusterMarkers[`cluster_${idx}`]=marker; });
+  }
+}
+
+function refreshMarkerIcon(id){ const p=places.find(x=>x.id===id); if(!p) return; if(leafletMap&&leafletMap.getZoom()>=CLUSTER_ZOOM_THRESHOLD&&leafletMarkers[id]) leafletMarkers[id].setIcon(makeIcon(p)); }
+function calcCrowdPct(){ const visible=nearbyPlaces.length?nearbyPlaces:places; if(!visible.length) return 30; const avg=visible.reduce((s,p)=>s+p.status,0)/visible.length; return Math.round(10+(avg/3)*82); }
+function updateCrowdBar(pct){ pct=Math.max(5,Math.min(95,pct)); const needle=document.getElementById('cbar-needle'),overlay=document.getElementById('cbar-overlay'),pctLabel=document.getElementById('cbar-pct'); if(needle) needle.style.left=pct+'%'; if(overlay) overlay.style.width=(100-pct)+'%'; if(pctLabel) pctLabel.textContent=pct+'%'; }
+
+async function manualRefresh(){
+  const icon=document.getElementById('refresh-icon'); icon.style.animation='none';icon.offsetHeight;icon.style.animation='rotate .7s cubic-bezier(.34,1.56,.64,1)';
+  const lat=userLat??CONFIG.DEFAULT_CENTER.lat,lng=userLng??CONFIG.DEFAULT_CENTER.lng;
+  const tileKey=latLngToTileKey(lat,lng),adjacent=getAdjacentTileKeys(lat,lng);
+  [tileKey,...adjacent].forEach(k=>{delete tileCache[k];}); lastLoadTileKey=null; nearbyPlaces=[];
+  await ensurePlacesLoadedAt(lat,lng); showToast('🔄 Locales actualizados');
 }
 
 /* ════════════════════════════════════════════════════════════
-   MAP — GPS + FOLLOW MODE
+   PANEL CERCA — lógica completa
    ════════════════════════════════════════════════════════════ */
-function addPoints(amount) {
-  const prevLevel = getLevelInfo(userPts).level;
-  userPts += amount; updateUserHUD();
-  const ptsEl = document.getElementById('my-pts');
-  if (ptsEl) { ptsEl.style.animation='none'; ptsEl.offsetHeight; ptsEl.style.animation='ptsFlash .45s cubic-bezier(.34,1.56,.64,1)'; }
-  const newLevel = getLevelInfo(userPts).level;
-  if (newLevel > prevLevel) setTimeout(() => levelUpCelebration(newLevel), 400);
-}
+let cercaAllPlaces=[], cercaFiltered=[];
+let cercaRadius=500, cercaCat='all', cercaSearchQ='', cercaSortMode='distance', cercaSortIdx=0;
+let cercaIsLoading=false, cercaLoaded=false, cercaAbortController=null;
+let cercaSearchTimer=null;
 
-function updateUserMarker(lat, lng) {
-  if (!leafletMap) return;
-  if (userMarker) { userMarker.setLatLng([lat, lng]); }
-  else {
-    const userIcon = L.divIcon({
-      html: `<div style="width:18px;height:18px;border-radius:50%;background:#6366F1;border:3px solid #fff;box-shadow:0 0 0 3px rgba(99,102,241,.4);"></div>`,
-      className: '', iconAnchor: [9, 9],
-    });
-    userMarker = L.marker([lat, lng], { icon: userIcon, zIndexOffset: 1000 }).addTo(leafletMap);
+const CERCA_SORT_MODES=['distance','status','rating'];
+const CERCA_SORT_LABELS=['Distancia','Más reportado','Rating'];
+
+const CERCA_CAT_KEYWORDS={
+  food:['restaurant','cafe','coffee','bakery','pizza','burger','food','bar','panadería','comida','cafetería','pizzería','fast_food','snack','helader'],
+  health:['pharmacy','farmacia','hospital','clinic','clínica','doctor','médico','salud','dental','dentist','optician','centro de salud'],
+  supermarket:['supermarket','supermercado','carrefour','disco','coto','walmart','jumbo','mercado','almacén','kiosk','minimarket'],
+  bank:['bank','banco','cajero','atm','hsbc','galicia','santander','bbva','icbc','pagos','rapipago','pago fácil'],
+  government:['gobierno','municipalidad','correo','registro','anses','reniec','dnrpa','oficina','ministerio','juzgado','tribunal'],
+};
+
+function cercaGuessCategory(name,type){
+  const lname=(name||'').toLowerCase(), ltype=(type||'').toLowerCase();
+  for(const [cat,kws] of Object.entries(CERCA_CAT_KEYWORDS)){
+    for(const kw of kws){ if(lname.includes(kw)||ltype.includes(kw)) return cat; }
   }
+  return 'other';
 }
 
-function updateGpsBtnUI() {
-  const btn = document.getElementById('gps-btn');
-  const pill = document.getElementById('follow-pill');
-  if (!btn) return;
-  btn.classList.remove('pulsing', 'active', 'following');
-  if (followMode) { btn.classList.add('following'); pill.classList.add('show'); }
-  else if (userLat !== null) { btn.classList.add('active'); pill.classList.remove('show'); }
-  else { pill.classList.remove('show'); }
+function cercaGuessEmoji(name,type){
+  const l=(name||'').toLowerCase();
+  if(l.includes('farmaci')||l.includes('pharmacy')) return '💊';
+  if(l.includes('hospital')||l.includes('clínic')||l.includes('centro de salud')) return '🏥';
+  if(l.includes('banco')||l.includes('bank')||l.includes('cajero')||l.includes('atm')) return '🏦';
+  if(l.includes('supermerc')||l.includes('carrefour')||l.includes('disco')||l.includes('coto')||l.includes('jumbo')) return '🛒';
+  if(l.includes('café')||l.includes('coffee')||l.includes('cafeter')) return '☕';
+  if(l.includes('panadería')||l.includes('bakery')) return '🥖';
+  if(l.includes('pizza')) return '🍕';
+  if(l.includes('correo')) return '📮';
+  if(l.includes('municipalidad')||l.includes('anses')||l.includes('gobierno')||l.includes('registro')) return '🏛️';
+  if(l.includes('restaurant')||l.includes('bife')||l.includes('parrill')) return '🍽️';
+  if(l.includes('helad')) return '🍦';
+  if(l.includes('peluquer')) return '💇';
+  if(l.includes('veterinar')) return '🐾';
+  if(l.includes('ferretera')) return '🔧';
+  return '🏪';
 }
 
-function onGpsBtnClick() {
-  if (followMode) { followMode = false; updateGpsBtnUI(); showToast('📍 Modo seguimiento desactivado'); return; }
-  if (userLat !== null) {
-    followMode = true; updateGpsBtnUI();
-    leafletMap.setView([userLat, userLng], CONFIG.FOLLOW_ZOOM, { animate: true, duration: 0.6 });
-    showToast('📍 Siguiendo tu posición'); return;
-  }
-  const btn = document.getElementById('gps-btn');
-  btn.classList.add('pulsing');
-  if (!navigator.geolocation) { showToast('⚠️ Tu navegador no soporta GPS'); btn.classList.remove('pulsing'); return; }
-  navigator.geolocation.getCurrentPosition(
-    pos => { followMode = true; onGpsSuccess(pos); startGpsWatch(); },
-    err => { btn.classList.remove('pulsing'); showToast(err.code === 1 ? '🔒 Permiso de ubicación denegado' : '⚠️ No se pudo obtener tu ubicación'); },
-    { enableHighAccuracy: true, timeout: 10000 }
-  );
+function cercaFmtDist(m){ return m<1000?m+'m':(m/1000).toFixed(1)+'km'; }
+
+async function cercaFetchOverpass(lat,lng,radius){
+  if(cercaAbortController) cercaAbortController.abort();
+  cercaAbortController=new AbortController();
+  const signal=cercaAbortController.signal;
+  const pad=0.0006+(radius/111320)*1.3;
+  const s=lat-pad,w=lng-pad,n=lat+pad,e=lng+pad;
+  const amenities='supermarket|pharmacy|bank|atm|fast_food|restaurant|cafe|bakery|hospital|clinic|doctors|dentist|post_office|marketplace|fuel|townhall|ice_cream|hairdresser|veterinary';
+  const shops='supermarket|convenience|pharmacy|bakery|butcher|hardware|clothes|hairdresser|greengrocer|newsagent|kiosk|beauty|optician|sports|toy|stationery|florist|car_wash|laundry|electronics';
+  const maxResults=radius<=200?50:radius<=500?120:220;
+  const q=`[out:json][timeout:14];(node["amenity"~"^(${amenities})$"](${s},${w},${n},${e});node["shop"~"^(${shops})$"](${s},${w},${n},${e}););out body ${maxResults};`;
+  const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q),headers:{'Content-Type':'application/x-www-form-urlencoded'},signal});
+  if(!res.ok) throw new Error('Overpass HTTP '+res.status);
+  const data=await res.json();
+  return (data.elements||[])
+    .filter(el=>el.tags&&el.tags.name)
+    .map(el=>{
+      const t=el.tags||{}, name=t.name||t['name:es']||'Sin nombre';
+      const key=t.amenity||t.shop||'general';
+      const osmInfo=OSM_TYPE_MAP[key]||{emoji:'🏪',tipo:'Comercio'};
+      const addr=[t['addr:street'],t['addr:housenumber']].filter(Boolean).join(' ')||'';
+      const dist=Math.round(distanceMeter(lat,lng,el.lat,el.lon));
+      const type=osmInfo.tipo;
+      const cat=cercaGuessCategory(name,type);
+      // Compartir estado si ya existe en placeIndex
+      const existing=placeIndex.get(`osm_${el.id}`);
+      return {
+        id:`osm_${el.id}`, name, type, emoji:osmInfo.emoji,
+        cat, addr, dist, lat:el.lat, lng:el.lon, open:true, verified:false,
+        rating:existing?.rating||(3.5+Math.random()*1.3).toFixed(1),
+        reviewsN:existing?.reviewsN||Math.floor(Math.random()*200+10),
+        status:existing?.status||0, reporters:existing?.reporters||0,
+        sponsor:existing?.sponsor||null,
+      };
+    })
+    .filter(p=>p.dist<=radius)
+    .sort((a,b)=>a.dist-b.dist);
 }
 
-function onMapDragStart() {
-  if (followMode) { followMode = false; updateGpsBtnUI(); showToast('👆 Arrastraste el mapa · tocá 📍 para seguir de nuevo'); }
-}
-
-function initMap() {
-  leafletMap = L.map('leaflet-map', { center: [CONFIG.DEFAULT_CENTER.lat, CONFIG.DEFAULT_CENTER.lng], zoom: 16, zoomControl: false });
-  L.control.zoom({ position: 'bottomright' }).addTo(leafletMap);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd', maxZoom: 20,
-  }).addTo(leafletMap);
-  leafletMap.on('dragstart', onMapDragStart);
-  leafletMap.on('zoomend', () => { const toShow = nearbyPlaces.length ? nearbyPlaces : places; if (toShow.length) buildMapMarkers(toShow); });
-  startGpsWatch();
-  initSearch();
-}
-
-let lastLoadTileKey = null;
-
-function startGpsWatch() {
-  if (!navigator.geolocation) return;
-  if (gpsWatchId !== null) navigator.geolocation.clearWatch(gpsWatchId);
-  gpsWatchId = navigator.geolocation.watchPosition(
-    pos => onGpsSuccess(pos),
-    err => { if (!mapInitialLoaded) { const { lat, lng } = CONFIG.DEFAULT_CENTER; ensurePlacesLoadedAt(lat, lng); mapInitialLoaded = true; } },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 3000 }
-  );
-}
-
-function onGpsSuccess(pos) {
-  const { latitude: lat, longitude: lng } = pos.coords;
-  const isFirst = userLat === null;
-  userLat = lat; userLng = lng;
-  updateUserMarker(lat, lng);
-  if (followMode) {
-    const moved = lastFollowLat !== null ? distanceMeter(lastFollowLat, lastFollowLng, lat, lng) : Infinity;
-    if (moved >= CONFIG.FOLLOW_MIN_MOVE_M) {
-      lastFollowLat = lat; lastFollowLng = lng;
-      if (isFirst) leafletMap.setView([lat, lng], CONFIG.FOLLOW_ZOOM, { animate: true, duration: 0.5 });
-      else leafletMap.panTo([lat, lng], { animate: true, duration: 0.4, easeLinearity: 0.5 });
-    }
-  }
-  if (isFirst) {
-    if (!followMode) leafletMap.setView([lat, lng], CONFIG.FOLLOW_ZOOM);
-    updateGpsBtnUI();
-    ensurePlacesLoadedAt(lat, lng);
-    lastLoadTileKey = latLngToTileKey(lat, lng);
-  } else {
-    const currentTileKey = latLngToTileKey(lat, lng);
-    if (currentTileKey !== lastLoadTileKey) { lastLoadTileKey = currentTileKey; ensurePlacesLoadedAt(lat, lng); }
-  }
-  if (!checkinShown && places.length > 0) { checkinShown = true; setTimeout(() => showCheckinModal(lat, lng), 1200); }
-}
-
-/* ─────────────── MARKERS ─────────────── */
-function makeStatusChipHTML(place) {
-  const s = (!place.reporters || place.reporters === 0) ? NO_REPORT_STATUS : STATUS_CFG[place.status];
-  return `<div class="fc-card-status" style="background:${s.color}"><div class="s-dot-sm"></div><div class="s-label-sm">${s.label}</div></div>`;
-}
-
-/**
- * Genera el HTML del logo para las cards del mapa.
- * Si el lugar es sponsor, muestra su imagen de logo; si no, el emoji.
- */
-function makeLogoHTML(place) {
-  if (place.sponsor && place.sponsor.logo_url) {
-    return `<img src="${place.sponsor.logo_url}" alt="${place.name}" style="width:100%;height:100%;object-fit:contain;border-radius:7px;">`;
-  }
-  return place.logo;
-}
-
-/**
- * Genera el ícono Leaflet de una card de lugar.
- * Los sponsors premium tienen borde y fondo de color; basic tienen borde tenue.
- * Los sponsors muestran su logo real y un mini-badge de verificación con el color del sponsor.
- */
-function makeIcon(place) {
-  const sponsor = place.sponsor;
-  const sponsorColor = sponsor ? (sponsor.badge_color || '#6366F1') : null;
-
-  const verBadgeColor = sponsorColor || '#6366F1';
-  const verBadge = place.verified
-    ? `<div class="fc-card-verified" style="background:${verBadgeColor}">✓</div>`
-    : '';
-
-  const sponsorBadgeHTML = sponsor
-    ? `<div class="fc-sponsor-badge" style="background:${sponsorColor}">✓ ${sponsor.badge_text || 'Verificado'}</div>`
-    : '';
-
-  const sponsorClass = sponsor ? `is-sponsor tier-${sponsor.tier || 'basic'}` : '';
-  const sponsorStyle = sponsor ? `style="--sponsor-color:${sponsorColor}"` : '';
-
-  return L.divIcon({
-    html: `<div class="fc-card-wrap ${sponsorClass}" ${sponsorStyle}>
-      <div class="fc-card">
-        <div class="fc-card-head">
-          <div class="fc-card-logo">${makeLogoHTML(place)}${verBadge}</div>
-          <div class="fc-card-info">
-            <div class="fc-card-name">${place.name}</div>
-            <div class="fc-card-type">${place.type}</div>
-          </div>
-          <span class="fc-card-open ${place.open?'open':'closed'}">${place.open?'Abierto':'Cerrado'}</span>
-        </div>
-        ${makeStatusChipHTML(place)}
-        ${sponsorBadgeHTML}
+function cercaShowSkeleton(){
+  const list=document.getElementById('cerca-list');
+  list.innerHTML=Array(6).fill(0).map((_,i)=>`
+    <div class="nc-skeleton" style="animation-delay:${i*0.05}s">
+      <div class="nc-skel-logo skel-anim"></div>
+      <div class="nc-skel-body">
+        <div class="nc-skel-line skel-anim" style="width:65%"></div>
+        <div class="nc-skel-line skel-anim" style="width:42%"></div>
+        <div class="nc-skel-block skel-anim"></div>
       </div>
-      <div class="fc-tail"></div>
-      <div class="fc-base"></div>
-    </div>`,
-    className: '', iconAnchor: [0, 172], popupAnchor: [0, -172],
-  });
+    </div>`).join('');
 }
 
-const CLUSTER_ZOOM_THRESHOLD = 20;
+async function cercaLoadPlaces(forceReload){
+  if(cercaIsLoading&&!forceReload) return;
+  cercaIsLoading=true;
+  document.getElementById('cerca-error-banner').style.display='none';
+  cercaShowSkeleton();
+  document.getElementById('cerca-count').textContent='…';
+  document.getElementById('cerca-count-lbl').textContent=' cargando';
 
-function getClusterGridDeg(zoom) {
-  if (zoom >= 15) return 0.0015;
-  if (zoom >= 13) return 0.005;
-  return 0.015;
+  const lat=userLat??CONFIG.DEFAULT_CENTER.lat, lng=userLng??CONFIG.DEFAULT_CENTER.lng;
+
+  try{
+    const osmPlaces=await cercaFetchOverpass(lat,lng,cercaRadius);
+    // Enriquecer con datos del backend si los hay
+    const sponsorMap=new Map();
+    placeIndex.forEach((p,id)=>{ if(p.sponsor) sponsorMap.set(id,p.sponsor); });
+    cercaAllPlaces=osmPlaces.map(p=>({ ...p, sponsor:sponsorMap.get(p.id)||p.sponsor||null }));
+    if(!cercaAllPlaces.length) cercaAllPlaces=cercaBuildDemoPlaces(lat,lng);
+    const now=new Date();
+    document.getElementById('cerca-updated-lbl').textContent=`Actualizado ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+  }catch(err){
+    if(err.name==='AbortError') return;
+    console.warn('Overpass panel Cerca falló:',err);
+    document.getElementById('cerca-error-banner').style.display='flex';
+    cercaAllPlaces=cercaBuildDemoPlaces(lat,lng);
+  }finally{
+    cercaIsLoading=false;
+    cercaLoaded=true;
+    cercaApplyFilters();
+  }
 }
 
-function densityClass(count) {
-  if (count <= 5) return 'density-low';
-  if (count <= 15) return 'density-med';
-  if (count <= 40) return 'density-high';
-  return 'density-max';
+function cercaBuildDemoPlaces(lat,lng){
+  const demos=[
+    {name:'Carrefour Express',type:'Supermercado',emoji:'🛒',cat:'supermarket',addr:'Av. Corrientes 1234',dlat:0.0012,dlng:0.0008,open:true,status:2,reporters:14,rating:'4.2',reviewsN:1200,verified:true},
+    {name:'Farmacity',type:'Farmacia',emoji:'💊',cat:'health',addr:'Florida 340',dlat:0.0004,dlng:0.0015,open:true,status:0,reporters:5,rating:'4.0',reviewsN:856,verified:true},
+    {name:'Banco Nación',type:'Banco',emoji:'🏦',cat:'bank',addr:'Florida 236',dlat:-0.0006,dlng:0.0010,open:true,status:2,reporters:18,rating:'3.2',reviewsN:430,verified:false},
+    {name:'Rapipago',type:'Pagos',emoji:'💳',cat:'bank',addr:'Lavalle 870',dlat:0.0009,dlng:-0.0005,open:true,status:1,reporters:7,rating:'3.6',reviewsN:210,verified:false},
+    {name:'Starbucks',type:'Cafetería',emoji:'☕',cat:'food',addr:'Av. Santa Fe 800',dlat:-0.0003,dlng:0.0018,open:true,status:0,reporters:3,rating:'4.4',reviewsN:2100,verified:false},
+    {name:"McDonald's",type:'Comida rápida',emoji:'🍔',cat:'food',addr:'Corrientes 567',dlat:0.0018,dlng:-0.0002,open:true,status:3,reporters:22,rating:'3.9',reviewsN:3400,verified:false},
+    {name:'ANSES',type:'Oficina pública',emoji:'🏛️',cat:'government',addr:'Lima 121',dlat:-0.0015,dlng:0.0003,open:false,status:1,reporters:9,rating:'2.8',reviewsN:720,verified:false},
+    {name:'Hospital Ramos Mejía',type:'Hospital',emoji:'🏥',cat:'health',addr:'Gral. Urquiza 609',dlat:0.0022,dlng:0.0011,open:true,status:2,reporters:16,rating:'3.5',reviewsN:580,verified:false},
+    {name:'Disco',type:'Supermercado',emoji:'🏪',cat:'supermarket',addr:'Av. Callao 540',dlat:-0.0008,dlng:-0.0014,open:true,status:3,reporters:22,rating:'3.8',reviewsN:2100,verified:false},
+    {name:'Correo Argentino',type:'Correo',emoji:'📮',cat:'government',addr:'Sarmiento 151',dlat:0.0005,dlng:-0.0018,open:true,status:1,reporters:6,rating:'3.1',reviewsN:340,verified:false},
+  ];
+  return demos.map((d,i)=>{
+    const plat=lat+d.dlat,plng=lng+d.dlng;
+    const dist=Math.round(distanceMeter(lat,lng,plat,plng));
+    return {id:`demo_${i}`,name:d.name,type:d.type,emoji:d.emoji,cat:d.cat,addr:d.addr,dist,lat:plat,lng:plng,open:d.open,verified:d.verified,rating:d.rating,reviewsN:d.reviewsN,status:d.status,reporters:d.reporters,sponsor:null};
+  }).filter(p=>p.dist<=cercaRadius);
 }
 
-function computeClusters(placesToCluster, gridDeg) {
-  const cells = {};
-  placesToCluster.forEach(p => {
-    const cx = Math.floor(p.lat / gridDeg), cy = Math.floor(p.lng / gridDeg);
-    const key = `${cx}:${cy}`;
-    if (!cells[key]) cells[key] = { lat: (cx + 0.5) * gridDeg, lng: (cy + 0.5) * gridDeg, places: [] };
-    cells[key].places.push(p);
-  });
-  return Object.values(cells).map(c => ({
-    lat: c.lat, lng: c.lng,
-    count: c.places.length, places: c.places,
-    avgStatus: c.places.reduce((s, p) => s + (p.reporters > 0 ? p.status : 0), 0) / c.places.length,
-    totalReporters: c.places.reduce((s, p) => s + (p.reporters || 0), 0),
-  }));
+function cercaApplyFilters(){
+  let places=[...cercaAllPlaces];
+  if(cercaSearchQ){ const q=cercaSearchQ.toLowerCase(); places=places.filter(p=>p.name.toLowerCase().includes(q)||p.type.toLowerCase().includes(q)||(p.addr||'').toLowerCase().includes(q)); }
+  if(cercaCat!=='all') places=places.filter(p=>p.cat===cercaCat);
+  if(cercaSortMode==='distance') places.sort((a,b)=>a.dist-b.dist);
+  else if(cercaSortMode==='status') places.sort((a,b)=>b.reporters-a.reporters||b.status-a.status);
+  else if(cercaSortMode==='rating') places.sort((a,b)=>parseFloat(b.rating)-parseFloat(a.rating));
+  cercaFiltered=places;
+  cercaRenderList();
 }
 
-function makeClusterIcon(cluster) {
-  const dc = densityClass(cluster.count);
-  const label = cluster.count === 1 ? '1 lugar' : `${cluster.count} lugares`;
-  const subtitle = cluster.totalReporters > 0 ? `${cluster.totalReporters} reportes activos` : 'Sin reportes aún';
-  return L.divIcon({
-    html: `<div class="cluster-card">
-      <div class="cluster-bubble ${dc}">
-        <div class="cluster-count">${cluster.count}</div>
-        <div class="cluster-label"><strong>${label}</strong>${subtitle}</div>
+function cercaRenderList(){
+  const list=document.getElementById('cerca-list');
+  const n=cercaFiltered.length;
+  document.getElementById('cerca-count').textContent=n;
+  document.getElementById('cerca-count-lbl').textContent=n===1?' lugar encontrado':' lugares encontrados';
+  if(!n){
+    list.innerHTML=`<div class="nc-empty"><div class="nc-empty-icon">🔍</div><div class="nc-empty-title">Sin resultados</div><div class="nc-empty-sub">Probá aumentar el radio o cambiando el filtro de categoría.</div></div>`;
+    return;
+  }
+  list.innerHTML=cercaFiltered.map((p,i)=>{
+    const s=(!p.reporters||p.reporters===0)?NO_REPORT_STATUS:STATUS_CFG[p.status];
+    const sponsorColor=p.sponsor?p.sponsor.badge_color:'';
+    const logoHtml=(p.sponsor&&p.sponsor.logo_url)?`<img src="${p.sponsor.logo_url}" alt="${p.name}">`:(p.emoji||'🏪');
+    const verBg=sponsorColor||'#6366F1';
+    const verBadge=p.verified?`<div class="nc-ver" style="background:${verBg}">✓</div>`:'';
+    const sponsorBadge=p.sponsor?`<div class="nc-sponsor-badge" style="background:${sponsorColor}">✓ ${p.sponsor.badge_text||'Verificado'}</div>`:'';
+    const sponsorClass=p.sponsor?'is-sponsor':'';
+    const sponsorStyle=p.sponsor?`style="--sp-color:${sponsorColor}"` :'';
+    const reviewsFormatted=typeof p.reviewsN==='number'?p.reviewsN.toLocaleString('es-AR'):p.reviewsN;
+    return `<div class="nc-card ${sponsorClass}" ${sponsorStyle} data-nc-idx="${i}" style="animation-delay:${Math.min(i*0.035,0.25)}s">
+      <div class="nc-logo">${logoHtml}${verBadge}</div>
+      <div class="nc-body">
+        <div class="nc-top">
+          <div class="nc-name">${p.name}</div>
+          <span class="nc-badge-open ${p.open?'open':'closed'}">${p.open?'Abierto':'Cerrado'}</span>
+        </div>
+        <div class="nc-meta">
+          <span class="nc-type">${p.type}</span>
+          <div class="nc-dot"></div>
+          <span class="nc-dist">📍 ${cercaFmtDist(p.dist)}</span>
+          ${p.addr?`<div class="nc-dot"></div><span class="nc-addr">${p.addr}</span>`:''}
+        </div>
+        <div class="nc-status" style="background:${s.color}">
+          <div class="nc-sdot"></div>
+          <span class="nc-slabel">${s.label}</span>
+          <span class="nc-ssub">${s.sub}</span>
+        </div>
+        ${sponsorBadge}
       </div>
-      <div class="cluster-tail"></div>
-      <div class="cluster-base"></div>
-    </div>`,
-    className: '', iconAnchor: [65, 62],
-  });
-}
-
-let clusterMarkers = {};
-
-function clearClusterMarkers() {
-  Object.values(clusterMarkers).forEach(m => m.remove());
-  clusterMarkers = {};
-}
-
-function clearIndividualMarkers() {
-  Object.keys(leafletMarkers).forEach(id => { leafletMarkers[id].remove(); delete leafletMarkers[id]; });
-}
-
-function buildMapMarkers(placesToShow) {
-  placesToShow = placesToShow || nearbyPlaces;
-  if (!leafletMap || !placesToShow.length) return;
-  const zoom = leafletMap.getZoom();
-
-  if (zoom >= CLUSTER_ZOOM_THRESHOLD) {
-    clearClusterMarkers();
-    const newIdSet = new Set(placesToShow.map(p => p.id));
-    Object.keys(leafletMarkers).forEach(id => { if (!newIdSet.has(id)) { leafletMarkers[id].remove(); delete leafletMarkers[id]; } });
-    placesToShow.forEach(p => {
-      if (leafletMarkers[p.id]) {
-        const marker = leafletMarkers[p.id];
-        if (marker._lastStatus !== p.status || marker._lastReporters !== p.reporters) {
-          marker.setIcon(makeIcon(p));
-          marker._lastStatus = p.status; marker._lastReporters = p.reporters;
-        }
-      } else {
-        const marker = L.marker([p.lat, p.lng], { icon: makeIcon(p) }).addTo(leafletMap);
-        marker._lastStatus = p.status; marker._lastReporters = p.reporters;
-        marker.on('click', () => { if (pickModeActive) { exitPickMode(); openPlacePopup(p); } else { openPlacePopup(p); } });
-        leafletMarkers[p.id] = marker;
-      }
-    });
-  } else {
-    clearIndividualMarkers();
-    const gridDeg = getClusterGridDeg(zoom);
-    const clusters = computeClusters(placesToShow, gridDeg);
-    clearClusterMarkers();
-    clusters.forEach((cluster, idx) => {
-      const marker = L.marker([cluster.lat, cluster.lng], { icon: makeClusterIcon(cluster) }).addTo(leafletMap);
-      marker.on('click', () => { const targetZoom = Math.min(leafletMap.getZoom() + 3, CLUSTER_ZOOM_THRESHOLD + 1); leafletMap.setView([cluster.lat, cluster.lng], targetZoom, { animate: true, duration: 0.5 }); });
-      clusterMarkers[`cluster_${idx}`] = marker;
-    });
-  }
-}
-
-function refreshMarkerIcon(id) {
-  const p = places.find(x => x.id === id);
-  if (!p) return;
-  if (leafletMap && leafletMap.getZoom() >= CLUSTER_ZOOM_THRESHOLD && leafletMarkers[id]) {
-    leafletMarkers[id].setIcon(makeIcon(p));
-  }
-}
-
-function calcCrowdPct() {
-  const visible = nearbyPlaces.length ? nearbyPlaces : places;
-  if (!visible.length) return 30;
-  const avg = visible.reduce((s, p) => s + p.status, 0) / visible.length;
-  return Math.round(10 + (avg / 3) * 82);
-}
-
-function updateCrowdBar(pct) {
-  pct = Math.max(5, Math.min(95, pct));
-  const needle = document.getElementById('cbar-needle');
-  const overlay = document.getElementById('cbar-overlay');
-  const pctLabel = document.getElementById('cbar-pct');
-  if (needle) needle.style.left = pct + '%';
-  if (overlay) overlay.style.width = (100 - pct) + '%';
-  if (pctLabel) pctLabel.textContent = pct + '%';
-}
-
-async function manualRefresh() {
-  const icon = document.getElementById('refresh-icon');
-  icon.style.animation = 'none'; icon.offsetHeight;
-  icon.style.animation = 'rotate .7s cubic-bezier(.34,1.56,.64,1)';
-  const lat = userLat ?? CONFIG.DEFAULT_CENTER.lat, lng = userLng ?? CONFIG.DEFAULT_CENTER.lng;
-  const tileKey = latLngToTileKey(lat, lng);
-  const adjacent = getAdjacentTileKeys(lat, lng);
-  [tileKey, ...adjacent].forEach(k => { delete tileCache[k]; });
-  lastLoadTileKey = null;
-  nearbyPlaces = [];
-  await ensurePlacesLoadedAt(lat, lng);
-  showToast('🔄 Locales actualizados');
-}
-
-/* ══════════════════════════════════════════════
-   CHECK-IN MODAL — con soporte de sponsor logos
-   ══════════════════════════════════════════════ */
-function showCheckinModal(lat, lng) {
-  const pool = nearbyPlaces.length ? nearbyPlaces : places;
-  const sorted = pool
-    .map(p => ({ ...p, _dist: Math.round(distanceMeter(lat, lng, p.lat, p.lng)) }))
-    .sort((a, b) => a._dist - b._dist)
-    .slice(0, 3);
-  if (!sorted.length) return;
-  const root = document.getElementById('checkin-overlay-root');
-
-  function close() {
-    const overlay = root.querySelector('.checkin-overlay');
-    if (overlay) { overlay.style.opacity = '0'; overlay.style.transition = 'opacity .25s'; }
-    setTimeout(() => { root.innerHTML = ''; }, 280);
-  }
-  function choosePlace(p) { close(); setTimeout(() => openPlacePopup(p), 300); }
-  function chooseOther() { close(); enterPickMode(); }
-
-  const tabsHtml = sorted.map(p => {
-    const veryNear = p._dist <= CONFIG.CHECKIN_NEAR_M;
-    const nearish  = p._dist <= 100;
-    const cls      = veryNear || nearish ? 'near' : 'far';
-    const distLabel = p._dist < 1000 ? `${p._dist}m` : `${(p._dist / 1000).toFixed(1)}km`;
-    const distDisplay = veryNear ? `📍 ${p._dist}m` : distLabel;
-    // Usar logo real si es sponsor
-    const logoContent = (p.sponsor && p.sponsor.logo_url)
-      ? `<img src="${p.sponsor.logo_url}" alt="${p.name}">`
-      : `<span>${p.logo}</span>`;
-    return `<button class="checkin-tab ${cls}" data-place-id="${p.id}">
-      <div class="checkin-tab-logo">${logoContent}</div>
-      <div class="checkin-tab-name">${p.name}</div>
-      <div class="checkin-tab-dist">${distDisplay}</div>
-    </button>`;
-  }).join('');
-
-  root.innerHTML = `
-    <div class="checkin-overlay" id="checkin-overlay">
-      <div class="checkin-card">
-        <div class="checkin-header">
-          <div class="checkin-header-emoji">📍</div>
-          <div class="checkin-header-title">¿En cuál de estos lugares estás?</div>
-          <div class="checkin-header-sub">Elegí para reportar cuánta gente hay ahora</div>
-        </div>
-        <div class="checkin-body">
-          <div class="checkin-tabs">
-            ${tabsHtml}
-            <button class="checkin-tab other-tab" id="checkin-other-tab">
-              <div class="checkin-tab-logo"><span>🗺️</span></div>
-              <div class="checkin-tab-name">Otro</div>
-              <div class="checkin-tab-dist">Elegir del mapa</div>
-            </button>
-          </div>
-          <button class="checkin-skip-main" id="checkin-skip-btn">
-            <span style="font-size:16px;opacity:.65">🗺️</span>
-            Solo ver el mapa
-          </button>
-          <p class="checkin-skip-hint">No estoy en ninguno de estos comercios ahora</p>
-        </div>
+      <div class="nc-right">
+        <div class="nc-rating"><span class="nc-star">★</span>${p.rating}<span class="nc-rn">&nbsp;(${reviewsFormatted})</span></div>
+        <button class="nc-report-btn" data-nc-idx="${i}">Reportar</button>
       </div>
     </div>`;
+  }).join('');
 
-  sorted.forEach(p => {
-    const btn = root.querySelector(`[data-place-id="${p.id}"]`);
-    if (btn) btn.addEventListener('click', () => choosePlace(p));
+  list.querySelectorAll('.nc-card').forEach(card=>{
+    card.addEventListener('click',e=>{
+      if(e.target.classList.contains('nc-report-btn')) return;
+      const p=cercaFiltered[+card.dataset.ncIdx];
+      if(!p) return;
+      // Buscar en placeIndex para tener el objeto completo con status actualizado
+      const enriched=placeIndex.get(p.id)||p;
+      openPlacePopup({...p,...enriched});
+    });
   });
-  root.querySelector('#checkin-other-tab').addEventListener('click', chooseOther);
-  root.querySelector('#checkin-skip-btn').addEventListener('click', close);
-  root.querySelector('#checkin-overlay').addEventListener('click', e => { if (e.target.id === 'checkin-overlay') close(); });
-}
-
-function enterPickMode() {
-  pickModeActive = true;
-  document.getElementById('pick-mode-banner').classList.add('show');
-  document.getElementById('leaflet-map').style.cursor = 'crosshair';
-}
-
-function exitPickMode() {
-  pickModeActive = false;
-  document.getElementById('pick-mode-banner').classList.remove('show');
-  document.getElementById('leaflet-map').style.cursor = '';
-}
-
-/* ═══════════════════════════════════════════════════════════
-   GOOGLE AUTH
-   ═══════════════════════════════════════════════════════════ */
-let tokenClient = null;
-const TOKEN_STORAGE_KEY = 'qooentum_gtoken';
-
-function saveTokenToStorage(token, expiresIn) {
-  try {
-    const expiresAt = Date.now() + (expiresIn ? expiresIn * 1000 : 3500 * 1000);
-    localStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify({ token, expiresAt }));
-  } catch(e) {}
-}
-
-function loadTokenFromStorage() {
-  try {
-    const raw = localStorage.getItem(TOKEN_STORAGE_KEY);
-    if (!raw) return null;
-    const data = JSON.parse(raw);
-    if (!data || !data.token) return null;
-    if (data.expiresAt && Date.now() > data.expiresAt + 5 * 60 * 1000) { localStorage.removeItem(TOKEN_STORAGE_KEY); return null; }
-    return data.token;
-  } catch(e) { return null; }
-}
-
-function initGoogleTokenClient() {
-  if (!GOOGLE_AUTH_READY) return false;
-  if (tokenClient) return true;
-  if (!window.google || !google.accounts || !google.accounts.oauth2) return false;
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CONFIG.GOOGLE_CLIENT_ID,
-    scope: 'email profile',
-    callback: handleGoogleTokenResponse,
-    error_callback: (err) => {
-      console.warn('Google OAuth error:', err);
-      resetLoginButton();
-      if (!err || err.type !== 'popup_closed') showToast('⚠️ No se pudo iniciar sesión con Google');
-    },
+  list.querySelectorAll('.nc-report-btn').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const p=cercaFiltered[+btn.dataset.ncIdx]; if(!p) return;
+      if(!isLoggedIn){showToastAction('🔑 Iniciá sesión para reportar y ganar puntos');return;}
+      openPlacePopup({...p,...(placeIndex.get(p.id)||{})});
+    });
   });
+}
+
+function cercaSetRadius(r,btn){
+  document.querySelectorAll('.cerca-r-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  cercaRadius=r; cercaLoaded=false; cercaLoadPlaces(true);
+}
+
+function cercaSetCat(cat,btn){
+  document.querySelectorAll('.cerca-f-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  cercaCat=cat; cercaApplyFilters();
+}
+
+function cercaCycleSort(){
+  cercaSortIdx=(cercaSortIdx+1)%3;
+  cercaSortMode=CERCA_SORT_MODES[cercaSortIdx];
+  document.getElementById('cerca-sort-lbl').textContent=CERCA_SORT_LABELS[cercaSortIdx];
+  cercaApplyFilters();
+}
+
+function cercaClearSearch(){
+  document.getElementById('cerca-search-input').value='';
+  document.getElementById('cerca-search-clear').classList.remove('visible');
+  cercaSearchQ=''; cercaApplyFilters();
+}
+
+function initCercaSearch(){
+  const input=document.getElementById('cerca-search-input'),clear=document.getElementById('cerca-search-clear');
+  input.addEventListener('input',e=>{
+    const val=e.target.value.trim();
+    clear.classList.toggle('visible',val.length>0);
+    clearTimeout(cercaSearchTimer);
+    cercaSearchTimer=setTimeout(()=>{ cercaSearchQ=val; cercaApplyFilters(); },260);
+  });
+}
+
+/* ─── CHECK-IN MODAL ─── */
+function showCheckinModal(lat,lng){
+  const pool=nearbyPlaces.length?nearbyPlaces:places;
+  const sorted=pool.map(p=>({...p,_dist:Math.round(distanceMeter(lat,lng,p.lat,p.lng))})).sort((a,b)=>a._dist-b._dist).slice(0,3);
+  if(!sorted.length) return;
+  const root=document.getElementById('checkin-overlay-root');
+  function close(){ const overlay=root.querySelector('.checkin-overlay'); if(overlay){overlay.style.opacity='0';overlay.style.transition='opacity .25s';} setTimeout(()=>{root.innerHTML='';},280); }
+  function choosePlace(p){ close(); setTimeout(()=>openPlacePopup(p),300); }
+  function chooseOther(){ close(); enterPickMode(); }
+  const tabsHtml=sorted.map(p=>{ const veryNear=p._dist<=CONFIG.CHECKIN_NEAR_M, nearish=p._dist<=100, cls=veryNear||nearish?'near':'far', distLabel=p._dist<1000?`${p._dist}m`:`${(p._dist/1000).toFixed(1)}km`, distDisplay=veryNear?`📍 ${p._dist}m`:distLabel; const logoContent=(p.sponsor&&p.sponsor.logo_url)?`<img src="${p.sponsor.logo_url}" alt="${p.name}">`:`<span>${p.logo}</span>`; return `<button class="checkin-tab ${cls}" data-place-id="${p.id}"><div class="checkin-tab-logo">${logoContent}</div><div class="checkin-tab-name">${p.name}</div><div class="checkin-tab-dist">${distDisplay}</div></button>`; }).join('');
+  root.innerHTML=`<div class="checkin-overlay" id="checkin-overlay"><div class="checkin-card"><div class="checkin-header"><div class="checkin-header-emoji">📍</div><div class="checkin-header-title">¿En cuál de estos lugares estás?</div><div class="checkin-header-sub">Elegí para reportar cuánta gente hay ahora</div></div><div class="checkin-body"><div class="checkin-tabs">${tabsHtml}<button class="checkin-tab other-tab" id="checkin-other-tab"><div class="checkin-tab-logo"><span>🗺️</span></div><div class="checkin-tab-name">Otro</div><div class="checkin-tab-dist">Elegir del mapa</div></button></div><button class="checkin-skip-main" id="checkin-skip-btn"><span style="font-size:16px;opacity:.65">🗺️</span>Solo ver el mapa</button><p class="checkin-skip-hint">No estoy en ninguno de estos comercios ahora</p></div></div></div>`;
+  sorted.forEach(p=>{ const btn=root.querySelector(`[data-place-id="${p.id}"]`); if(btn) btn.addEventListener('click',()=>choosePlace(p)); });
+  root.querySelector('#checkin-other-tab').addEventListener('click',chooseOther);
+  root.querySelector('#checkin-skip-btn').addEventListener('click',close);
+  root.querySelector('#checkin-overlay').addEventListener('click',e=>{ if(e.target.id==='checkin-overlay') close(); });
+}
+
+function enterPickMode(){ pickModeActive=true; document.getElementById('pick-mode-banner').classList.add('show'); document.getElementById('leaflet-map').style.cursor='crosshair'; }
+function exitPickMode(){ pickModeActive=false; document.getElementById('pick-mode-banner').classList.remove('show'); document.getElementById('leaflet-map').style.cursor=''; }
+
+/* ─── GOOGLE AUTH ─── */
+let tokenClient=null;
+const TOKEN_STORAGE_KEY='qooentum_gtoken';
+function saveTokenToStorage(token,expiresIn){ try { const expiresAt=Date.now()+(expiresIn?expiresIn*1000:3500*1000); localStorage.setItem(TOKEN_STORAGE_KEY,JSON.stringify({token,expiresAt})); } catch(e) {} }
+function loadTokenFromStorage(){ try { const raw=localStorage.getItem(TOKEN_STORAGE_KEY); if(!raw) return null; const data=JSON.parse(raw); if(!data||!data.token) return null; if(data.expiresAt&&Date.now()>data.expiresAt+5*60*1000){localStorage.removeItem(TOKEN_STORAGE_KEY);return null;} return data.token; } catch(e){return null;} }
+
+function initGoogleTokenClient(){
+  if(!GOOGLE_AUTH_READY) return false;
+  if(tokenClient) return true;
+  if(!window.google||!google.accounts||!google.accounts.oauth2) return false;
+  tokenClient=google.accounts.oauth2.initTokenClient({client_id:CONFIG.GOOGLE_CLIENT_ID,scope:'email profile',callback:handleGoogleTokenResponse,error_callback:(err)=>{console.warn('Google OAuth error:',err);resetLoginButton();if(!err||err.type!=='popup_closed')showToast('⚠️ No se pudo iniciar sesión con Google');}});
   return true;
 }
 
-function toggleUserDropdown() {
-  const wrap = document.getElementById('user-chip-wrap');
-  const dd = document.getElementById('user-dropdown');
-  dd.classList.toggle('open');
-  wrap.classList.toggle('open');
-}
+function toggleUserDropdown(){ const wrap=document.getElementById('user-chip-wrap'),dd=document.getElementById('user-dropdown'); dd.classList.toggle('open'); wrap.classList.toggle('open'); }
+document.addEventListener('click',function(e){ const wrap=document.getElementById('user-chip-wrap'); if(wrap&&!wrap.contains(e.target)){document.getElementById('user-dropdown').classList.remove('open');wrap.classList.remove('open');} });
 
-document.addEventListener('click', function(e) {
-  const wrap = document.getElementById('user-chip-wrap');
-  if (wrap && !wrap.contains(e.target)) {
-    document.getElementById('user-dropdown').classList.remove('open');
-    wrap.classList.remove('open');
-  }
-});
-
-function doLogout() {
-  isLoggedIn = false; currentUser = null; userPts = 0;
-  placeCooldowns = {}; followMode = false; updateGpsBtnUI();
-  localStorage.removeItem(SESSION_STORAGE_KEY);
-  localStorage.removeItem(TOKEN_STORAGE_KEY);
-  if (window.google && google.accounts && google.accounts.oauth2) { try { google.accounts.oauth2.revoke(); } catch(e) {} }
-  document.getElementById('user-chip-wrap').style.display = 'none';
-  const btn = document.getElementById('login-topbar-btn');
-  btn.style.display = 'flex'; btn.classList.remove('is-loading');
-  const t = btn.querySelector('.gbtn-txt'); if (t) t.textContent = 'Ingresar';
+function doLogout(){
+  isLoggedIn=false;currentUser=null;userPts=0;placeCooldowns={};followMode=false;updateGpsBtnUI();
+  localStorage.removeItem(SESSION_STORAGE_KEY);localStorage.removeItem(TOKEN_STORAGE_KEY);
+  if(window.google&&google.accounts&&google.accounts.oauth2){try{google.accounts.oauth2.revoke();}catch(e){}}
+  document.getElementById('user-chip-wrap').style.display='none';
+  const btn=document.getElementById('login-topbar-btn'); btn.style.display='flex';btn.classList.remove('is-loading');
+  const t=btn.querySelector('.gbtn-txt');if(t)t.textContent='Ingresar';
   document.getElementById('user-dropdown').classList.remove('open');
   document.getElementById('user-chip-wrap').classList.remove('open');
-  updateUserHUD(); stopOccupancySync();
-  if (currentPopupPlace) renderPopup(currentPopupPlace, isLoggedIn, currentUser);
+  updateUserHUD();stopOccupancySync();
+  if(currentPopupPlace) renderPopup(currentPopupPlace,isLoggedIn,currentUser);
   showToast('✅ Sesión cerrada correctamente');
 }
 
-function doGoogleLogin(btn) {
-  if (isLoggedIn) return;
-  if (!GOOGLE_AUTH_READY) { showToast('⚠️ El login con Google todavía no está configurado'); return; }
-  if (!initGoogleTokenClient()) { showToast('⏳ Google se está cargando, probá de nuevo en un segundo'); return; }
-  const loginBtn = btn || document.getElementById('login-topbar-btn');
-  if (loginBtn) { loginBtn.classList.add('is-loading'); const t = loginBtn.querySelector('.gbtn-txt'); if (t) t.textContent = 'Conectando…'; }
-  const hasPrevSession = !!localStorage.getItem(SESSION_STORAGE_KEY);
-  tokenClient.requestAccessToken({ prompt: hasPrevSession ? '' : 'select_account' });
+function doGoogleLogin(btn){
+  if(isLoggedIn) return;
+  if(!GOOGLE_AUTH_READY){showToast('⚠️ El login con Google todavía no está configurado');return;}
+  if(!initGoogleTokenClient()){showToast('⏳ Google se está cargando, probá de nuevo en un segundo');return;}
+  const loginBtn=btn||document.getElementById('login-topbar-btn');
+  if(loginBtn){loginBtn.classList.add('is-loading');const t=loginBtn.querySelector('.gbtn-txt');if(t)t.textContent='Conectando…';}
+  const hasPrevSession=!!localStorage.getItem(SESSION_STORAGE_KEY);
+  tokenClient.requestAccessToken({prompt:hasPrevSession?'':'select_account'});
 }
 
-function resetLoginButton() {
-  const btn = document.getElementById('login-topbar-btn');
-  if (!btn) return;
-  btn.classList.remove('is-loading');
-  const t = btn.querySelector('.gbtn-txt'); if (t) t.textContent = 'Ingresar';
+function resetLoginButton(){ const btn=document.getElementById('login-topbar-btn');if(!btn) return;btn.classList.remove('is-loading');const t=btn.querySelector('.gbtn-txt');if(t)t.textContent='Ingresar'; }
+function initialsFromName(name){ const parts=String(name||'').trim().split(/\s+/); return ((parts[0]||'')[0]||'').toUpperCase()+((parts[1]||'')[0]||'').toUpperCase()||'YO'; }
+
+function applyLoggedInUI(){
+  document.getElementById('login-topbar-btn').style.display='none';
+  document.getElementById('user-chip-wrap').style.display='flex';
+  const avatarEl=document.getElementById('topbar-avatar');
+  if(currentUser.picture){avatarEl.innerHTML=`<img src="${currentUser.picture}" alt="${currentUser.name}" referrerpolicy="no-referrer">`;}
+  else{avatarEl.textContent=initialsFromName(currentUser.name);}
+  updateUserHUD();maybeStartOccupancySync();
+  if(currentPopupPlace) renderPopup(currentPopupPlace,isLoggedIn,currentUser);
 }
 
-function initialsFromName(name) {
-  const parts = String(name||'').trim().split(/\s+/);
-  return ((parts[0]||'')[0]||'').toUpperCase() + ((parts[1]||'')[0]||'').toUpperCase() || 'YO';
+async function fetchProfileFromToken(accessToken){ const profileRes=await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:`Bearer ${accessToken}`}}); if(!profileRes.ok) throw new Error('No se pudo obtener el perfil de Google'); return await profileRes.json(); }
+
+async function handleGoogleTokenResponse(resp){
+  if(!resp||resp.error||!resp.access_token){resetLoginButton();if(resp&&resp.error!=='user_logged_out'&&resp.error!=='access_denied'&&resp.error!=='immediate_failed')showToast('⚠️ No se pudo iniciar sesión con Google');return;}
+  try{
+    const profile=await fetchProfileFromToken(resp.access_token);
+    const deviceEmail=localStorage.getItem(DEVICE_KEY);
+    if(deviceEmail&&deviceEmail!==profile.email){resetLoginButton();showToast(`⛔ Este dispositivo ya tiene una cuenta: ${deviceEmail.split('@')[0]}`);return;}
+    let backendResult=null;
+    if(BACKEND_READY) backendResult=await apiPost('login',{access_token:resp.access_token,email:profile.email,name:profile.name,picture:profile.picture});
+    const wasLoggedIn=isLoggedIn;
+    currentUser={email:profile.email,name:profile.name||profile.email,picture:profile.picture||''};
+    if(backendResult&&typeof backendResult.points==='number') userPts=backendResult.points;
+    if(backendResult&&backendResult.cooldowns) applyCooldownInfo(backendResult.cooldowns);
+    isLoggedIn=true;
+    localStorage.setItem(SESSION_STORAGE_KEY,JSON.stringify(currentUser));
+    localStorage.setItem(DEVICE_KEY,profile.email);
+    saveTokenToStorage(resp.access_token,resp.expires_in);
+    applyLoggedInUI();hideToastAction();maybeStartOccupancySync();
+    if(!wasLoggedIn) showToast(`👋 ¡Hola, ${currentUser.name.split(' ')[0]}!`);
+    if(pendingVote){const{placeId,voteIdx}=pendingVote;pendingVote=null;const p=places.find(x=>x.id===placeId);if(p) await submitVoteToBackend(p,voteIdx);}
+  }catch(err){console.warn('Error de login:',err);showToast('⚠️ Error al iniciar sesión con Google');}
+  finally{resetLoginButton();}
 }
 
-function applyLoggedInUI() {
-  document.getElementById('login-topbar-btn').style.display = 'none';
-  document.getElementById('user-chip-wrap').style.display = 'flex';
-  const avatarEl = document.getElementById('topbar-avatar');
-  if (currentUser.picture) { avatarEl.innerHTML = `<img src="${currentUser.picture}" alt="${currentUser.name}" referrerpolicy="no-referrer">`; }
-  else { avatarEl.textContent = initialsFromName(currentUser.name); }
-  updateUserHUD(); maybeStartOccupancySync();
-  if (currentPopupPlace) renderPopup(currentPopupPlace, isLoggedIn, currentUser);
+async function trySilentRenew(){
+  let attempts=0;
+  while((!window.google||!google.accounts||!google.accounts.oauth2)&&attempts<20){await new Promise(r=>setTimeout(r,200));attempts++;}
+  if(!initGoogleTokenClient()) return;
+  tokenClient.requestAccessToken({prompt:''});
 }
 
-async function fetchProfileFromToken(accessToken) {
-  const profileRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${accessToken}` } });
-  if (!profileRes.ok) throw new Error('No se pudo obtener el perfil de Google');
-  return await profileRes.json();
-}
-
-async function handleGoogleTokenResponse(resp) {
-  if (!resp || resp.error || !resp.access_token) {
-    resetLoginButton();
-    if (resp && resp.error !== 'user_logged_out' && resp.error !== 'access_denied' && resp.error !== 'immediate_failed') showToast('⚠️ No se pudo iniciar sesión con Google');
-    return;
-  }
-  try {
-    const profile = await fetchProfileFromToken(resp.access_token);
-    const deviceEmail = localStorage.getItem(DEVICE_KEY);
-    if (deviceEmail && deviceEmail !== profile.email) { resetLoginButton(); showToast(`⛔ Este dispositivo ya tiene una cuenta: ${deviceEmail.split('@')[0]}`); return; }
-    let backendResult = null;
-    if (BACKEND_READY) backendResult = await apiPost('login', { access_token: resp.access_token, email: profile.email, name: profile.name, picture: profile.picture });
-    const wasLoggedIn = isLoggedIn;
-    currentUser = { email: profile.email, name: profile.name || profile.email, picture: profile.picture || '' };
-    if (backendResult && typeof backendResult.points === 'number') userPts = backendResult.points;
-    if (backendResult && backendResult.cooldowns) applyCooldownInfo(backendResult.cooldowns);
-    isLoggedIn = true;
-    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(currentUser));
-    localStorage.setItem(DEVICE_KEY, profile.email);
-    saveTokenToStorage(resp.access_token, resp.expires_in);
-    applyLoggedInUI(); hideToastAction(); maybeStartOccupancySync();
-    if (!wasLoggedIn) showToast(`👋 ¡Hola, ${currentUser.name.split(' ')[0]}!`);
-    if (pendingVote) { const { placeId, voteIdx } = pendingVote; pendingVote = null; const p = places.find(x => x.id === placeId); if (p) await submitVoteToBackend(p, voteIdx); }
-  } catch (err) { console.warn('Error de login:', err); showToast('⚠️ Error al iniciar sesión con Google'); }
-  finally { resetLoginButton(); }
-}
-
-async function trySilentRenew() {
-  let attempts = 0;
-  while ((!window.google || !google.accounts || !google.accounts.oauth2) && attempts < 20) { await new Promise(r => setTimeout(r, 200)); attempts++; }
-  if (!initGoogleTokenClient()) return;
-  tokenClient.requestAccessToken({ prompt: '' });
-}
-
-async function restoreSession() {
-  const saved = localStorage.getItem(SESSION_STORAGE_KEY);
-  if (!saved) return;
-  try { currentUser = JSON.parse(saved); } catch { localStorage.removeItem(SESSION_STORAGE_KEY); currentUser = null; return; }
-  if (!currentUser || !currentUser.email) { localStorage.removeItem(SESSION_STORAGE_KEY); currentUser = null; return; }
-  const deviceEmail = localStorage.getItem(DEVICE_KEY);
-  if (deviceEmail && deviceEmail !== currentUser.email) { localStorage.removeItem(SESSION_STORAGE_KEY); currentUser = null; return; }
+async function restoreSession(){
+  const saved=localStorage.getItem(SESSION_STORAGE_KEY);
+  if(!saved) return;
+  try{currentUser=JSON.parse(saved);}catch{localStorage.removeItem(SESSION_STORAGE_KEY);currentUser=null;return;}
+  if(!currentUser||!currentUser.email){localStorage.removeItem(SESSION_STORAGE_KEY);currentUser=null;return;}
+  const deviceEmail=localStorage.getItem(DEVICE_KEY);
+  if(deviceEmail&&deviceEmail!==currentUser.email){localStorage.removeItem(SESSION_STORAGE_KEY);currentUser=null;return;}
   applyLoggedInUI();
-  const savedToken = loadTokenFromStorage();
-  if (savedToken) {
-    try {
-      const profile = await fetchProfileFromToken(savedToken);
-      if (profile && profile.email === currentUser.email) {
-        isLoggedIn = true;
-        if (BACKEND_READY) {
-          const me = await apiGet('me', { email: currentUser.email });
-          if (me && me.exists) {
-            userPts = me.points || 0;
-            if (me.name) currentUser.name = me.name;
-            if (me.picture) currentUser.picture = me.picture;
-            if (me.cooldowns) applyCooldownInfo(me.cooldowns);
-            localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(currentUser));
-          }
-        }
-        updateUserHUD(); maybeStartOccupancySync(); return;
+  const savedToken=loadTokenFromStorage();
+  if(savedToken){
+    try{
+      const profile=await fetchProfileFromToken(savedToken);
+      if(profile&&profile.email===currentUser.email){
+        isLoggedIn=true;
+        if(BACKEND_READY){const me=await apiGet('me',{email:currentUser.email});if(me&&me.exists){userPts=me.points||0;if(me.name)currentUser.name=me.name;if(me.picture)currentUser.picture=me.picture;if(me.cooldowns)applyCooldownInfo(me.cooldowns);localStorage.setItem(SESSION_STORAGE_KEY,JSON.stringify(currentUser));}}
+        updateUserHUD();maybeStartOccupancySync();return;
       }
-    } catch(e) { localStorage.removeItem(TOKEN_STORAGE_KEY); }
+    }catch(e){localStorage.removeItem(TOKEN_STORAGE_KEY);}
   }
-  isLoggedIn = false;
+  isLoggedIn=false;
   await trySilentRenew();
 }
 
-function updateUserHUD() {
-  const info = getLevelInfo(userPts);
-  document.getElementById('my-pts').textContent = userPts + ' pts';
-  document.getElementById('lvl-badge').textContent = 'Nivel ' + info.level;
-  document.getElementById('xp-bar-fill').style.width = info.pct + '%';
-  const prizePts = document.getElementById('my-pts-prizes');
-  if (prizePts) prizePts.textContent = userPts + ' pts disponibles';
+function updateUserHUD(){
+  const info=getLevelInfo(userPts);
+  document.getElementById('my-pts').textContent=userPts+' pts';
+  document.getElementById('lvl-badge').textContent='Nivel '+info.level;
+  document.getElementById('xp-bar-fill').style.width=info.pct+'%';
+  const prizePts=document.getElementById('my-pts-prizes');
+  if(prizePts) prizePts.textContent=userPts+' pts disponibles';
 }
 
-function levelUpCelebration(level) {
-  const modal = document.createElement('div');
-  modal.className = 'levelup-modal';
-  modal.innerHTML = `<div class="levelup-card"><div class="levelup-burst">⭐</div><div class="levelup-lvl">¡NIVEL ${level}!</div><div class="levelup-title">${titleForLevel(level)}</div><button class="levelup-close" onclick="this.closest('.levelup-modal').remove()">¡Genial!</button></div>`;
+function levelUpCelebration(level){
+  const modal=document.createElement('div');
+  modal.className='levelup-modal';
+  modal.innerHTML=`<div class="levelup-card"><div class="levelup-burst">⭐</div><div class="levelup-lvl">¡NIVEL ${level}!</div><div class="levelup-title">${titleForLevel(level)}</div><button class="levelup-close" onclick="this.closest('.levelup-modal').remove()">¡Genial!</button></div>`;
   document.body.appendChild(modal);
   burstConfetti(modal.querySelector('.levelup-card'));
-  setTimeout(() => { if (modal.parentNode) modal.remove(); }, 5000);
+  setTimeout(()=>{if(modal.parentNode)modal.remove();},5000);
 }
 
-function burstConfetti(originEl) {
-  if (!originEl) return;
-  const rect = originEl.getBoundingClientRect();
-  const emojis = ['🎉','✨','⭐','🔥','💥'];
-  for (let i = 0; i < 16; i++) {
-    const span = document.createElement('span');
-    span.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-    span.style.cssText = `position:fixed;left:${rect.left+rect.width/2}px;top:${rect.top+rect.height/2}px;font-size:${14+Math.random()*12}px;pointer-events:none;z-index:99999;`;
+function burstConfetti(originEl){
+  if(!originEl) return;
+  const rect=originEl.getBoundingClientRect(), emojis=['🎉','✨','⭐','🔥','💥'];
+  for(let i=0;i<16;i++){
+    const span=document.createElement('span');
+    span.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    span.style.cssText=`position:fixed;left:${rect.left+rect.width/2}px;top:${rect.top+rect.height/2}px;font-size:${14+Math.random()*12}px;pointer-events:none;z-index:99999;`;
     document.body.appendChild(span);
-    const angle = Math.random()*Math.PI*2, dist = 65+Math.random()*100;
-    const dx = Math.cos(angle)*dist, dy = Math.sin(angle)*dist-50;
-    const anim = span.animate([{transform:'translate(0,0) scale(.6) rotate(0deg)',opacity:1},{transform:`translate(${dx}px,${dy}px) scale(1.15) rotate(${Math.random()*400}deg)`,opacity:0}],{duration:750+Math.random()*400,easing:'cubic-bezier(.2,.8,.3,1)'});
-    anim.onfinish = () => span.remove();
-    setTimeout(() => span.remove(), 1400);
+    const angle=Math.random()*Math.PI*2, dist=65+Math.random()*100, dx=Math.cos(angle)*dist, dy=Math.sin(angle)*dist-50;
+    const anim=span.animate([{transform:'translate(0,0) scale(.6) rotate(0deg)',opacity:1},{transform:`translate(${dx}px,${dy}px) scale(1.15) rotate(${Math.random()*400}deg)`,opacity:0}],{duration:750+Math.random()*400,easing:'cubic-bezier(.2,.8,.3,1)'});
+    anim.onfinish=()=>span.remove();
+    setTimeout(()=>span.remove(),1400);
   }
 }
 
-/* ── TOASTS ── */
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
+/* ─── TOASTS ─── */
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg;t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); }
+let toastActionTimer=null;
+function showToastAction(msg){ const t=document.getElementById('toast-action'); document.getElementById('toast-action-msg').textContent=msg; t.classList.add('show'); clearTimeout(toastActionTimer); toastActionTimer=setTimeout(()=>t.classList.remove('show'),5000); }
+function hideToastAction(){ clearTimeout(toastActionTimer); document.getElementById('toast-action').classList.remove('show'); }
+
+/* ─── RANKING / PRIZES ─── */
+let rankingLoaded=false;
+async function ensureRankingLoaded(){ if(rankingLoaded||!BACKEND_READY) return; const result=await apiGet('ranking',currentUser?{email:currentUser.email}:{}); if(result&&Array.isArray(result.ranking)){rankingData=result.ranking;rankingLoaded=true;} }
+
+function buildRanking(){
+  const sorted=[...rankingData].sort((a,b)=>b.pts-a.pts);
+  const listEl=document.getElementById('rank-list');
+  if(!sorted.length){ listEl.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:60px 24px;text-align:center;height:100%;"><div style="font-size:34px">🏆</div><div style="font-size:14px;font-weight:800;color:var(--text)">Todavía no hay reportes</div><div style="font-size:12.5px;color:var(--text2);max-width:220px">Sé el primero en reportar el estado de un comercio y encabezá el ranking</div></div>`; return; }
+  const medals=['🥇','🥈','🥉'];
+  listEl.innerHTML=sorted.map((u,i)=>`<div class="rank-row${u.isMe?' is-me':''}" style="animation-delay:${i*.04}s"><div class="rank-pos">${medals[i]||(i+1)}</div><div class="rank-avatar" style="background:${u.bg};color:${u.fg}">${u.init}</div><div class="rank-info"><div class="rank-name">${u.name}${u.isMe?' <span style="font-size:11px;color:var(--green);font-weight:800">(vos)</span>':''}</div><div class="rank-sub">${u.reports} reportes este mes</div></div><div class="rank-pts-val">${u.pts.toLocaleString('es-AR')}</div></div>`).join('');
 }
 
-let toastActionTimer = null;
-function showToastAction(msg) {
-  const t = document.getElementById('toast-action');
-  document.getElementById('toast-action-msg').textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastActionTimer);
-  toastActionTimer = setTimeout(() => t.classList.remove('show'), 5000);
-}
-function hideToastAction() {
-  clearTimeout(toastActionTimer);
-  document.getElementById('toast-action').classList.remove('show');
+let prizesLoaded=false;
+async function ensurePrizesLoaded(){ if(prizesLoaded||!BACKEND_READY) return; const result=await apiGet('prizes'); if(result&&Array.isArray(result.prizes)){prizesData=result.prizes;prizesLoaded=true;} }
+
+function buildPrizes(){
+  document.getElementById('my-pts-prizes').textContent=userPts+' pts disponibles';
+  document.getElementById('prizes-list').innerHTML=prizesData.map((pr,idx)=>{ const pct=Math.min(100,Math.round((userPts/pr.pts)*100)); return `<div class="prize-row" style="animation-delay:${idx*.04}s"><div class="prize-emoji">${pr.emoji}</div><div class="prize-body"><div class="prize-name">${pr.name}</div><div class="prize-cat">${pr.pts.toLocaleString('es-AR')} pts · ${pr.cat} · ${pr.partner}</div><div class="pbar-bg"><div class="pbar-fill" style="width:0%" data-w="${pct}"></div></div></div><div class="prize-cta cant">Muy pronto</div></div>`; }).join('');
+  requestAnimationFrame(()=>{ document.querySelectorAll('.pbar-fill').forEach(el=>{el.style.width=el.dataset.w+'%';}); });
 }
 
-/* ── RANKING / PRIZES ── */
-let rankingLoaded = false;
-async function ensureRankingLoaded() {
-  if (rankingLoaded || !BACKEND_READY) return;
-  const result = await apiGet('ranking', currentUser ? { email: currentUser.email } : {});
-  if (result && Array.isArray(result.ranking)) { rankingData = result.ranking; rankingLoaded = true; }
-}
-
-function buildRanking() {
-  const sorted = [...rankingData].sort((a,b) => b.pts - a.pts);
-  const listEl = document.getElementById('rank-list');
-  if (!sorted.length) {
-    listEl.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:60px 24px;text-align:center;height:100%;"><div style="font-size:34px">🏆</div><div style="font-size:14px;font-weight:800;color:var(--text)">Todavía no hay reportes</div><div style="font-size:12.5px;color:var(--text2);max-width:220px">Sé el primero en reportar el estado de un comercio y encabezá el ranking</div></div>`;
-    return;
-  }
-  const medals = ['🥇','🥈','🥉'];
-  listEl.innerHTML = sorted.map((u,i)=>
-    `<div class="rank-row${u.isMe?' is-me':''}" style="animation-delay:${i*.04}s">
-      <div class="rank-pos">${medals[i]||(i+1)}</div>
-      <div class="rank-avatar" style="background:${u.bg};color:${u.fg}">${u.init}</div>
-      <div class="rank-info"><div class="rank-name">${u.name}${u.isMe?' <span style="font-size:11px;color:var(--green);font-weight:800">(vos)</span>':''}</div><div class="rank-sub">${u.reports} reportes este mes</div></div>
-      <div class="rank-pts-val">${u.pts.toLocaleString('es-AR')}</div>
-    </div>`
-  ).join('');
-}
-
-let prizesLoaded = false;
-async function ensurePrizesLoaded() {
-  if (prizesLoaded || !BACKEND_READY) return;
-  const result = await apiGet('prizes');
-  if (result && Array.isArray(result.prizes)) { prizesData = result.prizes; prizesLoaded = true; }
-}
-
-function buildPrizes() {
-  document.getElementById('my-pts-prizes').textContent = userPts + ' pts disponibles';
-  document.getElementById('prizes-list').innerHTML = prizesData.map((pr,idx) => {
-    const pct = Math.min(100, Math.round((userPts/pr.pts)*100));
-    return `<div class="prize-row" style="animation-delay:${idx*.04}s">
-      <div class="prize-emoji">${pr.emoji}</div>
-      <div class="prize-body">
-        <div class="prize-name">${pr.name}</div>
-        <div class="prize-cat">${pr.pts.toLocaleString('es-AR')} pts · ${pr.cat} · ${pr.partner}</div>
-        <div class="pbar-bg"><div class="pbar-fill" style="width:0%" data-w="${pct}"></div></div>
-      </div>
-      <div class="prize-cta cant">Muy pronto</div>
-    </div>`;
-  }).join('');
-  requestAnimationFrame(() => { document.querySelectorAll('.pbar-fill').forEach(el => { el.style.width = el.dataset.w + '%'; }); });
-}
-
-function switchTab(tab) {
-  ['map','ranking','prizes'].forEach(t => {
-    document.getElementById('panel-'+t).classList.toggle('visible', t===tab);
+/* ─── SWITCH TAB ─── */
+function switchTab(tab){
+  ['map','cerca','ranking','prizes'].forEach(t=>{
+    document.getElementById('panel-'+t).classList.toggle('visible',t===tab);
   });
-  if (tab === 'ranking') { buildRanking(); ensureRankingLoaded().then(buildRanking); }
-  if (tab === 'prizes')  { buildPrizes(); ensurePrizesLoaded().then(buildPrizes); }
-  if (tab === 'map' && leafletMap) setTimeout(() => leafletMap.invalidateSize(), 50);
+  if(tab==='map'&&leafletMap) setTimeout(()=>leafletMap.invalidateSize(),50);
+  if(tab==='cerca'){
+    // Cargar solo la primera vez o si cambió la ubicación
+    if(!cercaLoaded) cercaLoadPlaces();
+    else cercaApplyFilters(); // Refrescar estados desde placeIndex
+  }
+  if(tab==='ranking'){buildRanking();ensureRankingLoaded().then(buildRanking);}
+  if(tab==='prizes'){buildPrizes();ensurePrizesLoaded().then(buildPrizes);}
 }
 
-/* ─────────────── INTERVALS ─────────────── */
-setInterval(() => { tickCooldownUI(); }, 1000);
-setInterval(() => { pruneOldTiles(); persistCache(); }, 60 * 60 * 1000);
+/* ─── INTERVALS ─── */
+setInterval(()=>{ tickCooldownUI(); }, 1000);
+setInterval(()=>{ pruneOldTiles(); persistCache(); }, 60*60*1000);
+// Sync de estados del panel Cerca cada 20s si está visible
+setInterval(()=>{
+  if(document.getElementById('panel-cerca').classList.contains('visible')&&cercaAllPlaces.length){
+    cercaAllPlaces=cercaAllPlaces.map(p=>{ const updated=placeIndex.get(p.id); return updated?{...p,status:updated.status,reporters:updated.reporters}:p; });
+    cercaApplyFilters();
+  }
+},20000);
 
-/* ─────────────── INIT ─────────────── */
-window.addEventListener('DOMContentLoaded', () => {
+/* ─── INIT ─── */
+window.addEventListener('DOMContentLoaded',()=>{
   loadCache();
   loadCooldownsFromStorage();
   pruneOldTiles();
   initMap();
+  initCercaSearch();
   updateCrowdBar(calcCrowdPct());
   updateUserHUD();
   initGoogleTokenClient();
@@ -2351,30 +1883,12 @@ window.addEventListener('DOMContentLoaded', () => {
   maybeStartOccupancySync();
 });
 
-/* ─────────────── PWA ─────────────── */
-let deferredInstallPrompt = null;
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW registration failed:', err)); });
-}
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault(); deferredInstallPrompt = e;
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  if (!isStandalone) document.getElementById('install-banner').style.display = 'flex';
-});
-
-function installPwa() {
-  document.getElementById('install-banner').style.display = 'none';
-  if (!deferredInstallPrompt) return;
-  deferredInstallPrompt.prompt();
-  deferredInstallPrompt.userChoice.finally(() => { deferredInstallPrompt = null; });
-}
-
-window.addEventListener('appinstalled', () => {
-  document.getElementById('install-banner').style.display = 'none';
-  showToast('✅ Qooentum instalada');
-});
+/* ─── PWA ─── */
+let deferredInstallPrompt=null;
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('SW registration failed:',err));}); }
+window.addEventListener('beforeinstallprompt',(e)=>{ e.preventDefault();deferredInstallPrompt=e; const isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone; if(!isStandalone)document.getElementById('install-banner').style.display='flex'; });
+function installPwa(){ document.getElementById('install-banner').style.display='none'; if(!deferredInstallPrompt) return; deferredInstallPrompt.prompt(); deferredInstallPrompt.userChoice.finally(()=>{deferredInstallPrompt=null;}); }
+window.addEventListener('appinstalled',()=>{ document.getElementById('install-banner').style.display='none'; showToast('✅ Qooentum instalada'); });
 </script>
 </body>
 </html>
