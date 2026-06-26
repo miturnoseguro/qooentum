@@ -1272,10 +1272,12 @@ async function cercaLoadPlaces(forceReload) {
       placesData = await cercaFetchGeoapify(lat, lng, cercaRadius);
     }
 
-    if (!placesData.length) {
-      placesData = cercaBuildDemoPlaces(lat, lng);
-      if (errBanner) errBanner.style.display = 'flex';
-    }
+if (!placesData.length) {
+  placesData = cercaBuildDemoPlaces(lat, lng);
+  if (errBanner) errBanner.style.display = 'flex';
+} else {
+  if (errBanner) errBanner.style.display = 'none';
+}
 
     // Enriquecer con datos del backend (estados/reportes reales)
     if (BACKEND_READY) {
