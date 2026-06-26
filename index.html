@@ -1081,7 +1081,58 @@ function startGpsWatch(){
   if(gpsWatchId!==null) navigator.geolocation.clearWatch(gpsWatchId);
   gpsWatchId=navigator.geolocation.watchPosition(pos=>onGpsSuccess(pos),err=>{if(!mapInitialLoaded){const{lat,lng}=CONFIG.DEFAULT_CENTER;ensurePlacesLoadedAt(lat,lng);mapInitialLoaded=true;}},{enableHighAccuracy:true,timeout:10000,maximumAge:3000});
 }
+async function geoapifySearch(query,lat,lng) {
+  if(!GEOAPIFY_READY) return [];
+  // Filtrar localmente primero
+  const q=query.toLowerCase();
+  const localMatches=places.filter(p=>
+    p.name.toLowerCase().includes(q)||
+    p.addr.toLowerCase().includes(q)||
+    p.type.toLowerCase().includes(q)
+  ).slice(0,10);
+  if(localMatches.length>=3) return localMatches;
+  // Buscar via Places API con nombre
+  const url=`https://api.geoapify.com/v2/places?categories=commercial,catering,healthcare,leisure,government,post_office,fuel&filter=circle:${lng},${lat},5000&limit=50&apiKey=${CONFIG.GEOAPIFY_API_KEY}`;
+  try {
+    const res=await fetch(url);
+    if(!res.ok) return localMatches;
+    const data=await res.json();
+    if(!data.features) return localMatches;
+    const results=data.features
+      .map(geoapifyPlaceToPlace)
+      .filter(p=>p.name.toLowerCase().includes(q)||p.type.toLowerCase().includes(q));
+    return results.length?results:localMatches;
+  } catch(e) { return localMatches; }
+}
 
+async function cercaFetchCitySearch(query,lat,lng){
+  if(!GEOAPIFY_READY) return [];
+  const q=query.toLowerCase();
+  // Buscar en los ya cargados primero
+  const localMatches=cercaAllPlaces.filter(p=>
+    p.name.toLowerCase().includes(q)||
+    p.type.toLowerCase().includes(q)||
+    (p.addr||'').toLowerCase().includes(q)
+  );
+  // Ampliar radio via Places API
+  const url=`https://api.geoapify.com/v2/places?categories=commercial,catering,healthcare,leisure,government,post_office,fuel&filter=circle:${lng},${lat},5000&limit=100&apiKey=${CONFIG.GEOAPIFY_API_KEY}`;
+  try {
+    const res=await fetch(url);
+    if(!res.ok) return localMatches;
+    const data=await res.json();
+    if(!data.features) return localMatches;
+    const allResults=data.features.map(f=>{
+      const p=geoapifyPlaceToPlace(f);
+      p.dist=Math.round(distanceMeter(lat,lng,p.lat,p.lng));
+      p.cat=cercaGuessCategory(p.name,p.type);
+      return p;
+    }).filter(p=>p.name.toLowerCase().includes(q)||p.type.toLowerCase().includes(q));
+    // Combinar sin duplicados
+    const combined=[...localMatches];
+    allResults.forEach(r=>{ if(!combined.find(p=>p.id===r.id)) combined.push(r); });
+    return combined.slice(0,30);
+  } catch(e) { return localMatches; }
+}
 function onGpsSuccess(pos){
   const{latitude:lat,longitude:lng}=pos.coords;
   const isFirst=userLat===null;
@@ -1316,27 +1367,7 @@ if (!placesData.length) {
   }
 }
 
-async function cercaFetchCitySearch(query,lat,lng){
-  if(!GEOAPIFY_READY) return [];
-  const url=`https://api.geoapify.com/v2/geocode/search?text=${encodeURIComponent(query)}&filter=circle:${lng},${lat},5000&bias=proximity:${lng},${lat}&limit=25&lang=es&apiKey=${CONFIG.GEOAPIFY_API_KEY}`;
-  try{
-    const res=await fetch(url);
-    if(!res.ok) throw new Error('Geoapify search '+res.status);
-    const data=await res.json();
-    if(!data.features) return [];
-    return data.features
-      .filter(f=>f.properties.name&&!f.properties.name.startsWith('Unnamed'))
-      .map(f=>{
-        const existing=cercaAllPlaces.find(p=>distanceMeter(lat,lng,p.lat,p.lng)<30&&p.name===f.properties.name);
-        if(existing) return {...existing,dist:Math.round(distanceMeter(lat,lng,existing.lat,existing.lng))};
-        const p=geoapifyPlaceToPlace(f);
-        p.dist=Math.round(distanceMeter(lat,lng,p.lat,p.lng));
-        p.cat=cercaGuessCategory(p.name,p.type);
-        return p;
-      })
-      .slice(0,30);
-  }catch(e){ console.warn('City search falló:',e); return []; }
-}
+
 
 function cercaUpdateFromStore(){
   let changed=false;
