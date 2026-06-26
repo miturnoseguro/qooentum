@@ -786,7 +786,6 @@ html,body{
       <button class="cerca-r-btn" data-r="300" onclick="cercaSetRadius(300,this)">300m</button>
       <button class="cerca-r-btn" data-r="500" onclick="cercaSetRadius(500,this)">500m</button>
       <button class="cerca-r-btn active" data-r="1000" onclick="cercaSetRadius(1000,this)">1 km</button>
-      <!-- Nuevo: 2 km -->
       <button class="cerca-r-btn" data-r="2000" onclick="cercaSetRadius(2000,this)">2 km</button>
     </div>
 
@@ -889,6 +888,8 @@ html,body{
 const CONFIG = {
   APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbySr-veSK4eoAtOR1vHYB--o-ngrQqG0JC7dEeIXDKw5wZJRSdhUe5iEN4wibhsPTEX2w/exec',
   GOOGLE_CLIENT_ID: '283820904318-leis6rl3mfhtve2amj59q8sq221dg3qf.apps.googleusercontent.com',
+  // 👇 AGREGÁ TU CLAVE API DE GEOAPIFY AQUÍ (gratis en https://www.geoapify.com/)
+  GEOAPIFY_API_KEY: 'TU_CLAVE_API_GEOAPIFY',
   DEFAULT_CENTER: { lat: -34.6083, lng: -58.3896 },
   NEARBY_RADIUS_M: 30,
   REPORT_RADIUS_M: 10,
@@ -906,6 +907,7 @@ const CONFIG = {
 
 const BACKEND_READY = !CONFIG.APPS_SCRIPT_URL.startsWith('PEGAR_AQUI');
 const GOOGLE_AUTH_READY = !CONFIG.GOOGLE_CLIENT_ID.startsWith('PEGAR_AQUI');
+const GEOAPIFY_READY = CONFIG.GEOAPIFY_API_KEY && !CONFIG.GEOAPIFY_API_KEY.startsWith('TU_CLAVE');
 const SESSION_STORAGE_KEY = 'qooentum_user';
 const DEVICE_KEY = 'qooentum_device_email';
 const COOLDOWNS_STORAGE_KEY = 'qooentum_cooldowns';
@@ -925,75 +927,70 @@ const VOTE_PTS = [10,10,15,20];
 const LEVEL_TITLES = ['Novato','Explorador','Cazador de Filas','Maestro del Mapa','Leyenda Urbana'];
 const XP_PER_LEVEL = 150;
 
-/* Tipos de establecimientos ampliados */
-const OSM_TYPE_MAP = {
-  supermarket:{emoji:'🛒',tipo:'Supermercado'},
-  convenience:{emoji:'🏪',tipo:'Almacén'},
-  pharmacy:{emoji:'💊',tipo:'Farmacia'},
-  bank:{emoji:'🏦',tipo:'Banco / Cajeros'},
-  atm:{emoji:'🏧',tipo:'Cajero automático'},
-  post_office:{emoji:'📮',tipo:'Correo'},
-  fast_food:{emoji:'🍔',tipo:'Comida rápida'},
-  restaurant:{emoji:'🍽️',tipo:'Restaurante'},
-  cafe:{emoji:'☕',tipo:'Cafetería'},
-  bakery:{emoji:'🥖',tipo:'Panadería'},
-  butcher:{emoji:'🥩',tipo:'Carnicería'},
-  hospital:{emoji:'🏥',tipo:'Hospital'},
-  clinic:{emoji:'🏥',tipo:'Clínica'},
-  doctors:{emoji:'👨‍⚕️',tipo:'Consultorio'},
-  dentist:{emoji:'🦷',tipo:'Odontólogo'},
-  government:{emoji:'🏛️',tipo:'Oficina pública'},
-  townhall:{emoji:'🏛️',tipo:'Municipalidad'},
-  fuel:{emoji:'⛽',tipo:'Estación de servicio'},
-  laundry:{emoji:'👕',tipo:'Lavandería'},
-  dry_cleaning:{emoji:'👔',tipo:'Tintorería'},
-  hardware:{emoji:'🔧',tipo:'Ferretería'},
-  clothes:{emoji:'👗',tipo:'Ropa'},
-  shoes:{emoji:'👟',tipo:'Calzado'},
-  electronics:{emoji:'📱',tipo:'Electrónica'},
-  optician:{emoji:'👓',tipo:'Óptica'},
-  beauty:{emoji:'💄',tipo:'Estética'},
-  hairdresser:{emoji:'💇',tipo:'Peluquería'},
-  gym:{emoji:'🏋️',tipo:'Gimnasio'},
-  veterinary:{emoji:'🐾',tipo:'Veterinaria'},
-  marketplace:{emoji:'🛍️',tipo:'Mercado'},
-  kiosk:{emoji:'📰',tipo:'Kiosco'},
-  newsagent:{emoji:'📰',tipo:'Kiosco'},
-  greengrocer:{emoji:'🥦',tipo:'Verdulería'},
-  florist:{emoji:'💐',tipo:'Florería'},
-  car_wash:{emoji:'🚗',tipo:'Lavadero'},
-  toy:{emoji:'🧸',tipo:'Juguetería'},
-  sports:{emoji:'⚽',tipo:'Artículos deportivos'},
-  stationery:{emoji:'📚',tipo:'Librería'},
-  general:{emoji:'🏪',tipo:'Comercio general'},
-  // Nuevos
-  mobile_phone:{emoji:'📱',tipo:'Telefonía'},
-  gift:{emoji:'🎁',tipo:'Regalería'},
-  jewelry:{emoji:'💍',tipo:'Joyería'},
-  furniture:{emoji:'🛋️',tipo:'Muebles'},
-  art:{emoji:'🎨',tipo:'Galería de arte'},
-  bookshop:{emoji:'📖',tipo:'Librería'},
-  music:{emoji:'🎵',tipo:'Música'},
-  video:{emoji:'🎬',tipo:'Video / Cine'},
-  computer:{emoji:'💻',tipo:'Informática'},
-  mobile_phone_repair:{emoji:'📱',tipo:'Reparación de celulares'},
-  laundry_self_service:{emoji:'👕',tipo:'Lavandería autoservicio'},
-  tailor:{emoji:'✂️',tipo:'Sastrería'},
-  shoe_repair:{emoji:'👟',tipo:'Zapatería'},
-  key_cutter:{emoji:'🔑',tipo:'Cerrajería'},
-  locksmith:{emoji:'🔐',tipo:'Cerrajería'},
-  security:{emoji:'🛡️',tipo:'Seguridad'},
-  travel_agency:{emoji:'✈️',tipo:'Agencia de viajes'},
-  insurance:{emoji:'📋',tipo:'Seguros'},
-  real_estate:{emoji:'🏠',tipo:'Inmobiliaria'},
-  lawyer:{emoji:'⚖️',tipo:'Abogado'},
-  accountant:{emoji:'🧾',tipo:'Contador'},
-  photographer:{emoji:'📸',tipo:'Fotografía'},
-  printing:{emoji:'🖨️',tipo:'Impresión / Copias'},
-  pet_shop:{emoji:'🐶',tipo:'Tienda de mascotas'},
-  garden_centre:{emoji:'🌿',tipo:'Jardinería'},
-  construction:{emoji:'🏗️',tipo:'Materiales de construcción'},
-  paint:{emoji:'🎨',tipo:'Pinturería'},
+// Mapeo de categorías de Geoapify a nuestros tipos
+const GEOAPIFY_CAT_MAP = {
+  'commercial.supermarket': {emoji:'🛒', tipo:'Supermercado'},
+  'commercial.convenience': {emoji:'🏪', tipo:'Almacén'},
+  'commercial.pharmacy': {emoji:'💊', tipo:'Farmacia'},
+  'commercial.bank': {emoji:'🏦', tipo:'Banco'},
+  'commercial.atm': {emoji:'🏧', tipo:'Cajero'},
+  'post_office': {emoji:'📮', tipo:'Correo'},
+  'catering.fast_food': {emoji:'🍔', tipo:'Comida rápida'},
+  'catering.restaurant': {emoji:'🍽️', tipo:'Restaurante'},
+  'catering.cafe': {emoji:'☕', tipo:'Cafetería'},
+  'catering.bakery': {emoji:'🥖', tipo:'Panadería'},
+  'catering.butcher': {emoji:'🥩', tipo:'Carnicería'},
+  'healthcare.hospital': {emoji:'🏥', tipo:'Hospital'},
+  'healthcare.clinic': {emoji:'🏥', tipo:'Clínica'},
+  'healthcare.doctors': {emoji:'👨‍⚕️', tipo:'Consultorio'},
+  'healthcare.dentist': {emoji:'🦷', tipo:'Odontólogo'},
+  'government': {emoji:'🏛️', tipo:'Oficina pública'},
+  'government.townhall': {emoji:'🏛️', tipo:'Municipalidad'},
+  'fuel': {emoji:'⛽', tipo:'Estación de servicio'},
+  'commercial.laundry': {emoji:'👕', tipo:'Lavandería'},
+  'commercial.dry_cleaning': {emoji:'👔', tipo:'Tintorería'},
+  'commercial.hardware': {emoji:'🔧', tipo:'Ferretería'},
+  'commercial.clothes': {emoji:'👗', tipo:'Ropa'},
+  'commercial.shoes': {emoji:'👟', tipo:'Calzado'},
+  'commercial.electronics': {emoji:'📱', tipo:'Electrónica'},
+  'commercial.optician': {emoji:'👓', tipo:'Óptica'},
+  'commercial.beauty': {emoji:'💄', tipo:'Estética'},
+  'commercial.hairdresser': {emoji:'💇', tipo:'Peluquería'},
+  'leisure.gym': {emoji:'🏋️', tipo:'Gimnasio'},
+  'commercial.veterinary': {emoji:'🐾', tipo:'Veterinaria'},
+  'commercial.marketplace': {emoji:'🛍️', tipo:'Mercado'},
+  'commercial.kiosk': {emoji:'📰', tipo:'Kiosco'},
+  'commercial.greengrocer': {emoji:'🥦', tipo:'Verdulería'},
+  'commercial.florist': {emoji:'💐', tipo:'Florería'},
+  'commercial.car_wash': {emoji:'🚗', tipo:'Lavadero'},
+  'commercial.toys': {emoji:'🧸', tipo:'Juguetería'},
+  'commercial.sports': {emoji:'⚽', tipo:'Artículos deportivos'},
+  'commercial.stationery': {emoji:'📚', tipo:'Librería'},
+  'commercial.mobile_phone': {emoji:'📱', tipo:'Telefonía'},
+  'commercial.gift': {emoji:'🎁', tipo:'Regalería'},
+  'commercial.jewelry': {emoji:'💍', tipo:'Joyería'},
+  'commercial.furniture': {emoji:'🛋️', tipo:'Muebles'},
+  'commercial.art': {emoji:'🎨', tipo:'Galería de arte'},
+  'commercial.bookshop': {emoji:'📖', tipo:'Librería'},
+  'commercial.music': {emoji:'🎵', tipo:'Música'},
+  'commercial.video': {emoji:'🎬', tipo:'Video / Cine'},
+  'commercial.computer': {emoji:'💻', tipo:'Informática'},
+  'commercial.tailor': {emoji:'✂️', tipo:'Sastrería'},
+  'commercial.shoe_repair': {emoji:'👟', tipo:'Zapatería'},
+  'commercial.key_cutter': {emoji:'🔑', tipo:'Cerrajería'},
+  'commercial.locksmith': {emoji:'🔐', tipo:'Cerrajería'},
+  'commercial.security': {emoji:'🛡️', tipo:'Seguridad'},
+  'commercial.travel_agency': {emoji:'✈️', tipo:'Agencia de viajes'},
+  'commercial.insurance': {emoji:'📋', tipo:'Seguros'},
+  'commercial.real_estate': {emoji:'🏠', tipo:'Inmobiliaria'},
+  'professional.lawyer': {emoji:'⚖️', tipo:'Abogado'},
+  'professional.accountant': {emoji:'🧾', tipo:'Contador'},
+  'professional.photographer': {emoji:'📸', tipo:'Fotografía'},
+  'commercial.printing': {emoji:'🖨️', tipo:'Impresión / Copias'},
+  'commercial.pet_shop': {emoji:'🐶', tipo:'Tienda de mascotas'},
+  'commercial.garden_centre': {emoji:'🌿', tipo:'Jardinería'},
+  'commercial.construction': {emoji:'🏗️', tipo:'Materiales de construcción'},
+  'commercial.paint': {emoji:'🎨', tipo:'Pinturería'},
 };
 
 const SEED_PRIZES = [
@@ -1043,7 +1040,6 @@ async function syncOccupancyStatus() {
       buildMapMarkers(nearbyPlaces.length ? nearbyPlaces : places);
       updateCrowdBar(calcCrowdPct());
       if (currentPopupPlace) { const u = placeIndex.get(currentPopupPlace.id); if (u) { Object.assign(currentPopupPlace,u); renderPopup(currentPopupPlace,isLoggedIn,currentUser); } }
-      // Actualizar también el panel Cerca si está visible
       if (document.getElementById('panel-cerca').classList.contains('visible')) {
         cercaUpdateFromStore();
       }
@@ -1091,35 +1087,86 @@ async function apiGet(action,params={}) { if (!BACKEND_READY) return null; const
 async function apiPost(action,payload={}) { if (!BACKEND_READY) return null; try { const res=await fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify({action,...payload})}); const data=await res.json(); if (!data.ok) throw new Error(data.error||'Error de backend'); return data.result; } catch(err) { console.warn('apiPost falló:',action,err); showToast('⚠️ No se pudo conectar con el servidor'); return null; } }
 async function apiPostVote(payload) { if (!BACKEND_READY) return {ok:false,network:false,result:null}; try { const res=await fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'vote',...payload})}); const data=await res.json(); if (!data.ok) { const msg=String(data.error||''); if (msg.startsWith('COOLDOWN:')) return {ok:false,network:false,cooldown:true,nextVoteAt:msg.slice('COOLDOWN:'.length)}; throw new Error(msg||'Error de backend'); } return {ok:true,network:true,result:data.result}; } catch(err) { console.warn('apiPost falló: vote',err); return {ok:false,network:false,result:null}; } }
 
-/* ─── OVERPASS API ─── */
-function osmNodeToPlace(node) {
-  const tags=node.tags||{};
-  const key=tags.amenity||tags.shop||tags.office||'general';
-  const info=OSM_TYPE_MAP[key]||{emoji:'🏪',tipo:'Comercio'};
-  const name=tags.name||tags['name:es']||info.tipo;
-  const addr=[tags['addr:street'],tags['addr:housenumber']].filter(Boolean).join(' ')||'Sin dirección';
-  return { id:`osm_${node.id}`, name, type:info.tipo, logo:info.emoji, lat:node.lat, lng:node.lon, addr, status:0, reporters:0, rating:(3.5+Math.random()*1.4).toFixed(1), reviewsN:Math.floor(Math.random()*200+10), open:true, verified:false, fromOSM:true };
+/* ─── GEOAPIFY API ─── */
+function geoapifyPlaceToPlace(feature) {
+  const props = feature.properties;
+  const cat = props.categories?.[0] || 'commercial.general';
+  const info = GEOAPIFY_CAT_MAP[cat] || {emoji:'🏪', tipo:'Comercio'};
+  const name = props.name || 'Sin nombre';
+  const addr = [props.street, props.housenumber].filter(Boolean).join(' ') || props.address_line2 || 'Sin dirección';
+  return {
+    id: `geo_${feature.properties.place_id || feature.id}`,
+    name,
+    type: info.tipo,
+    logo: info.emoji,
+    lat: feature.geometry.coordinates[1],
+    lng: feature.geometry.coordinates[0],
+    addr,
+    status: 0,
+    reporters: 0,
+    rating: (3.5 + Math.random() * 1.4).toFixed(1),
+    reviewsN: Math.floor(Math.random() * 200 + 10),
+    open: true,
+    verified: false,
+    fromGeoapify: true,
+  };
 }
 
-async function loadOverpassForTiles(tileKeys) {
+// Carga lugares en un área usando Geoapify Places
+async function loadGeoapifyForTiles(tileKeys) {
+  if (!GEOAPIFY_READY) return [];
   if (!tileKeys.length) return [];
   let minLat=Infinity,minLng=Infinity,maxLat=-Infinity,maxLng=-Infinity;
   tileKeys.forEach(key=>{ const [s,w,n,e]=tileToBbox(key); if (s<minLat) minLat=s; if (w<minLng) minLng=w; if (n>maxLat) maxLat=n; if (e>maxLng) maxLng=e; });
-  // Ampliamos la lista de amenity y shop para incluir más comercios
-  const amenityFilter='supermarket|pharmacy|bank|atm|fast_food|restaurant|cafe|bakery|hospital|clinic|doctors|dentist|post_office|fuel|marketplace|townhall|veterinary|gym|hairdresser|beauty|optician|car_wash|laundry|dry_cleaning|hardware|electronics|mobile_phone|jewelry|furniture|bookshop|music|video|computer|travel_agency|insurance|real_estate|lawyer|accountant|photographer|printing|pet_shop|garden_centre|construction|paint|key_cutter|locksmith|security';
-  const shopFilter='supermarket|convenience|pharmacy|bakery|butcher|hardware|clothes|shoes|hairdresser|greengrocer|newsagent|kiosk|beauty|optician|sports|toy|stationery|florist|car_wash|laundry|electronics|mobile_phone|gift|jewelry|furniture|art|bookshop|music|video|computer|travel_agency|insurance|real_estate|pet|garden_centre|paint|key_cutter|locksmith|security|tailor|shoe_repair';
-  const maxResults = 200; // más resultados
-  const q=`[out:json][timeout:18];(node["amenity"~"^(${amenityFilter})$"](${minLat},${minLng},${maxLat},${maxLng});node["shop"~"^(${shopFilter})$"](${minLat},${minLng},${maxLat},${maxLng}););out body ${maxResults};`;
+  // Expandimos un poco el bbox para no perder bordes
+  const pad=0.002;
+  const bbox = `${minLng-pad},${minLat-pad},${maxLng+pad},${maxLat+pad}`;
+  // Categorías comerciales, de servicios, salud, etc.
+  const categories = [
+    'commercial', 'catering', 'healthcare', 'leisure', 'government',
+    'post_office', 'fuel', 'professional', 'transport'
+  ].join(',');
+  const url = `https://api.geoapify.com/v2/places?categories=${categories}&filter=rect${bbox}&limit=300&apiKey=${CONFIG.GEOAPIFY_API_KEY}`;
   try {
-    const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q),headers:{'Content-Type':'application/x-www-form-urlencoded'}});
-    if (!res.ok) throw new Error('Overpass HTTP '+res.status);
-    const data=await res.json();
-    return (data.elements||[])
-      .filter(n=>n.type==='node'&&n.tags&&n.tags.name)
-      .map(osmNodeToPlace);
-  } catch(e) { console.warn('Overpass falló:',e); return []; }
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Geoapify HTTP ' + res.status);
+    const data = await res.json();
+    if (!data.features || !data.features.length) return [];
+    return data.features.map(geoapifyPlaceToPlace);
+  } catch (e) {
+    console.warn('Geoapify falló:', e);
+    return [];
+  }
 }
 
+// Función para búsqueda de lugares por texto usando Geoapify Geocode
+async function geoapifySearch(query, lat, lng) {
+  if (!GEOAPIFY_READY) return [];
+  const url = `https://api.geoapify.com/v2/geocode/search?text=${encodeURIComponent(query)}&filter=circle:${lng},${lat},5000&bias=proximity:${lng},${lat}&limit=20&lang=es&apiKey=${CONFIG.GEOAPIFY_API_KEY}`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Geoapify search HTTP ' + res.status);
+    const data = await res.json();
+    if (!data.features) return [];
+    return data.features
+      .filter(f => f.properties.name && !f.properties.name.startsWith('Unnamed'))
+      .map(f => {
+        const existing = places.find(p => {
+          const d = distanceMeter(lat, lng, p.lat, p.lng);
+          return d < 30 && p.name === f.properties.name;
+        });
+        if (existing) return existing;
+        const place = geoapifyPlaceToPlace(f);
+        place.fromSearch = true;
+        return place;
+      });
+  } catch (e) {
+    console.warn('Geoapify search falló:', e);
+    return [];
+  }
+}
+
+/* ─── CARGA DE LUGARES (reemplaza Overpass) ─── */
 async function ensurePlacesLoadedAt(lat,lng) {
   const tileKey=latLngToTileKey(lat,lng);
   const adjacentKeys=getAdjacentTileKeys(lat,lng);
@@ -1133,11 +1180,11 @@ async function ensurePlacesLoadedAt(lat,lng) {
     return;
   }
   if (!mapInitialLoaded) mapInitialLoaded=true;
-  const [osmPlaces,backendResult]=await Promise.all([loadOverpassForTiles(missingKeys), BACKEND_READY?apiGet('sync_places',{lat,lng,radius:Math.round(CONFIG.TILE_DEG*111320*1.5)}):Promise.resolve(null)]);
+  const [geoPlaces,backendResult]=await Promise.all([loadGeoapifyForTiles(missingKeys), BACKEND_READY?apiGet('sync_places',{lat,lng,radius:Math.round(CONFIG.TILE_DEG*111320*1.5)}):Promise.resolve(null)]);
   const backendPlaces=(backendResult&&Array.isArray(backendResult.places))?backendResult.places:[];
   const backendById=new Map(backendPlaces.map(p=>[p.id,p]));
-  const merged=osmPlaces.map(p=>{ const bp=backendById.get(p.id); return bp?{...p,...bp}:p; });
-  const onlyBackend=backendPlaces.filter(p=>!osmPlaces.find(o=>o.id===p.id));
+  const merged=geoPlaces.map(p=>{ const bp=backendById.get(p.id); return bp?{...p,...bp}:p; });
+  const onlyBackend=backendPlaces.filter(p=>!geoPlaces.find(o=>o.id===p.id));
   const allNew=[...merged,...onlyBackend];
   missingKeys.forEach(key=>{ const [s,w,n,e]=tileToBbox(key); const forThisTile=allNew.filter(p=>p.lat>=s&&p.lat<=n&&p.lng>=w&&p.lng<=e); mergePlacesIntoCache(forThisTile,key); });
   persistCache(); rebuildNearby(lat,lng); buildMapMarkers(nearbyPlaces); updateCrowdBar(calcCrowdPct());
@@ -1167,22 +1214,18 @@ function rebuildNearby(lat,lng) {
   placeIndex.forEach(p=>{ if (distanceMeter(lat,lng,p.lat,p.lng)<=maxDistM) nearbyPlaces.push(p); });
 }
 
-/* ─── SEARCH (mapa) ─── */
+/* ─── SEARCH (mapa) con Geoapify ─── */
 async function searchPlacesByQuery(query) {
   if (!query||query.length<2) return [];
   const q=query.toLowerCase();
   const localMatches=places.filter(p=>p.name.toLowerCase().includes(q)||p.addr.toLowerCase().includes(q)||p.type.toLowerCase().includes(q)).slice(0,5);
   if (localMatches.length>=3) return localMatches;
-  try {
-    const viewboxLat=userLat||CONFIG.DEFAULT_CENTER.lat, viewboxLng=userLng||CONFIG.DEFAULT_CENTER.lng, delta=0.05;
-    const viewbox=`${viewboxLng-delta},${viewboxLat-delta},${viewboxLng+delta},${viewboxLat+delta}`;
-    const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=6&addressdetails=1&bounded=0&viewbox=${viewbox}&countrycodes=ar&dedupe=1`;
-    const res=await fetch(url,{headers:{'Accept-Language':'es','User-Agent':'Qooentum/1.0'}});
-    if (!res.ok) throw new Error('Nominatim error');
-    const data=await res.json();
-    const relevant=data.filter(r=>!['highway','boundary','landuse','natural','water'].includes(r.class));
-    return relevant.map(r=>{ const osmId=`osm_${r.osm_type}_${r.osm_id}`; const existing=places.find(p=>p.id===osmId||(Math.abs(p.lat-parseFloat(r.lat))<0.0002&&Math.abs(p.lng-parseFloat(r.lon))<0.0002)); if (existing) return existing; const key=r.type||r.class||'general'; const info=OSM_TYPE_MAP[key]||{emoji:'🏪',tipo:r.type||'Lugar'}; const addr=r.display_name.split(',').slice(0,3).join(', '); return {id:osmId,name:r.name||r.display_name.split(',')[0],type:info.tipo,logo:info.emoji,lat:parseFloat(r.lat),lng:parseFloat(r.lon),addr,status:0,reporters:0,rating:(3.5+Math.random()*1.2).toFixed(1),reviewsN:Math.floor(Math.random()*80+5),open:true,verified:false,fromOSM:true,fromSearch:true}; }).slice(0,6);
-  } catch(e) { console.warn('Search falló:',e); return localMatches; }
+  if (GEOAPIFY_READY && userLat !== null && userLng !== null) {
+    const results = await geoapifySearch(query, userLat, userLng);
+    if (results.length) return results;
+  }
+  // Fallback a datos locales
+  return localMatches;
 }
 
 const searchInput=()=>document.getElementById('map-search-input');
@@ -1223,7 +1266,7 @@ function clearSearch() { searchInput().value=''; searchClear().classList.remove(
 function openSearchResultPopup(place) { const existing=places.find(p=>p.id===place.id); if (!existing) places.push(place); place._fromSearch=true; openPlacePopup(place); }
 
 /* ════════════════════════════════════════════════════════════
-   REACT POPUP
+   REACT POPUP (sin cambios)
    ════════════════════════════════════════════════════════════ */
 const { useState, useEffect, useRef } = React;
 
@@ -1331,7 +1374,6 @@ async function handlePopupVoteSubmit(placeId,voteIdx) {
   if (!canReportThisPlace(p)){showToast(`📍 Tenés que estar dentro del comercio para reportar`);return;}
   applyLocalCooldown(placeId); p.status=voteIdx; p.reporters+=1; voteCount++;
   placeStore[p.id]=p; refreshMarkerIcon(p.id); updateCrowdBar(calcCrowdPct());
-  // Actualizar panel Cerca en tiempo real
   if (document.getElementById('panel-cerca').classList.contains('visible')) {
     cercaUpdateFromStore();
   }
@@ -1457,7 +1499,7 @@ async function manualRefresh(){
 }
 
 /* ════════════════════════════════════════════════════════════
-   PANEL CERCA — lógica completa (mejorada)
+   PANEL CERCA — con Geoapify
    ════════════════════════════════════════════════════════════ */
 let cercaAllPlaces=[], cercaFiltered=[];
 let cercaRadius=1000, cercaCat='all', cercaSearchQ='', cercaSortMode='distance', cercaSortIdx=0;
@@ -1485,64 +1527,71 @@ function cercaGuessCategory(name,type){
   return 'other';
 }
 
-function cercaGuessEmoji(name,type){
-  const l=(name||'').toLowerCase();
-  if(l.includes('farmaci')||l.includes('pharmacy')) return '💊';
-  if(l.includes('hospital')||l.includes('clínic')||l.includes('centro de salud')) return '🏥';
-  if(l.includes('banco')||l.includes('bank')||l.includes('cajero')||l.includes('atm')) return '🏦';
-  if(l.includes('supermerc')||l.includes('carrefour')||l.includes('disco')||l.includes('coto')||l.includes('jumbo')) return '🛒';
-  if(l.includes('café')||l.includes('coffee')||l.includes('cafeter')) return '☕';
-  if(l.includes('panadería')||l.includes('bakery')) return '🥖';
-  if(l.includes('pizza')) return '🍕';
-  if(l.includes('correo')) return '📮';
-  if(l.includes('municipalidad')||l.includes('anses')||l.includes('gobierno')||l.includes('registro')) return '🏛️';
-  if(l.includes('restaurant')||l.includes('bife')||l.includes('parrill')) return '🍽️';
-  if(l.includes('helad')) return '🍦';
-  if(l.includes('peluquer')) return '💇';
-  if(l.includes('veterinar')) return '🐾';
-  if(l.includes('ferretera')) return '🔧';
-  if(l.includes('ropa')||l.includes('vestir')||l.includes('indumentaria')) return '👗';
-  if(l.includes('electrónica')||l.includes('computadora')||l.includes('celular')) return '📱';
-  return '🏪';
-}
-
 function cercaFmtDist(m){ return m<1000?m+'m':(m/1000).toFixed(1)+'km'; }
 
-async function cercaFetchOverpass(lat,lng,radius){
+// Carga de lugares con Geoapify para el panel Cerca
+async function cercaFetchGeoapify(lat,lng,radius){
   if(cercaAbortController) cercaAbortController.abort();
   cercaAbortController=new AbortController();
   const signal=cercaAbortController.signal;
   const pad=0.0006+(radius/111320)*1.3;
-  const s=lat-pad,w=lng-pad,n=lat+pad,e=lng+pad;
-  const amenities='supermarket|pharmacy|bank|atm|fast_food|restaurant|cafe|bakery|hospital|clinic|doctors|dentist|post_office|marketplace|fuel|townhall|veterinary|gym|hairdresser|beauty|optician|car_wash|laundry|dry_cleaning|hardware|electronics|mobile_phone|jewelry|furniture|bookshop|music|video|computer|travel_agency|insurance|real_estate|lawyer|accountant|photographer|printing|pet_shop|garden_centre|construction|paint|key_cutter|locksmith|security';
-  const shops='supermarket|convenience|pharmacy|bakery|butcher|hardware|clothes|shoes|hairdresser|greengrocer|newsagent|kiosk|beauty|optician|sports|toy|stationery|florist|car_wash|laundry|electronics|mobile_phone|gift|jewelry|furniture|art|bookshop|music|video|computer|travel_agency|insurance|real_estate|pet|garden_centre|paint|key_cutter|locksmith|security|tailor|shoe_repair';
-  const maxResults=radius<=200?60:radius<=500?150:radius<=1000?300:500;
-  const q=`[out:json][timeout:20];(node["amenity"~"^(${amenities})$"](${s},${w},${n},${e});node["shop"~"^(${shops})$"](${s},${w},${n},${e}););out body ${maxResults};`;
-  const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q),headers:{'Content-Type':'application/x-www-form-urlencoded'},signal});
-  if(!res.ok) throw new Error('Overpass HTTP '+res.status);
-  const data=await res.json();
-  return (data.elements||[])
-    .filter(el=>el.tags&&el.tags.name)
-    .map(el=>{
-      const t=el.tags||{}, name=t.name||t['name:es']||'Sin nombre';
-      const key=t.amenity||t.shop||'general';
-      const osmInfo=OSM_TYPE_MAP[key]||{emoji:'🏪',tipo:'Comercio'};
-      const addr=[t['addr:street'],t['addr:housenumber']].filter(Boolean).join(' ')||'';
-      const dist=Math.round(distanceMeter(lat,lng,el.lat,el.lon));
-      const type=osmInfo.tipo;
-      const cat=cercaGuessCategory(name,type);
-      const existing=placeIndex.get(`osm_${el.id}`);
-      return {
-        id:`osm_${el.id}`, name, type, emoji:osmInfo.emoji,
-        cat, addr, dist, lat:el.lat, lng:el.lon, open:true, verified:false,
-        rating:existing?.rating||(3.5+Math.random()*1.3).toFixed(1),
-        reviewsN:existing?.reviewsN||Math.floor(Math.random()*200+10),
-        status:existing?.status||0, reporters:existing?.reporters||0,
-        sponsor:existing?.sponsor||null,
-      };
-    })
-    .filter(p=>p.dist<=radius)
-    .sort((a,b)=>a.dist-b.dist);
+  const bbox = `${lng-pad},${lat-pad},${lng+pad},${lat+pad}`;
+  const categories = [
+    'commercial', 'catering', 'healthcare', 'leisure', 'government',
+    'post_office', 'fuel', 'professional', 'transport'
+  ].join(',');
+  const limit = radius <= 500 ? 120 : 300;
+  const url = `https://api.geoapify.com/v2/places?categories=${categories}&filter=rect${bbox}&limit=${limit}&apiKey=${CONFIG.GEOAPIFY_API_KEY}`;
+  try {
+    const res=await fetch(url, { signal });
+    if(!res.ok) throw new Error('Geoapify HTTP '+res.status);
+    const data=await res.json();
+    if(!data.features) return [];
+    return data.features
+      .map(feature => {
+        const p = geoapifyPlaceToPlace(feature);
+        const dist = Math.round(distanceMeter(lat, lng, p.lat, p.lng));
+        p.dist = dist;
+        const cat = cercaGuessCategory(p.name, p.type);
+        p.cat = cat;
+        const existing = placeIndex.get(p.id);
+        if (existing) {
+          p.status = existing.status;
+          p.reporters = existing.reporters;
+          p.sponsor = existing.sponsor;
+        }
+        return p;
+      })
+      .filter(p => p.dist <= radius)
+      .sort((a,b) => a.dist - b.dist);
+  } catch(e) {
+    if (e.name === 'AbortError') return [];
+    console.warn('Geoapify panel Cerca falló:', e);
+    return [];
+  }
+}
+
+// Fallback a demo si no hay datos
+function cercaBuildDemoPlaces(lat,lng){
+  const demos=[
+    {name:'Carrefour Express',type:'Supermercado',emoji:'🛒',cat:'supermarket',addr:'Av. Corrientes 1234',dlat:0.0012,dlng:0.0008,open:true,status:2,reporters:14,rating:'4.2',reviewsN:1200,verified:true},
+    {name:'Farmacity',type:'Farmacia',emoji:'💊',cat:'health',addr:'Florida 340',dlat:0.0004,dlng:0.0015,open:true,status:0,reporters:5,rating:'4.0',reviewsN:856,verified:true},
+    {name:'Banco Nación',type:'Banco',emoji:'🏦',cat:'bank',addr:'Florida 236',dlat:-0.0006,dlng:0.0010,open:true,status:2,reporters:18,rating:'3.2',reviewsN:430,verified:false},
+    {name:'Rapipago',type:'Pagos',emoji:'💳',cat:'bank',addr:'Lavalle 870',dlat:0.0009,dlng:-0.0005,open:true,status:1,reporters:7,rating:'3.6',reviewsN:210,verified:false},
+    {name:'Starbucks',type:'Cafetería',emoji:'☕',cat:'food',addr:'Av. Santa Fe 800',dlat:-0.0003,dlng:0.0018,open:true,status:0,reporters:3,rating:'4.4',reviewsN:2100,verified:false},
+    {name:"McDonald's",type:'Comida rápida',emoji:'🍔',cat:'food',addr:'Corrientes 567',dlat:0.0018,dlng:-0.0002,open:true,status:3,reporters:22,rating:'3.9',reviewsN:3400,verified:false},
+    {name:'ANSES',type:'Oficina pública',emoji:'🏛️',cat:'government',addr:'Lima 121',dlat:-0.0015,dlng:0.0003,open:false,status:1,reporters:9,rating:'2.8',reviewsN:720,verified:false},
+    {name:'Hospital Ramos Mejía',type:'Hospital',emoji:'🏥',cat:'health',addr:'Gral. Urquiza 609',dlat:0.0022,dlng:0.0011,open:true,status:2,reporters:16,rating:'3.5',reviewsN:580,verified:false},
+    {name:'Disco',type:'Supermercado',emoji:'🏪',cat:'supermarket',addr:'Av. Callao 540',dlat:-0.0008,dlng:-0.0014,open:true,status:3,reporters:22,rating:'3.8',reviewsN:2100,verified:false},
+    {name:'Correo Argentino',type:'Correo',emoji:'📮',cat:'government',addr:'Sarmiento 151',dlat:0.0005,dlng:-0.0018,open:true,status:1,reporters:6,rating:'3.1',reviewsN:340,verified:false},
+    {name:'Zara',type:'Ropa',emoji:'👗',cat:'shopping',addr:'Av. Santa Fe 1200',dlat:0.0011,dlng:0.0019,open:true,status:0,reporters:2,rating:'4.3',reviewsN:560,verified:false},
+    {name:'Falabella',type:'Tienda departamental',emoji:'🛍️',cat:'shopping',addr:'Av. Florida 800',dlat:-0.0007,dlng:0.0012,open:true,status:1,reporters:5,rating:'3.9',reviewsN:980,verified:false},
+  ];
+  return demos.map((d,i)=>{
+    const plat=lat+d.dlat,plng=lng+d.dlng;
+    const dist=Math.round(distanceMeter(lat,lng,plat,plng));
+    return {id:`demo_${i}`,name:d.name,type:d.type,emoji:d.emoji,cat:d.cat,addr:d.addr,dist,lat:plat,lng:plng,open:d.open,verified:d.verified,rating:d.rating,reviewsN:d.reviewsN,status:d.status,reporters:d.reporters,sponsor:null};
+  }).filter(p=>p.dist<=cercaRadius);
 }
 
 function cercaShowSkeleton(){
@@ -1569,16 +1618,35 @@ async function cercaLoadPlaces(forceReload){
   const lat=userLat??CONFIG.DEFAULT_CENTER.lat, lng=userLng??CONFIG.DEFAULT_CENTER.lng;
 
   try{
-    const osmPlaces=await cercaFetchOverpass(lat,lng,cercaRadius);
-    const sponsorMap=new Map();
-    placeIndex.forEach((p,id)=>{ if(p.sponsor) sponsorMap.set(id,p.sponsor); });
-    cercaAllPlaces=osmPlaces.map(p=>({ ...p, sponsor:sponsorMap.get(p.id)||p.sponsor||null }));
-    if(!cercaAllPlaces.length) cercaAllPlaces=cercaBuildDemoPlaces(lat,lng);
+    let placesData = [];
+    if (GEOAPIFY_READY) {
+      placesData = await cercaFetchGeoapify(lat, lng, cercaRadius);
+    }
+    if (!placesData.length) {
+      // fallback a demo
+      placesData = cercaBuildDemoPlaces(lat, lng);
+      document.getElementById('cerca-error-banner').style.display='flex';
+    }
+    // Enriquecer con datos de backend
+    const backendResult = BACKEND_READY ? await apiGet('sync_places', {lat, lng, radius: cercaRadius, status_only: 1}) : null;
+    if (backendResult && Array.isArray(backendResult.places)) {
+      const backendMap = new Map(backendResult.places.map(bp => [bp.id, bp]));
+      placesData = placesData.map(p => {
+        const bp = backendMap.get(p.id);
+        if (bp) {
+          p.status = bp.status ?? p.status;
+          p.reporters = bp.reporters ?? p.reporters;
+        }
+        return p;
+      });
+    }
+    cercaAllPlaces = placesData;
+    if (!cercaAllPlaces.length) cercaAllPlaces = cercaBuildDemoPlaces(lat,lng);
     const now=new Date();
     document.getElementById('cerca-updated-lbl').textContent=`Actualizado ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
   }catch(err){
     if(err.name==='AbortError') return;
-    console.warn('Overpass panel Cerca falló:',err);
+    console.warn('Error cargando cerca:', err);
     document.getElementById('cerca-error-banner').style.display='flex';
     cercaAllPlaces=cercaBuildDemoPlaces(lat,lng);
   }finally{
@@ -1588,56 +1656,32 @@ async function cercaLoadPlaces(forceReload){
   }
 }
 
-function cercaBuildDemoPlaces(lat,lng){
-  const demos=[
-    {name:'Carrefour Express',type:'Supermercado',emoji:'🛒',cat:'supermarket',addr:'Av. Corrientes 1234',dlat:0.0012,dlng:0.0008,open:true,status:2,reporters:14,rating:'4.2',reviewsN:1200,verified:true},
-    {name:'Farmacity',type:'Farmacia',emoji:'💊',cat:'health',addr:'Florida 340',dlat:0.0004,dlng:0.0015,open:true,status:0,reporters:5,rating:'4.0',reviewsN:856,verified:true},
-    {name:'Banco Nación',type:'Banco',emoji:'🏦',cat:'bank',addr:'Florida 236',dlat:-0.0006,dlng:0.0010,open:true,status:2,reporters:18,rating:'3.2',reviewsN:430,verified:false},
-    {name:'Rapipago',type:'Pagos',emoji:'💳',cat:'bank',addr:'Lavalle 870',dlat:0.0009,dlng:-0.0005,open:true,status:1,reporters:7,rating:'3.6',reviewsN:210,verified:false},
-    {name:'Starbucks',type:'Cafetería',emoji:'☕',cat:'food',addr:'Av. Santa Fe 800',dlat:-0.0003,dlng:0.0018,open:true,status:0,reporters:3,rating:'4.4',reviewsN:2100,verified:false},
-    {name:"McDonald's",type:'Comida rápida',emoji:'🍔',cat:'food',addr:'Corrientes 567',dlat:0.0018,dlng:-0.0002,open:true,status:3,reporters:22,rating:'3.9',reviewsN:3400,verified:false},
-    {name:'ANSES',type:'Oficina pública',emoji:'🏛️',cat:'government',addr:'Lima 121',dlat:-0.0015,dlng:0.0003,open:false,status:1,reporters:9,rating:'2.8',reviewsN:720,verified:false},
-    {name:'Hospital Ramos Mejía',type:'Hospital',emoji:'🏥',cat:'health',addr:'Gral. Urquiza 609',dlat:0.0022,dlng:0.0011,open:true,status:2,reporters:16,rating:'3.5',reviewsN:580,verified:false},
-    {name:'Disco',type:'Supermercado',emoji:'🏪',cat:'supermarket',addr:'Av. Callao 540',dlat:-0.0008,dlng:-0.0014,open:true,status:3,reporters:22,rating:'3.8',reviewsN:2100,verified:false},
-    {name:'Correo Argentino',type:'Correo',emoji:'📮',cat:'government',addr:'Sarmiento 151',dlat:0.0005,dlng:-0.0018,open:true,status:1,reporters:6,rating:'3.1',reviewsN:340,verified:false},
-    {name:'Zara',type:'Ropa',emoji:'👗',cat:'shopping',addr:'Av. Santa Fe 1200',dlat:0.0011,dlng:0.0019,open:true,status:0,reporters:2,rating:'4.3',reviewsN:560,verified:false},
-    {name:'Falabella',type:'Tienda departamental',emoji:'🛍️',cat:'shopping',addr:'Av. Florida 800',dlat:-0.0007,dlng:0.0012,open:true,status:1,reporters:5,rating:'3.9',reviewsN:980,verified:false},
-  ];
-  return demos.map((d,i)=>{
-    const plat=lat+d.dlat,plng=lng+d.dlng;
-    const dist=Math.round(distanceMeter(lat,lng,plat,plng));
-    return {id:`demo_${i}`,name:d.name,type:d.type,emoji:d.emoji,cat:d.cat,addr:d.addr,dist,lat:plat,lng:plng,open:d.open,verified:d.verified,rating:d.rating,reviewsN:d.reviewsN,status:d.status,reporters:d.reporters,sponsor:null};
-  }).filter(p=>p.dist<=cercaRadius);
-}
-
 async function cercaFetchCitySearch(query, lat, lng){
-  const delta=0.14;
-  const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=25&addressdetails=1&bounded=0&viewbox=${lng-delta},${lat-delta},${lng+delta},${lat+delta}&countrycodes=ar&dedupe=1`;
+  if (!GEOAPIFY_READY) return [];
+  const url = `https://api.geoapify.com/v2/geocode/search?text=${encodeURIComponent(query)}&filter=circle:${lng},${lat},5000&bias=proximity:${lng},${lat}&limit=25&lang=es&apiKey=${CONFIG.GEOAPIFY_API_KEY}`;
   try{
-    const res=await fetch(url,{headers:{'Accept-Language':'es','User-Agent':'Qooentum/1.0'}});
-    if(!res.ok) throw new Error('Nominatim '+res.status);
+    const res=await fetch(url);
+    if(!res.ok) throw new Error('Geoapify search '+res.status);
     const data=await res.json();
-    return data
-      .filter(r=>!['highway','boundary','landuse','natural','water','suburb','city','town','village'].includes(r.class))
-      .map(r=>{
-        const osmId=`osm_${r.osm_type}_${r.osm_id}`;
-        const existing=placeIndex.get(osmId)||(places||[]).find(p=>Math.abs(p.lat-parseFloat(r.lat))<0.0003&&Math.abs(p.lng-parseFloat(r.lon))<0.0003);
-        const plat=parseFloat(r.lat), plng=parseFloat(r.lon);
-        const dist=Math.round(distanceMeter(lat,lng,plat,plng));
-        if(existing) return {...existing, dist};
-        const key=r.type||r.class||'general';
-        const info=OSM_TYPE_MAP[key]||{emoji:'🏪',tipo:r.type||'Lugar'};
-        const addr=r.display_name.split(',').slice(0,3).join(', ');
-        const name=r.name||r.display_name.split(',')[0];
-        const cat=cercaGuessCategory(name,info.tipo);
-        return {id:osmId,name,type:info.tipo,emoji:info.emoji,cat,addr,dist,lat:plat,lng:plng,open:true,verified:false,rating:(3.5+Math.random()*1.2).toFixed(1),reviewsN:Math.floor(Math.random()*80+5),status:0,reporters:0,sponsor:null};
+    if(!data.features) return [];
+    return data.features
+      .filter(f => f.properties.name && !f.properties.name.startsWith('Unnamed'))
+      .map(f => {
+        const existing = cercaAllPlaces.find(p => {
+          const d = distanceMeter(lat, lng, p.lat, p.lng);
+          return d < 30 && p.name === f.properties.name;
+        });
+        if (existing) return { ...existing, dist: Math.round(distanceMeter(lat, lng, existing.lat, existing.lng)) };
+        const p = geoapifyPlaceToPlace(f);
+        p.dist = Math.round(distanceMeter(lat, lng, p.lat, p.lng));
+        p.cat = cercaGuessCategory(p.name, p.type);
+        return p;
       })
       .slice(0,30);
   }catch(e){ console.warn('City search falló:',e); return []; }
 }
 
 function cercaUpdateFromStore() {
-  // Actualiza los status/reporters de la lista actual desde placeStore
   let changed=false;
   cercaAllPlaces = cercaAllPlaces.map(p => {
     const stored = placeIndex.get(p.id);
@@ -1673,9 +1717,9 @@ function cercaApplyFilters(){
     cercaFiltered=filtrados;
     cercaRenderList();
 
-    if(!cercaCitySearchInFlight){
+    if(!cercaCitySearchInFlight && GEOAPIFY_READY && userLat !== null && userLng !== null){
       cercaCitySearchInFlight=true;
-      const lat=userLat??CONFIG.DEFAULT_CENTER.lat, lng=userLng??CONFIG.DEFAULT_CENTER.lng;
+      const lat=userLat, lng=userLng;
       cercaFetchCitySearch(cercaSearchQ, lat, lng).then(results=>{
         cercaCitySearchInFlight=false;
         if(cercaSearchQ){
@@ -1709,7 +1753,7 @@ function cercaRenderList(){
   list.innerHTML=cercaFiltered.map((p,i)=>{
     const s=(!p.reporters||p.reporters===0)?NO_REPORT_STATUS:STATUS_CFG[p.status];
     const sponsorColor=p.sponsor?p.sponsor.badge_color:'';
-    const logoHtml=(p.sponsor&&p.sponsor.logo_url)?`<img src="${p.sponsor.logo_url}" alt="${p.name}">`:(p.emoji||'🏪');
+    const logoHtml=(p.sponsor&&p.sponsor.logo_url)?`<img src="${p.sponsor.logo_url}" alt="${p.name}">`:(p.logo||'🏪');
     const verBg=sponsorColor||'#6366F1';
     const verBadge=p.verified?`<div class="nc-ver" style="background:${verBg}">✓</div>`:'';
     const sponsorBadge=p.sponsor?`<div class="nc-sponsor-badge" style="background:${sponsorColor}">✓ ${p.sponsor.badge_text||'Verificado'}</div>`:'';
@@ -1819,7 +1863,7 @@ function showCheckinModal(lat,lng){
 function enterPickMode(){ pickModeActive=true; document.getElementById('pick-mode-banner').classList.add('show'); document.getElementById('leaflet-map').style.cursor='crosshair'; }
 function exitPickMode(){ pickModeActive=false; document.getElementById('pick-mode-banner').classList.remove('show'); document.getElementById('leaflet-map').style.cursor=''; }
 
-/* ─── GOOGLE AUTH ─── */
+/* ─── GOOGLE AUTH (sin cambios) ─── */
 let tokenClient=null;
 const TOKEN_STORAGE_KEY='qooentum_gtoken';
 function saveTokenToStorage(token,expiresIn){ try { const expiresAt=Date.now()+(expiresIn?expiresIn*1000:3500*1000); localStorage.setItem(TOKEN_STORAGE_KEY,JSON.stringify({token,expiresAt})); } catch(e) {} }
