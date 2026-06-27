@@ -433,9 +433,8 @@ html,body{height:100%;overflow:hidden;background:#fff;color:var(--text);font-fam
         <button class="install-banner-btn" onclick="installPwa()">Instalar</button>
         <button class="install-banner-close" onclick="document.getElementById('install-banner').style.display='none'">✕</button>
       </div>
-    </div>
 
-    <nav class="bottom-nav" id="bottom-nav">
+      <nav class="bottom-nav" id="bottom-nav">
       <button class="nav-btn active" id="nav-map-map" onclick="switchTab('map')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
         Mapa
@@ -449,6 +448,7 @@ html,body{height:100%;overflow:hidden;background:#fff;color:var(--text);font-fam
         Ranking
       </button>
     </nav>
+    </div>
   </div>
 
   <!-- CERCA PANEL -->
@@ -835,7 +835,7 @@ function rebuildNearby(lat,lng){
 async function searchPlacesByQuery(query){
   if(!query||query.length<2)return[];
   const q=query.toLowerCase();
-  const localMatches=places.filter(p=>(p.name||'').toLowerCase().includes(q)||(String(p.addr||'')).toLowerCase().includes(q)||(p.type||'').toLowerCase().includes(q)).slice(0,5);
+  const localMatches=places.filter(p=>p.name.toLowerCase().includes(q)||p.addr.toLowerCase().includes(q)||p.type.toLowerCase().includes(q)).slice(0,5);
   if(localMatches.length>=3)return localMatches;
   if(userLat!==null&&userLng!==null){const results=await staticPoisAutocomplete(query,userLat,userLng);if(results.length)return results;}
   return localMatches;
@@ -1376,7 +1376,7 @@ function cercaUpdateFromStore(){
 function cercaApplyFilters(){
   let pl=[...cercaAllPlaces];
   if(cercaCat!=='all')pl=pl.filter(p=>p.cat===cercaCat);
-  if(cercaSearchQ){const q=cercaSearchQ.toLowerCase();pl=pl.filter(p=>(p.name||'').toLowerCase().includes(q)||(p.type||'').toLowerCase().includes(q)||(String(p.addr||'')).toLowerCase().includes(q));}
+  if(cercaSearchQ){const q=cercaSearchQ.toLowerCase();pl=pl.filter(p=>p.name.toLowerCase().includes(q)||p.type.toLowerCase().includes(q)||(p.addr||'').toLowerCase().includes(q));}
   if(cercaSortMode==='distance')pl.sort((a,b)=>a.dist-b.dist);
   else if(cercaSortMode==='status')pl.sort((a,b)=>b.reporters-a.reporters||b.status-a.status);
   else if(cercaSortMode==='rating')pl.sort((a,b)=>parseFloat(b.rating)-parseFloat(a.rating));
