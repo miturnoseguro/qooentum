@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -18,12 +17,20 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&display=swap">
 <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+/* Carga Google Maps JS API de forma asíncrona */
+(function(){
+  const apiKey = 'AIzaSyDC68boNy1yfHgZem6gb4hUH0ZyEL-hRVs';
+  const s = document.createElement('script');
+  s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&v=beta&libraries=maps,marker&callback=onGoogleMapsReady`;
+  s.async = true; s.defer = true;
+  document.head.appendChild(s);
+})();
+</script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -87,15 +94,12 @@ html,body{height:100%;overflow:hidden;background:#fff;color:var(--text);font-fam
 @keyframes panelIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 #panel-map{flex-direction:row !important;animation:none;}
 .map-pane{position:relative;flex:1;overflow:hidden;min-width:0;}
-#leaflet-map{width:100%;height:100%;z-index:1;}
-.leaflet-popup-content-wrapper{border-radius:14px !important;border:1px solid var(--border) !important;padding:0 !important;box-shadow:var(--shadow-lg) !important;}
-.leaflet-popup-content{margin:0 !important;}
-.leaflet-popup-tip-container{display:none;}
-.leaflet-control-zoom{border:1px solid var(--border) !important;border-radius:14px !important;overflow:hidden;box-shadow:var(--shadow-float) !important;background:rgba(255,255,255,.95) !important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);margin:0 14px 14px 0 !important;}
-.leaflet-control-zoom a{color:var(--text2) !important;font-size:22px !important;font-weight:700 !important;line-height:44px !important;width:44px !important;height:44px !important;background:transparent !important;transition:all .18s cubic-bezier(.34,1.56,.64,1) !important;}
-.leaflet-control-zoom a:first-child{border-bottom:1px solid var(--border) !important;}
-.leaflet-control-zoom a:hover{color:var(--green-dk) !important;background:var(--green-lt) !important;}
-.leaflet-control-zoom a:active{transform:scale(.94);}
+#google-map{width:100%;height:100%;z-index:1;}
+/* Ocultar controles nativos de Google Maps que reubicamos */
+.gm-bundled-control,.gm-svpc,.gm-fullscreen-control{display:none!important;}
+.gm-style .gm-style-iw-c{border-radius:14px!important;padding:0!important;box-shadow:var(--shadow-lg)!important;}
+/* Marker overlay custom */
+.gm-marker-overlay{cursor:pointer;}
 .map-search-wrap{position:absolute;top:14px;left:14px;right:14px;z-index:999;animation:adSlideIn .4s cubic-bezier(.34,1.56,.64,1);}
 .map-search-bar{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1.5px solid var(--border);border-radius:99px;padding:10px 16px;box-shadow:var(--shadow-float);transition:border-color .2s,box-shadow .2s;}
 .map-search-bar:focus-within{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,196,140,.12),var(--shadow-float);}
@@ -428,7 +432,7 @@ html,body{height:100%;overflow:hidden;background:#fff;color:var(--text);font-fam
 
   <div id="panel-map" class="panel" style="position:relative;">
     <div class="map-pane">
-      <div id="leaflet-map"></div>
+      <div id="google-map"></div>
       <div class="map-float-controls" style="top:14px;right:14px;">
         <div class="gps-float-btn" id="gps-btn" onclick="onGpsBtnClick()" title="Centrar / seguir mi ubicación">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 3"/></svg>
@@ -667,9 +671,10 @@ const SEED_PRIZES = [
 let userPts=0, currentUser=null;
 let places=[], placeIndex=new Map(), nearbyPlaces=[], rankingData=[];
 let prizesData=SEED_PRIZES.map(p=>({...p}));
-let leafletMap=null, leafletMarkers={};
+let gmap=null, gmapReady=false, gmapReadyCallbacks=[];
+let gmMarkers={}, gmClusterMarkers=[], userMarker=null;
 let isLoggedIn=false, voteCount=0, pendingVote=null;
-let placeCooldowns={}, gpsWatchId=null, userMarker=null;
+let placeCooldowns={}, gpsWatchId=null;
 let mapInitialLoaded=false, userLat=null, userLng=null;
 let checkinShown=false, pickModeActive=false;
 let searchTimer=null, searchQuery='';
@@ -1177,9 +1182,14 @@ function addPoints(amount){const prevLevel=getLevelInfo(userPts).level;userPts+=
 
 /* ─── MAP GPS ─── */
 function updateUserMarker(lat,lng){
-  if(!leafletMap)return;
-  if(userMarker)userMarker.setLatLng([lat,lng]);
-  else{const userIcon=L.divIcon({html:`<div style="width:18px;height:18px;border-radius:50%;background:#6366F1;border:3px solid #fff;box-shadow:0 0 0 3px rgba(99,102,241,.4);"></div>`,className:'',iconAnchor:[9,9]});userMarker=L.marker([lat,lng],{icon:userIcon,zIndexOffset:1000}).addTo(leafletMap);}
+  if(!gmap)return;
+  if(userMarker){
+    userMarker.position=new google.maps.LatLng(lat,lng);
+  } else {
+    const el=document.createElement('div');
+    el.style.cssText='width:18px;height:18px;border-radius:50%;background:#6366F1;border:3px solid #fff;box-shadow:0 0 0 3px rgba(99,102,241,.4);';
+    userMarker=new google.maps.marker.AdvancedMarkerElement({map:gmap,position:{lat,lng},content:el,zIndex:1000,title:'Tu posición'});
+  }
 }
 
 function updateGpsBtnUI(){const btn=document.getElementById('gps-btn'),pill=document.getElementById('follow-pill');if(!btn)return;btn.classList.remove('pulsing','active','following');if(followMode){btn.classList.add('following');pill.classList.add('show');}else if(userLat!==null){btn.classList.add('active');pill.classList.remove('show');}else{pill.classList.remove('show');}}
@@ -1190,7 +1200,7 @@ function onGpsBtnClick(){
   }
   if(userLat!==null){
     followMode=true;updateGpsBtnUI();
-    leafletMap.flyTo([userLat,userLng],CONFIG.FOLLOW_ZOOM,{animate:true,duration:0.6});
+    if(gmap){gmap.panTo({lat:userLat,lng:userLng});gmap.setZoom(CONFIG.FOLLOW_ZOOM);}
     showToast('📍 Siguiendo tu posición');return;
   }
   const btn=document.getElementById('gps-btn');btn.classList.add('pulsing');
@@ -1200,12 +1210,25 @@ function onGpsBtnClick(){
 
 function onMapDragStart(){/* El seguimiento GPS permanece activo aunque el usuario arrastre el mapa */}
 
+function onGoogleMapsReady(){
+  gmapReady=true;
+  if(typeof initMap==='function')initMap();
+  gmapReadyCallbacks.forEach(fn=>fn());
+  gmapReadyCallbacks=[];
+}
+
 function initMap(){
-  leafletMap=L.map('leaflet-map',{center:[CONFIG.DEFAULT_CENTER.lat,CONFIG.DEFAULT_CENTER.lng],zoom:16,zoomControl:false});
-  L.control.zoom({position:'bottomright'}).addTo(leafletMap);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',subdomains:'abcd',maxZoom:20}).addTo(leafletMap);
-  leafletMap.on('dragstart',onMapDragStart);
-  leafletMap.on('zoomend',()=>{const toShow=nearbyPlaces.length?nearbyPlaces:places;if(toShow.length)buildMapMarkers(toShow);});
+  if(!gmapReady){gmapReadyCallbacks.push(initMap);return;}
+  gmap=new google.maps.Map(document.getElementById('google-map'),{
+    center:{lat:CONFIG.DEFAULT_CENTER.lat,lng:CONFIG.DEFAULT_CENTER.lng},
+    zoom:16,
+    mapId:'qooentum_map',
+    disableDefaultUI:true,
+    gestureHandling:'greedy',
+    clickableIcons:false,
+  });
+  gmap.addListener('dragstart',onMapDragStart);
+  gmap.addListener('zoom_changed',()=>{const toShow=nearbyPlaces.length?nearbyPlaces:places;if(toShow.length)buildMapMarkers(toShow);});
   startGpsWatch();
 }
 
