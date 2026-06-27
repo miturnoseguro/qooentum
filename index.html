@@ -492,7 +492,7 @@ html,body{height:100%;overflow:hidden;background:#fff;color:var(--text);font-fam
       <button class="cerca-f-chip" data-cat="health" onclick="cercaSetCat('health',this)">💊 Salud</button>
       <button class="cerca-f-chip" data-cat="supermarket" onclick="cercaSetCat('supermarket',this)">🛒 Súper</button>
       <button class="cerca-f-chip" data-cat="bank" onclick="cercaSetCat('bank',this)">🏦 Banco</button>
-      <button class="cerca-f-chip" data-cat="government" onclick="cercaSetCat('government',this)">🏛️ Gobierno</button>
+      <button class="cerca-f-chip" data-cat="office.government" onclick="cercaSetCat('office.government',this)">🏛️ Gobierno</button>
       <button class="cerca-f-chip" data-cat="shopping" onclick="cercaSetCat('shopping',this)">🛍️ Tiendas</button>
     </div>
     <div class="cerca-stats-bar">
@@ -632,8 +632,8 @@ const GEOAPIFY_CAT_MAP = {
   'healthcare.clinic':{emoji:'🏥',tipo:'Clínica'},
   'healthcare.doctors':{emoji:'👨‍⚕️',tipo:'Consultorio'},
   'healthcare.dentist':{emoji:'🦷',tipo:'Odontólogo'},
-  'government':{emoji:'🏛️',tipo:'Oficina pública'},
-  'government.townhall':{emoji:'🏛️',tipo:'Municipalidad'},
+  'office.government':{emoji:'🏛️',tipo:'Oficina pública'},
+  'office.government.townhall':{emoji:'🏛️',tipo:'Municipalidad'},
   'fuel':{emoji:'⛽',tipo:'Estación de servicio'},
   'commercial.laundry':{emoji:'👕',tipo:'Lavandería'},
   'commercial.hardware':{emoji:'🔧',tipo:'Ferretería'},
@@ -757,7 +757,7 @@ async function loadGeoapifyForTiles(tileKeys){
   tileKeys.forEach(key=>{const[s,w,n,e]=tileToBbox(key);if(s<minLat)minLat=s;if(w<minLng)minLng=w;if(n>maxLat)maxLat=n;if(e>maxLng)maxLng=e;});
   const pad=0.002;
   const bbox=`${minLng-pad},${minLat-pad},${maxLng+pad},${maxLat+pad}`;
-  const categories='commercial,catering,healthcare,leisure,government,post_office,fuel,professional,transport';
+  const categories='commercial,catering,healthcare,leisure,office.government,office,post_office,fuel,professional,transport';
   const url=`https://api.geoapify.com/v2/places?categories=${categories}&filter=rect:${bbox}&limit=300&apiKey=${CONFIG.GEOAPIFY_API_KEY}`;
   try{
     const res=await fetch(url,{cache:'no-store'});
@@ -779,7 +779,7 @@ async function geoapifySearch(query,lat,lng){
   const q=query.toLowerCase();
   const localMatches=places.filter(p=>p.name.toLowerCase().includes(q)||p.addr.toLowerCase().includes(q)||p.type.toLowerCase().includes(q)).slice(0,10);
   if(localMatches.length>=3)return localMatches;
-  const url=`https://api.geoapify.com/v2/places?categories=commercial,catering,healthcare,leisure,government,post_office,fuel&filter=circle:${lng},${lat},5000&limit=50&apiKey=${CONFIG.GEOAPIFY_API_KEY}`;
+  const url=`https://api.geoapify.com/v2/places?categories=commercial,catering,healthcare,leisure,office.government,office,post_office,fuel&filter=circle:${lng},${lat},5000&limit=50&apiKey=${CONFIG.GEOAPIFY_API_KEY}`;
   try{
     const res=await fetch(url,{cache:'no-store'});
     if(!res.ok)return localMatches;
@@ -1147,7 +1147,7 @@ async function cercaFetchGeoapify(lat,lng,radius){
   const signal=cercaAbortController.signal;
   const pad=0.0006+(radius/111320)*1.3;
   const bbox=`${lng-pad},${lat-pad},${lng+pad},${lat+pad}`;
-  const categories='commercial,catering,healthcare,leisure,government,post_office,fuel,professional,transport';
+  const categories='commercial,catering,healthcare,leisure,office.government,office,post_office,fuel,professional,transport';
   const limit=radius<=500?120:300;
   const url=`https://api.geoapify.com/v2/places?categories=${categories}&filter=rect:${bbox}&limit=${limit}&apiKey=${CONFIG.GEOAPIFY_API_KEY}`;
   try{
@@ -1178,7 +1178,7 @@ async function cercaFetchCitySearch(query,lat,lng){
   if(!GEOAPIFY_READY)return[];
   const q=query.toLowerCase();
   const localMatches=cercaAllPlaces.filter(p=>p.name.toLowerCase().includes(q)||p.type.toLowerCase().includes(q)||(p.addr||'').toLowerCase().includes(q));
-  const url=`https://api.geoapify.com/v2/places?categories=commercial,catering,healthcare,leisure,government,post_office,fuel&filter=circle:${lng},${lat},5000&limit=100&apiKey=${CONFIG.GEOAPIFY_API_KEY}`;
+  const url=`https://api.geoapify.com/v2/places?categories=commercial,catering,healthcare,leisure,office.government,office,post_office,fuel&filter=circle:${lng},${lat},5000&limit=100&apiKey=${CONFIG.GEOAPIFY_API_KEY}`;
   try{
     const res=await fetch(url,{cache:'no-store'});
     if(!res.ok)return localMatches;
