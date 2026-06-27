@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1128,7 +1129,7 @@ const CERCA_CAT_KEYWORDS={
   health:['pharmacy','farmacia','hospital','clinic','clínica','doctor','médico','salud','dental','dentist','optician','centro de salud'],
   supermarket:['supermarket','supermercado','carrefour','disco','coto','walmart','jumbo','mercado','almacén','kiosk','minimarket'],
   bank:['bank','banco','cajero','atm','hsbc','galicia','santander','bbva','icbc','pagos','rapipago','pago fácil'],
-  government:['gobierno','municipalidad','correo','registro','anses','oficina','ministerio','juzgado','tribunal'],
+  'office.government':['gobierno','municipalidad','correo','registro','anses','oficina','ministerio','juzgado','tribunal'],
   shopping:['ropa','calzado','zapatería','electrónica','ferretería','bazar','hogar','muebles','deportes','juguetería','librería','papelería','floristería','perfumería','joyería'],
 };
 
@@ -1204,10 +1205,10 @@ function cercaBuildDemoPlaces(lat,lng){
     {name:'Rapipago',type:'Pagos',emoji:'💳',cat:'bank',addr:'Lavalle 870',dlat:0.0009,dlng:-0.0005,open:true,status:1,reporters:7,rating:'3.6',reviewsN:210,verified:false},
     {name:'Starbucks',type:'Cafetería',emoji:'☕',cat:'food',addr:'Av. Santa Fe 800',dlat:-0.0003,dlng:0.0018,open:true,status:0,reporters:3,rating:'4.4',reviewsN:2100,verified:false},
     {name:"McDonald's",type:'Comida rápida',emoji:'🍔',cat:'food',addr:'Corrientes 567',dlat:0.0018,dlng:-0.0002,open:true,status:3,reporters:22,rating:'3.9',reviewsN:3400,verified:false},
-    {name:'ANSES',type:'Oficina pública',emoji:'🏛️',cat:'government',addr:'Lima 121',dlat:-0.0015,dlng:0.0003,open:false,status:1,reporters:9,rating:'2.8',reviewsN:720,verified:false},
+    {name:'ANSES',type:'Oficina pública',emoji:'🏛️',cat:'office.government',addr:'Lima 121',dlat:-0.0015,dlng:0.0003,open:false,status:1,reporters:9,rating:'2.8',reviewsN:720,verified:false},
     {name:'Hospital Ramos Mejía',type:'Hospital',emoji:'🏥',cat:'health',addr:'Gral. Urquiza 609',dlat:0.0022,dlng:0.0011,open:true,status:2,reporters:16,rating:'3.5',reviewsN:580,verified:false},
     {name:'Disco',type:'Supermercado',emoji:'🏪',cat:'supermarket',addr:'Av. Callao 540',dlat:-0.0008,dlng:-0.0014,open:true,status:3,reporters:22,rating:'3.8',reviewsN:2100,verified:false},
-    {name:'Correo Argentino',type:'Correo',emoji:'📮',cat:'government',addr:'Sarmiento 151',dlat:0.0005,dlng:-0.0018,open:true,status:1,reporters:6,rating:'3.1',reviewsN:340,verified:false},
+    {name:'Correo Argentino',type:'Correo',emoji:'📮',cat:'office.government',addr:'Sarmiento 151',dlat:0.0005,dlng:-0.0018,open:true,status:1,reporters:6,rating:'3.1',reviewsN:340,verified:false},
     {name:'Zara',type:'Ropa',emoji:'👗',cat:'shopping',addr:'Av. Santa Fe 1200',dlat:0.0011,dlng:0.0019,open:true,status:0,reporters:2,rating:'4.3',reviewsN:560,verified:false},
     {name:'Falabella',type:'Tienda departamental',emoji:'🛍️',cat:'shopping',addr:'Av. Florida 800',dlat:-0.0007,dlng:0.0012,open:true,status:1,reporters:5,rating:'3.9',reviewsN:980,verified:false},
   ];
