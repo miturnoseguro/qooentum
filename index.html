@@ -1080,11 +1080,16 @@ function initMap(){
 
   mlMap.on('load',()=>{
     mlReady=true;
+    mlMap.resize();
     mlReadyCallbacks.forEach(fn=>fn());
     mlReadyCallbacks=[];
     initSearch();
     startGpsWatch();
   });
+
+  // Resize cuando el contenedor cambia (orientación, DevTools, etc.)
+  new ResizeObserver(()=>{ if(mlMap) mlMap.resize(); })
+    .observe(document.getElementById('maplibre-map'));
 
   mlMap.on('zoom',()=>{
     const toShow=nearbyPlaces.length?nearbyPlaces:places;
