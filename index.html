@@ -429,16 +429,10 @@ html,body{height:100%;overflow:hidden;background:#fff;color:var(--text);font-fam
   <div id="panel-map" class="panel" style="position:relative;">
     <div class="map-pane">
       <div id="leaflet-map"></div>
-      <div class="map-search-wrap" id="map-search-wrap">
-        <div class="map-search-bar">
-          <svg class="map-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input class="map-search-input" id="map-search-input" type="text" placeholder="Buscar comercio o dirección…" autocomplete="off" spellcheck="false">
-          <button class="map-search-clear" id="map-search-clear" onclick="clearSearch()">✕</button>
-          <div class="gps-float-btn" id="gps-btn" onclick="onGpsBtnClick()" title="Centrar / seguir mi ubicación" style="width:34px;height:34px;border-radius:9px;flex-shrink:0;box-shadow:none;border-color:var(--border);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 3"/></svg>
-          </div>
+      <div class="map-float-controls" style="top:14px;right:14px;">
+        <div class="gps-float-btn" id="gps-btn" onclick="onGpsBtnClick()" title="Centrar / seguir mi ubicación">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 3"/></svg>
         </div>
-        <div class="search-results-dropdown" id="search-results-dropdown"></div>
       </div>
       <div class="follow-pill" id="follow-pill"><div class="follow-dot"></div>Siguiendo tu posición</div>
       <div class="pick-mode-banner" id="pick-mode-banner"><div class="pick-mode-dot"></div>Tocá el comercio donde estás</div>
@@ -477,17 +471,6 @@ html,body{height:100%;overflow:hidden;background:#fff;color:var(--text);font-fam
       <svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><circle cx="11" cy="11" r="8"/><path d="M11 8v3l2 2"/></svg>
       Cerca mío
       <span class="panel-header-sub" id="cerca-updated-lbl"></span>
-    </div>
-    <div class="cerca-search-wrap">
-      <div class="cerca-search-bar">
-        <svg class="cerca-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input id="cerca-search-input" type="text" placeholder="Buscar en toda la ciudad…" autocomplete="off">
-        <button class="cerca-search-clear" id="cerca-search-clear" onclick="cercaClearSearch()">✕</button>
-        <div class="cerca-city-badge" id="cerca-city-badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:9px;height:9px"><circle cx="12" cy="12" r="10"/></svg>
-          Ciudad
-        </div>
-      </div>
     </div>
     <div class="cerca-radius-row" id="cerca-radius-row">
       <span class="cerca-radius-lbl">Radio:</span>
@@ -691,7 +674,7 @@ let mapInitialLoaded=false, userLat=null, userLng=null;
 let checkinShown=false, pickModeActive=false;
 let searchTimer=null, searchQuery='';
 let tileCache={}, placeStore={};
-let followMode=false, lastFollowLat=null, lastFollowLng=null;
+let followMode=true, lastFollowLat=null, lastFollowLng=null;
 let occupancySyncInterval=null;
 
 /* ─── UTILS ─── */
@@ -1190,14 +1173,20 @@ function updateUserMarker(lat,lng){
 function updateGpsBtnUI(){const btn=document.getElementById('gps-btn'),pill=document.getElementById('follow-pill');if(!btn)return;btn.classList.remove('pulsing','active','following');if(followMode){btn.classList.add('following');pill.classList.add('show');}else if(userLat!==null){btn.classList.add('active');pill.classList.remove('show');}else{pill.classList.remove('show');}}
 
 function onGpsBtnClick(){
-  if(followMode){followMode=false;updateGpsBtnUI();showToast('📍 Modo seguimiento desactivado');return;}
-  if(userLat!==null){followMode=true;updateGpsBtnUI();leafletMap.setView([userLat,userLng],CONFIG.FOLLOW_ZOOM,{animate:true,duration:0.6});showToast('📍 Siguiendo tu posición');return;}
+  if(followMode){
+    followMode=false;updateGpsBtnUI();showToast('📍 Seguimiento pausado · tocá para volver a centrar');return;
+  }
+  if(userLat!==null){
+    followMode=true;updateGpsBtnUI();
+    leafletMap.flyTo([userLat,userLng],CONFIG.FOLLOW_ZOOM,{animate:true,duration:0.6});
+    showToast('📍 Siguiendo tu posición');return;
+  }
   const btn=document.getElementById('gps-btn');btn.classList.add('pulsing');
   if(!navigator.geolocation){showToast('⚠️ Tu navegador no soporta GPS');btn.classList.remove('pulsing');return;}
   navigator.geolocation.getCurrentPosition(pos=>{followMode=true;onGpsSuccess(pos);startGpsWatch();},err=>{btn.classList.remove('pulsing');showToast(err.code===1?'🔒 Permiso de ubicación denegado':'⚠️ No se pudo obtener tu ubicación');},{enableHighAccuracy:true,timeout:10000});
 }
 
-function onMapDragStart(){if(followMode){followMode=false;updateGpsBtnUI();showToast('👆 Arrastraste el mapa · tocá 📍 para seguir de nuevo');}}
+function onMapDragStart(){/* El seguimiento GPS permanece activo aunque el usuario arrastre el mapa */}
 
 function initMap(){
   leafletMap=L.map('leaflet-map',{center:[CONFIG.DEFAULT_CENTER.lat,CONFIG.DEFAULT_CENTER.lng],zoom:16,zoomControl:false});
@@ -1205,7 +1194,7 @@ function initMap(){
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',subdomains:'abcd',maxZoom:20}).addTo(leafletMap);
   leafletMap.on('dragstart',onMapDragStart);
   leafletMap.on('zoomend',()=>{const toShow=nearbyPlaces.length?nearbyPlaces:places;if(toShow.length)buildMapMarkers(toShow);});
-  startGpsWatch();initSearch();
+  startGpsWatch();
 }
 
 let lastLoadTileKey=null;
@@ -1221,7 +1210,10 @@ function onGpsSuccess(pos){
   const isFirst=userLat===null;
   userLat=lat;userLng=lng;
   updateUserMarker(lat,lng);
-  if(followMode){const moved=lastFollowLat!==null?distanceMeter(lastFollowLat,lastFollowLng,lat,lng):Infinity;if(moved>=CONFIG.FOLLOW_MIN_MOVE_M){lastFollowLat=lat;lastFollowLng=lng;if(isFirst)leafletMap.setView([lat,lng],CONFIG.FOLLOW_ZOOM,{animate:true,duration:0.5});else leafletMap.panTo([lat,lng],{animate:true,duration:0.4,easeLinearity:0.5});}}
+  if(followMode){
+    if(isFirst)leafletMap.setView([lat,lng],CONFIG.FOLLOW_ZOOM,{animate:true,duration:0.5});
+    else leafletMap.panTo([lat,lng],{animate:true,duration:0.4,easeLinearity:0.5});
+  }
   if(isFirst){if(!followMode)leafletMap.setView([lat,lng],CONFIG.FOLLOW_ZOOM);updateGpsBtnUI();ensurePlacesLoadedAt(lat,lng);lastLoadTileKey=latLngToTileKey(lat,lng);}
   else{const currentTileKey=latLngToTileKey(lat,lng);if(currentTileKey!==lastLoadTileKey){lastLoadTileKey=currentTileKey;ensurePlacesLoadedAt(lat,lng);}}
   if(!checkinShown&&places.length>0){checkinShown=true;setTimeout(()=>showCheckinModal(lat,lng),1200);}
@@ -1266,7 +1258,7 @@ function buildMapMarkers(placesToShow){
     clearIndividualMarkers();
     const gridDeg=getClusterGridDeg(zoom),clusters=computeClusters(placesToShow,gridDeg);
     clearClusterMarkers();
-    clusters.forEach((cluster,idx)=>{const marker=L.marker([cluster.lat,cluster.lng],{icon:makeClusterIcon(cluster)}).addTo(leafletMap);marker.on('click',()=>{const targetZoom=Math.min(leafletMap.getZoom()+3,CLUSTER_ZOOM_THRESHOLD+1);leafletMap.setView([cluster.lat,cluster.lng],targetZoom,{animate:true,duration:0.5});});clusterMarkers[`cluster_${idx}`]=marker;});
+    clusters.forEach((cluster,idx)=>{const marker=L.marker([cluster.lat,cluster.lng],{icon:makeClusterIcon(cluster)}).addTo(leafletMap);marker.on('click',()=>{const targetZoom=Math.min(leafletMap.getZoom()+3,CLUSTER_ZOOM_THRESHOLD+1);leafletMap.flyTo([cluster.lat,cluster.lng],targetZoom,{animate:true,duration:0.6,easeLinearity:0.3});});clusterMarkers[`cluster_${idx}`]=marker;});
   }
 }
 
@@ -1501,15 +1493,7 @@ function cercaClearSearch(){
   cercaSearchQ='';cercaApplyFilters();
 }
 
-function initCercaSearch(){
-  const input=document.getElementById('cerca-search-input'),clear=document.getElementById('cerca-search-clear');
-  input.addEventListener('input',e=>{
-    const val=e.target.value.trim();
-    clear.classList.toggle('visible',val.length>0);
-    clearTimeout(cercaSearchTimer);
-    cercaSearchTimer=setTimeout(()=>{cercaSearchQ=val;cercaApplyFilters();},260);
-  });
-}
+function initCercaSearch(){ /* buscador removido */ }
 
 /* ─── CHECK-IN MODAL ─── */
 function showCheckinModal(lat,lng){
