@@ -1,5 +1,5 @@
-/* Qooentum — Service Worker v2 */
-const CACHE_NAME = 'qooentum-v2';
+/* Qooentum — Service Worker v3 (con Foursquare) */
+const CACHE_NAME = 'qooentum-v3';
 const PRECACHE_URLS = [
   './',
   './index.html',
@@ -9,13 +9,14 @@ const PRECACHE_URLS = [
 ];
 
 /* ─── Dominios que NUNCA se cachean ─────────────────────────
-   Geoapify: las respuestas pueden ser 400 (bad bbox) y no
-   queremos servirlas desde caché. Siempre ir a la red.
-   googleapis: tokens OAuth, perfiles de usuario — jamás cachear.
-   script.google.com: backend Apps Script — siempre fresco.
+   - Foursquare: respuestas dinámicas, no cachear
+   - googleapis: tokens OAuth, perfiles de usuario
+   - accounts.google: autenticación
+   - script.google: backend Apps Script
    ─────────────────────────────────────────────────────────── */
 const NEVER_CACHE_DOMAINS = [
-  'api.geoapify.com',
+  'api.foursquare.com',
+  'location.foursquare.com',
   'googleapis.com',
   'accounts.google.com',
   'script.google.com',
@@ -42,16 +43,21 @@ self.addEventListener('activate', (event) => {
         Promise.all(
           keys
             .filter((k) => k !== CACHE_NAME)
-            .map((k) => caches.delete(k))
+            .map((k) => {
+              console.log(`🗑️  Eliminando caché vieja: ${k}`);
+              return caches.delete(k);
+            })
         )
       )
-      /* Después de borrar cachés viejas, limpiamos cualquier
-         entrada de Geoapify que haya quedado de versiones previas */
+      /* Limpiar entradas de Foursquare/APIs que no deben cachearse */
       .then(() => caches.open(CACHE_NAME))
       .then(async (cache) => {
         const reqs = await cache.keys();
         const toDelete = reqs.filter((r) => shouldNeverCache(new URL(r.url)));
         await Promise.all(toDelete.map((r) => cache.delete(r)));
+        if (toDelete.length > 0) {
+          console.log(`🧹 Limpiadas ${toDelete.length} entradas de APIs externas`);
+        }
       })
       .then(() => self.clients.claim())
   );
@@ -68,7 +74,16 @@ self.addEventListener('fetch', (event) => {
 
   /* 1. Dominios críticos → siempre red, sin caché */
   if (shouldNeverCache(url)) {
-    event.respondWith(fetch(req));
+    event.respondWith(
+      fetch(req)
+        .catch(() => {
+          // Offline: retornar error
+          return new Response(
+            JSON.stringify({ error: 'Sin conexión a internet' }),
+            { status: 503, headers: { 'Content-Type': 'application/json' } }
+          );
+        })
+    );
     return;
   }
 
@@ -107,7 +122,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  /* 4. Cross-origin (fonts, Leaflet tiles, CDN, Unsplash)
+  /* 4. Cross-origin (fonts, Leaflet tiles, CDN)
         → stale-while-revalidate, SOLO cachear respuestas ok */
   event.respondWith(
     caches.match(req).then((cached) => {
@@ -120,8 +135,17 @@ self.addEventListener('fetch', (event) => {
           }
           return res;
         })
-        .catch(() => cached);
+        .catch(() => cached || new Response('Offline', { status: 503 }));
       return cached || fetchPromise;
     })
   );
 });
+
+/* ─── SKIP WAITING (permite actualización inmediata) ─── */
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+console.log('✅ Service Worker v3 registrado (Foursquare ready)');
