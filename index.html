@@ -574,7 +574,6 @@ html,body{height:100%;overflow:hidden;background:#fff;color:var(--text);font-fam
 const CONFIG = {
   APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbySr-veSK4eoAtOR1vHYB--o-ngrQqG0JC7dEeIXDKw5wZJRSdhUe5iEN4wibhsPTEX2w/exec',
   GOOGLE_CLIENT_ID: '283820904318-leis6rl3mfhtve2amj59q8sq221dg3qf.apps.googleusercontent.com',
-  GEOAPIFY_API_KEY: '631ee415c3eb4b87b4d5a0c59503af58',
   DEFAULT_CENTER: { lat: -34.6083, lng: -58.3896 },
   NEARBY_RADIUS_M: 30,
   REPORT_RADIUS_M: 10,
@@ -592,7 +591,6 @@ const CONFIG = {
 
 const BACKEND_READY = !CONFIG.APPS_SCRIPT_URL.startsWith('PEGAR_AQUI');
 const GOOGLE_AUTH_READY = !CONFIG.GOOGLE_CLIENT_ID.startsWith('PEGAR_AQUI');
-const GEOAPIFY_READY = CONFIG.GEOAPIFY_API_KEY && !CONFIG.GEOAPIFY_API_KEY.startsWith('TU_CLAVE');
 
 /* ─── FOURSQUARE CONFIG ─── */
 const FOURSQUARE_CONFIG = {
@@ -621,55 +619,6 @@ const TREND = ['↘ Baja','→ Estable','↗ Sube','↗ Sube'];
 const VOTE_PTS = [10,10,15,20];
 const LEVEL_TITLES = ['Novato','Explorador','Cazador de Filas','Maestro del Mapa','Leyenda Urbana'];
 const XP_PER_LEVEL = 150;
-
-const GEOAPIFY_CAT_MAP = {
-  'commercial.supermarket':{emoji:'🛒',tipo:'Supermercado'},
-  'commercial.convenience':{emoji:'🏪',tipo:'Almacén'},
-  'commercial.pharmacy':{emoji:'💊',tipo:'Farmacia'},
-  'commercial.bank':{emoji:'🏦',tipo:'Banco'},
-  'commercial.atm':{emoji:'🏧',tipo:'Cajero'},
-  'post_office':{emoji:'📮',tipo:'Correo'},
-  'catering.fast_food':{emoji:'🍔',tipo:'Comida rápida'},
-  'catering.restaurant':{emoji:'🍽️',tipo:'Restaurante'},
-  'catering.cafe':{emoji:'☕',tipo:'Cafetería'},
-  'catering.bakery':{emoji:'🥖',tipo:'Panadería'},
-  'catering.butcher':{emoji:'🥩',tipo:'Carnicería'},
-  'healthcare.hospital':{emoji:'🏥',tipo:'Hospital'},
-  'healthcare.clinic':{emoji:'🏥',tipo:'Clínica'},
-  'healthcare.doctors':{emoji:'👨‍⚕️',tipo:'Consultorio'},
-  'healthcare.dentist':{emoji:'🦷',tipo:'Odontólogo'},
-  'government':{emoji:'🏛️',tipo:'Oficina pública'},
-  'government.townhall':{emoji:'🏛️',tipo:'Municipalidad'},
-  'fuel':{emoji:'⛽',tipo:'Estación de servicio'},
-  'commercial.laundry':{emoji:'👕',tipo:'Lavandería'},
-  'commercial.hardware':{emoji:'🔧',tipo:'Ferretería'},
-  'commercial.clothes':{emoji:'👗',tipo:'Ropa'},
-  'commercial.shoes':{emoji:'👟',tipo:'Calzado'},
-  'commercial.electronics':{emoji:'📱',tipo:'Electrónica'},
-  'commercial.optician':{emoji:'👓',tipo:'Óptica'},
-  'commercial.beauty':{emoji:'💄',tipo:'Estética'},
-  'commercial.hairdresser':{emoji:'💇',tipo:'Peluquería'},
-  'leisure.gym':{emoji:'🏋️',tipo:'Gimnasio'},
-  'commercial.veterinary':{emoji:'🐾',tipo:'Veterinaria'},
-  'commercial.marketplace':{emoji:'🛍️',tipo:'Mercado'},
-  'commercial.kiosk':{emoji:'📰',tipo:'Kiosco'},
-  'commercial.greengrocer':{emoji:'🥦',tipo:'Verdulería'},
-  'commercial.florist':{emoji:'💐',tipo:'Florería'},
-  'commercial.toys':{emoji:'🧸',tipo:'Juguetería'},
-  'commercial.sports':{emoji:'⚽',tipo:'Artículos deportivos'},
-  'commercial.stationery':{emoji:'📚',tipo:'Librería'},
-  'commercial.mobile_phone':{emoji:'📱',tipo:'Telefonía'},
-  'commercial.gift':{emoji:'🎁',tipo:'Regalería'},
-  'commercial.jewelry':{emoji:'💍',tipo:'Joyería'},
-  'commercial.furniture':{emoji:'🛋️',tipo:'Muebles'},
-  'commercial.bookshop':{emoji:'📖',tipo:'Librería'},
-  'commercial.computer':{emoji:'💻',tipo:'Informática'},
-  'commercial.pet_shop':{emoji:'🐶',tipo:'Tienda de mascotas'},
-  'commercial.printing':{emoji:'🖨️',tipo:'Impresión'},
-  'commercial.car_wash':{emoji:'🚗',tipo:'Lavadero'},
-  'professional.lawyer':{emoji:'⚖️',tipo:'Abogado'},
-  'professional.accountant':{emoji:'🧾',tipo:'Contador'},
-};
 
 const SEED_PRIZES = [
   {id:'p1',emoji:'☕',name:'Café gratis',            pts:200, cat:'Gastronomía',    partner:'Starbucks'},
@@ -747,126 +696,160 @@ function stopOccupancySync(){if(occupancySyncInterval){clearInterval(occupancySy
 function maybeStartOccupancySync(){if(isLoggedIn&&!occupancySyncInterval)startOccupancySync();else if(!isLoggedIn&&occupancySyncInterval)stopOccupancySync();}
 
 /* ─── FOURSQUARE API ─── */
-function foursquarePlaceToPlace(fsq,lat,lng){
-  const cat=fsq.categories?.[0]?.name||'Comercio';
-  const icon=FOURSQUARE_CAT_EMOJI[cat]||{emoji:'🏪',tipo:cat};
+const FSQ_CAT_EMOJI={
+  'Supermarket':{emoji:'🛒',tipo:'Supermercado'},
+  'Grocery Store':{emoji:'🛒',tipo:'Supermercado'},
+  'Convenience Store':{emoji:'🏪',tipo:'Almacén'},
+  'Pharmacy':{emoji:'💊',tipo:'Farmacia'},
+  'Bank':{emoji:'🏦',tipo:'Banco'},
+  'ATM':{emoji:'🏧',tipo:'Cajero'},
+  'Post Office':{emoji:'📮',tipo:'Correo'},
+  'Fast Food Restaurant':{emoji:'🍔',tipo:'Comida rápida'},
+  'Restaurant':{emoji:'🍽️',tipo:'Restaurante'},
+  'Café':{emoji:'☕',tipo:'Cafetería'},
+  'Coffee Shop':{emoji:'☕',tipo:'Cafetería'},
+  'Bakery':{emoji:'🥖',tipo:'Panadería'},
+  'Butcher':{emoji:'🥩',tipo:'Carnicería'},
+  'Hospital':{emoji:'🏥',tipo:'Hospital'},
+  'Clinic':{emoji:'🏥',tipo:'Clínica'},
+  "Doctor's Office":{emoji:'👨‍⚕️',tipo:'Consultorio'},
+  'Dentist':{emoji:'🦷',tipo:'Odontólogo'},
+  'Government Building':{emoji:'🏛️',tipo:'Oficina pública'},
+  'City Hall':{emoji:'🏛️',tipo:'Municipalidad'},
+  'Gas Station':{emoji:'⛽',tipo:'Estación de servicio'},
+  'Clothing Store':{emoji:'👗',tipo:'Ropa'},
+  'Shoe Store':{emoji:'👟',tipo:'Calzado'},
+  'Electronics Store':{emoji:'📱',tipo:'Electrónica'},
+  'Optical Shop':{emoji:'👓',tipo:'Óptica'},
+  'Beauty Salon':{emoji:'💄',tipo:'Estética'},
+  'Salon / Barbershop':{emoji:'💇',tipo:'Peluquería'},
+  'Gym':{emoji:'🏋️',tipo:'Gimnasio'},
+  'Veterinarian':{emoji:'🐾',tipo:'Veterinaria'},
+  'Market':{emoji:'🛍️',tipo:'Mercado'},
+  'Newsstand':{emoji:'📰',tipo:'Kiosco'},
+  'Fruit & Vegetable Store':{emoji:'🥦',tipo:'Verdulería'},
+  'Flower Shop':{emoji:'💐',tipo:'Florería'},
+  'Toy Store':{emoji:'🧸',tipo:'Juguetería'},
+  'Sporting Goods Shop':{emoji:'⚽',tipo:'Artículos deportivos'},
+  'Bookstore':{emoji:'📚',tipo:'Librería'},
+  'Gift Shop':{emoji:'🎁',tipo:'Regalería'},
+  'Jewelry Store':{emoji:'💍',tipo:'Joyería'},
+  'Furniture / Home Store':{emoji:'🛋️',tipo:'Muebles'},
+  'Computer Store':{emoji:'💻',tipo:'Informática'},
+  'Pet Store':{emoji:'🐶',tipo:'Tienda de mascotas'},
+  'Laundromat':{emoji:'👕',tipo:'Lavandería'},
+  'Hardware Store':{emoji:'🔧',tipo:'Ferretería'},
+  'Car Wash':{emoji:'🚗',tipo:'Lavadero'},
+};
+
+function fsqCatLookup(categories){
+  if(!categories||!categories.length)return{emoji:'🏪',tipo:'Comercio'};
+  for(const c of categories){
+    if(FSQ_CAT_EMOJI[c.name])return FSQ_CAT_EMOJI[c.name];
+  }
+  // Buscar por substring en el nombre de categoría
+  const name=(categories[0]?.name||'').toLowerCase();
+  if(name.includes('super')||name.includes('grocery'))return{emoji:'🛒',tipo:'Supermercado'};
+  if(name.includes('pharmacy')||name.includes('drug'))return{emoji:'💊',tipo:'Farmacia'};
+  if(name.includes('bank')||name.includes('financial'))return{emoji:'🏦',tipo:'Banco'};
+  if(name.includes('restaurant')||name.includes('food'))return{emoji:'🍽️',tipo:'Restaurante'};
+  if(name.includes('café')||name.includes('coffee'))return{emoji:'☕',tipo:'Cafetería'};
+  if(name.includes('hospital')||name.includes('health'))return{emoji:'🏥',tipo:'Hospital'};
+  if(name.includes('gym')||name.includes('fitness'))return{emoji:'🏋️',tipo:'Gimnasio'};
+  if(name.includes('school')||name.includes('education'))return{emoji:'🏫',tipo:'Educación'};
+  return{emoji:'🏪',tipo:categories[0]?.name||'Comercio'};
+}
+
+function fsqToPlace(fsq,refLat,refLng){
+  const icon=fsqCatLookup(fsq.categories);
   const addr=fsq.location?.formatted_address||fsq.location?.address||'Sin dirección';
+  const plat=fsq.geocodes?.main?.latitude??refLat;
+  const plng=fsq.geocodes?.main?.longitude??refLng;
+  // distance viene en metros desde la API cuando se hace search con ll=
+  const dist=typeof fsq.distance==='number'?fsq.distance:Math.round(distanceMeter(refLat,refLng,plat,plng));
   return{
     id:`fsq_${fsq.fsq_id}`,
     name:fsq.name,
-    type:icon.tipo||cat,
+    type:icon.tipo,
     logo:icon.emoji,
-    lat:fsq.geocodes?.main?.latitude||lat,
-    lng:fsq.geocodes?.main?.longitude||lng,
-    addr,
-    status:0,reporters:0,
-    rating:fsq.rating?fsq.rating.toFixed(1):(3.5+Math.random()*1.4).toFixed(1),
+    lat:plat, lng:plng, addr,
+    status:0, reporters:0,
+    rating:fsq.rating!=null?Number(fsq.rating).toFixed(1):(3.5+Math.random()*1.4).toFixed(1),
     reviewsN:fsq.stats?.total_ratings||Math.floor(Math.random()*200+10),
     open:fsq.closed_bucket!=='VeryLikelyClosed'&&fsq.closed_bucket!=='LikelyClosed',
-    verified:false,
-    fromFoursquare:true,
-    dist:fsq.distance||0
+    verified:false, fromFoursquare:true,
+    dist
   };
 }
 
-const FOURSQUARE_CAT_EMOJI={
-  'Supermarket':{emoji:'🛒',tipo:'Supermercado'},'Grocery Store':{emoji:'🛒',tipo:'Supermercado'},
-  'Convenience Store':{emoji:'🏪',tipo:'Almacén'},'Pharmacy':{emoji:'💊',tipo:'Farmacia'},
-  'Bank':{emoji:'🏦',tipo:'Banco'},'ATM':{emoji:'🏧',tipo:'Cajero'},
-  'Post Office':{emoji:'📮',tipo:'Correo'},'Fast Food Restaurant':{emoji:'🍔',tipo:'Comida rápida'},
-  'Restaurant':{emoji:'🍽️',tipo:'Restaurante'},'Café':{emoji:'☕',tipo:'Cafetería'},
-  'Coffee Shop':{emoji:'☕',tipo:'Cafetería'},'Bakery':{emoji:'🥖',tipo:'Panadería'},
-  'Hospital':{emoji:'🏥',tipo:'Hospital'},'Clinic':{emoji:'🏥',tipo:'Clínica'},
-  'Doctor\'s Office':{emoji:'👨‍⚕️',tipo:'Consultorio'},'Dentist':{emoji:'🦷',tipo:'Odontólogo'},
-  'Government Building':{emoji:'🏛️',tipo:'Oficina pública'},'Gas Station':{emoji:'⛽',tipo:'Estación de servicio'},
-  'Clothing Store':{emoji:'👗',tipo:'Ropa'},'Shoe Store':{emoji:'👟',tipo:'Calzado'},
-  'Electronics Store':{emoji:'📱',tipo:'Electrónica'},'Gym':{emoji:'🏋️',tipo:'Gimnasio'},
-  'Veterinarian':{emoji:'🐾',tipo:'Veterinaria'},'Kiosk':{emoji:'📰',tipo:'Kiosco'},
-};
-
-async function foursquareSearchPlaces(lat,lng,radius){
-  if(!FOURSQUARE_READY)return[];
+async function fsqSearch(lat,lng,radius){
   const cacheKey=`${Math.floor(lat*1000)}_${Math.floor(lng*1000)}_${radius}`;
   const cached=FOURSQUARE_CACHE.get(cacheKey);
   if(cached&&Date.now()-cached.ts<FSQ_CACHE_TTL)return cached.data;
   try{
     const params=new URLSearchParams({'ll':`${lat},${lng}`,'radius':radius,'limit':50,'sort':'distance'});
-    const res=await fetch(`${FOURSQUARE_CONFIG.API_BASE}/places/search?${params}`,{headers:{'Authorization':FOURSQUARE_CONFIG.API_KEY,'Accept':'application/json'}});
-    if(!res.ok)throw new Error('Foursquare HTTP '+res.status);
+    const res=await fetch(`${FOURSQUARE_CONFIG.API_BASE}/places/search?${params}`,
+      {headers:{'Authorization':FOURSQUARE_CONFIG.API_KEY,'Accept':'application/json'}});
+    if(!res.ok){
+      const errText=await res.text().catch(()=>'');
+      console.error(`Foursquare error ${res.status}:`,errText);
+      throw new Error('Foursquare HTTP '+res.status);
+    }
     const data=await res.json();
-    const places=(data.results||[]).map(p=>foursquarePlaceToPlace(p,lat,lng)).filter(p=>p.dist<=radius);
-    FOURSQUARE_CACHE.set(cacheKey,{data:places,ts:Date.now()});
-    return places;
-  }catch(e){console.warn('Foursquare falló:',e);return[];}
+    const results=(data.results||[]).map(p=>fsqToPlace(p,lat,lng));
+    FOURSQUARE_CACHE.set(cacheKey,{data:results,ts:Date.now()});
+    return results;
+  }catch(e){console.warn('fsqSearch falló:',e);return[];}
 }
 
-async function foursquareAutocomplete(query,lat,lng){
-  if(!FOURSQUARE_READY||!query||query.length<2)return[];
+async function fsqAutocomplete(query,lat,lng){
+  if(!query||query.length<2)return[];
   try{
     const params=new URLSearchParams({'query':query,'ll':`${lat},${lng}`,'limit':8});
-    const res=await fetch(`${FOURSQUARE_CONFIG.API_BASE}/places/autocomplete?${params}`,{headers:{'Authorization':FOURSQUARE_CONFIG.API_KEY}});
+    const res=await fetch(`${FOURSQUARE_CONFIG.API_BASE}/places/autocomplete?${params}`,
+      {headers:{'Authorization':FOURSQUARE_CONFIG.API_KEY,'Accept':'application/json'}});
     if(!res.ok)return[];
     const data=await res.json();
-    return(data.results||[]).filter(r=>r.type==='place').map(r=>({id:`fsq_${r.place?.fsq_id||r.text?.primary}`,name:r.text?.primary||'',addr:r.text?.secondary||'',lat:r.place?.geocodes?.main?.latitude||lat,lng:r.place?.geocodes?.main?.longitude||lng,type:r.place?.categories?.[0]?.name||'Comercio',logo:'📍',status:0,reporters:0,open:true,fromFoursquare:true}));
-  }catch(e){console.warn('Foursquare autocomplete falló:',e);return[];}
+    return(data.results||[])
+      .filter(r=>r.type==='place'&&r.place)
+      .map(r=>{
+        const icon=fsqCatLookup(r.place?.categories);
+        const plat=r.place?.geocodes?.main?.latitude||lat;
+        const plng=r.place?.geocodes?.main?.longitude||lng;
+        return{
+          id:`fsq_${r.place.fsq_id}`,
+          name:r.text?.primary||r.place.name||'',
+          addr:r.text?.secondary||'',
+          lat:plat, lng:plng,
+          type:icon.tipo, logo:icon.emoji,
+          status:0, reporters:0, open:true, fromFoursquare:true,
+          dist:Math.round(distanceMeter(lat,lng,plat,plng))
+        };
+      });
+  }catch(e){console.warn('fsqAutocomplete falló:',e);return[];}
 }
 
-/* ─── GEOAPIFY ─── */
-function geoapifyPlaceToPlace(feature){
-  const props=feature.properties;
-  const cat=props.categories?.[0]||'commercial.general';
-  const info=GEOAPIFY_CAT_MAP[cat]||{emoji:'🏪',tipo:'Comercio'};
-  const name=props.name||'Sin nombre';
-  const addr=[props.street,props.housenumber].filter(Boolean).join(' ')||props.address_line2||'Sin dirección';
-  return{id:`geo_${props.place_id||feature.id}`,name,type:info.tipo,logo:info.emoji,lat:feature.geometry.coordinates[1],lng:feature.geometry.coordinates[0],addr,status:0,reporters:0,rating:(3.5+Math.random()*1.4).toFixed(1),reviewsN:Math.floor(Math.random()*200+10),open:true,verified:false,fromGeoapify:true};
-}
-
-async function loadGeoapifyForTiles(tileKeys){
+/* ─── CARGA DE LUGARES PARA TILES (mapa principal) ─── */
+async function loadPlacesForTiles(tileKeys){
   let minLat=Infinity,minLng=Infinity,maxLat=-Infinity,maxLng=-Infinity;
   tileKeys.forEach(key=>{const[s,w,n,e]=tileToBbox(key);if(s<minLat)minLat=s;if(w<minLng)minLng=w;if(n>maxLat)maxLat=n;if(e>maxLng)maxLng=e;});
   const centerLat=(minLat+maxLat)/2,centerLng=(minLng+maxLng)/2;
-  const radius=Math.round(Math.max(maxLat-minLat,maxLng-minLng)*111320*1.2);
-  // Intentar primero con Foursquare
-  if(FOURSQUARE_READY){
-    try{
-      const fsqPlaces=await foursquareSearchPlaces(centerLat,centerLng,Math.min(radius,1500));
-      if(fsqPlaces.length>0)return fsqPlaces;
-    }catch(e){console.warn('Foursquare tiles falló, fallback a Geoapify:',e);}
-  }
-  // Fallback a Geoapify
-  if(!GEOAPIFY_READY||!tileKeys.length)return[];
-  const pad=0.002;
-  const bbox=`${minLng-pad},${minLat-pad},${maxLng+pad},${maxLat+pad}`;
-  const categories='commercial,catering,healthcare,leisure,government,post_office,fuel,professional,transport';
-  const url=`https://api.geoapify.com/v2/places?categories=${categories}&filter=rect:${bbox}&limit=300&apiKey=${CONFIG.GEOAPIFY_API_KEY}`;
-  try{const res=await fetch(url);if(!res.ok)throw new Error('Geoapify HTTP '+res.status);const data=await res.json();if(!data.features||!data.features.length)return[];return data.features.map(geoapifyPlaceToPlace);}
-  catch(e){console.warn('Geoapify falló:',e);return[];}
+  const radius=Math.min(Math.round(Math.max(maxLat-minLat,maxLng-minLng)*111320*1.4),1500);
+  return fsqSearch(centerLat,centerLng,radius);
 }
 
-/* ─── GEOAPIFY SEARCH — usa Foursquare como primario, Geoapify como fallback ─── */
-async function geoapifySearch(query,lat,lng){
-  // Intentar primero con Foursquare autocomplete
-  if(FOURSQUARE_READY){
-    const fsqResults=await foursquareAutocomplete(query,lat,lng);
-    if(fsqResults.length>=2)return fsqResults;
-  }
-  // Fallback a búsqueda local + Geoapify
-  if(!GEOAPIFY_READY)return[];
+/* ─── SEARCH (mapa) ─── */
+async function searchPlacesByQuery(query){
+  if(!query||query.length<2)return[];
   const q=query.toLowerCase();
-  const localMatches=places.filter(p=>p.name.toLowerCase().includes(q)||p.addr.toLowerCase().includes(q)||p.type.toLowerCase().includes(q)).slice(0,10);
+  const localMatches=places.filter(p=>p.name.toLowerCase().includes(q)||p.addr.toLowerCase().includes(q)||p.type.toLowerCase().includes(q)).slice(0,5);
   if(localMatches.length>=3)return localMatches;
-  const url=`https://api.geoapify.com/v2/places?categories=commercial,catering,healthcare,leisure,government,post_office,fuel&filter=circle:${lng},${lat},5000&limit=50&apiKey=${CONFIG.GEOAPIFY_API_KEY}`;
-  try{
-    const res=await fetch(url);
-    if(!res.ok)return localMatches;
-    const data=await res.json();
-    if(!data.features)return localMatches;
-    const results=data.features.map(geoapifyPlaceToPlace).filter(p=>p.name.toLowerCase().includes(q)||p.type.toLowerCase().includes(q));
-    return results.length?results:localMatches;
-  }catch(e){return localMatches;}
+  if(userLat!==null&&userLng!==null){
+    const results=await fsqAutocomplete(query,userLat,userLng);
+    if(results.length)return results;
+  }
+  return localMatches;
 }
-
-/* ─── CARGA DE LUGARES ─── */
 async function ensurePlacesLoadedAt(lat,lng){
   const tileKey=latLngToTileKey(lat,lng);
   const adjacentKeys=getAdjacentTileKeys(lat,lng);
@@ -880,11 +863,11 @@ async function ensurePlacesLoadedAt(lat,lng){
     return;
   }
   if(!mapInitialLoaded)mapInitialLoaded=true;
-  const[geoPlaces,backendResult]=await Promise.all([loadGeoapifyForTiles(missingKeys),BACKEND_READY?apiGet('sync_places',{lat,lng,radius:Math.round(CONFIG.TILE_DEG*111320*1.5)}):Promise.resolve(null)]);
+  const[fsqPlaces,backendResult]=await Promise.all([loadPlacesForTiles(missingKeys),BACKEND_READY?apiGet('sync_places',{lat,lng,radius:Math.round(CONFIG.TILE_DEG*111320*1.5)}):Promise.resolve(null)]);
   const backendPlaces=(backendResult&&Array.isArray(backendResult.places))?backendResult.places:[];
   const backendById=new Map(backendPlaces.map(p=>[p.id,p]));
-  const merged=geoPlaces.map(p=>{const bp=backendById.get(p.id);return bp?{...p,...bp}:p;});
-  const onlyBackend=backendPlaces.filter(p=>!geoPlaces.find(o=>o.id===p.id));
+  const merged=fsqPlaces.map(p=>{const bp=backendById.get(p.id);return bp?{...p,...bp}:p;});
+  const onlyBackend=backendPlaces.filter(p=>!fsqPlaces.find(o=>o.id===p.id));
   const allNew=[...merged,...onlyBackend];
   missingKeys.forEach(key=>{const[s,w,n,e]=tileToBbox(key);const forThisTile=allNew.filter(p=>p.lat>=s&&p.lat<=n&&p.lng>=w&&p.lng<=e);mergePlacesIntoCache(forThisTile,key);});
   persistCache();rebuildNearby(lat,lng);buildMapMarkers(nearbyPlaces);updateCrowdBar(calcCrowdPct());
@@ -920,7 +903,7 @@ async function searchPlacesByQuery(query){
   const q=query.toLowerCase();
   const localMatches=places.filter(p=>p.name.toLowerCase().includes(q)||p.addr.toLowerCase().includes(q)||p.type.toLowerCase().includes(q)).slice(0,5);
   if(localMatches.length>=3)return localMatches;
-  if(GEOAPIFY_READY&&userLat!==null&&userLng!==null){const results=await geoapifySearch(query,userLat,userLng);if(results.length)return results;}
+  if(userLat!==null&&userLng!==null){const results=await fsqAutocomplete(query,userLat,userLng);if(results.length)return results;}
   return localMatches;
 }
 
@@ -1216,72 +1199,36 @@ function cercaGuessCategory(name,type){
 
 function cercaFmtDist(m){return m<1000?m+'m':(m/1000).toFixed(1)+'km';}
 
-async function cercaFetchGeoapify(lat,lng,radius){
-  // Intentar primero con Foursquare (nueva API)
-  if(FOURSQUARE_READY){
-    try{
-      const fsqPlaces=await foursquareSearchPlaces(lat,lng,radius);
-      if(fsqPlaces.length>0){
-        return fsqPlaces.map(p=>{
-          const dist=Math.round(distanceMeter(lat,lng,p.lat,p.lng));
-          p.dist=dist;p.cat=cercaGuessCategory(p.name,p.type);
-          const existing=placeIndex.get(p.id);
-          if(existing){p.status=existing.status;p.reporters=existing.reporters;p.sponsor=existing.sponsor;}
-          return p;
-        }).filter(p=>p.dist<=radius).sort((a,b)=>a.dist-b.dist);
-      }
-    }catch(e){console.warn('Foursquare cerca falló, fallback a Geoapify:',e);}
-  }
-  // Fallback a Geoapify si Foursquare no está disponible
-  if(!GEOAPIFY_READY)return[];
+async function cercaFetchPlaces(lat,lng,radius){
   if(cercaAbortController)cercaAbortController.abort();
   cercaAbortController=new AbortController();
-  const signal=cercaAbortController.signal;
-  const pad=0.0006+(radius/111320)*1.3;
-  const bbox=`${lng-pad},${lat-pad},${lng+pad},${lat+pad}`;
-  const categories='commercial,catering,healthcare,leisure,government,post_office,fuel,professional,transport';
-  const limit=radius<=500?120:300;
-  const url=`https://api.geoapify.com/v2/places?categories=${categories}&filter=rect:${bbox}&limit=${limit}&apiKey=${CONFIG.GEOAPIFY_API_KEY}`;
   try{
-    const res=await fetch(url,{signal});
-    if(!res.ok)throw new Error('Geoapify HTTP '+res.status);
-    const data=await res.json();
-    if(!data.features)return[];
-    return data.features.map(feature=>{
-      const p=geoapifyPlaceToPlace(feature);
-      const dist=Math.round(distanceMeter(lat,lng,p.lat,p.lng));
-      p.dist=dist;p.cat=cercaGuessCategory(p.name,p.type);
+    const results=await fsqSearch(lat,lng,radius);
+    return results.map(p=>{
+      p.dist=Math.round(distanceMeter(lat,lng,p.lat,p.lng));
+      p.cat=cercaGuessCategory(p.name,p.type);
       const existing=placeIndex.get(p.id);
       if(existing){p.status=existing.status;p.reporters=existing.reporters;p.sponsor=existing.sponsor;}
       return p;
     }).filter(p=>p.dist<=radius).sort((a,b)=>a.dist-b.dist);
   }catch(e){
     if(e.name==='AbortError')return[];
-    console.warn('Geoapify panel Cerca falló:',e);return[];
+    console.warn('cercaFetchPlaces falló:',e);return[];
   }
 }
 
-/* ─── CERCA CITY SEARCH — usa Places API (geocode/search no disponible en plan free) ─── */
 async function cercaFetchCitySearch(query,lat,lng){
-  if(!GEOAPIFY_READY)return[];
   const q=query.toLowerCase();
-  // Primero buscar en los ya cargados
   const localMatches=cercaAllPlaces.filter(p=>p.name.toLowerCase().includes(q)||p.type.toLowerCase().includes(q)||(p.addr||'').toLowerCase().includes(q));
-  // Ampliar via Places API filtrando por nombre
-  const url=`https://api.geoapify.com/v2/places?categories=commercial,catering,healthcare,leisure,government,post_office,fuel&filter=circle:${lng},${lat},5000&limit=100&apiKey=${CONFIG.GEOAPIFY_API_KEY}`;
+  if(localMatches.length>=3)return localMatches;
   try{
-    const res=await fetch(url);
-    if(!res.ok)return localMatches;
-    const data=await res.json();
-    if(!data.features)return localMatches;
-    const allResults=data.features.map(f=>{
-      const p=geoapifyPlaceToPlace(f);
-      p.dist=Math.round(distanceMeter(lat,lng,p.lat,p.lng));
-      p.cat=cercaGuessCategory(p.name,p.type);
-      return p;
-    }).filter(p=>p.name.toLowerCase().includes(q)||p.type.toLowerCase().includes(q));
+    const results=await fsqAutocomplete(query,lat,lng);
     const combined=[...localMatches];
-    allResults.forEach(r=>{if(!combined.find(p=>p.id===r.id))combined.push(r);});
+    results.forEach(r=>{
+      r.dist=Math.round(distanceMeter(lat,lng,r.lat,r.lng));
+      r.cat=cercaGuessCategory(r.name,r.type);
+      if(!combined.find(p=>p.id===r.id))combined.push(r);
+    });
     return combined.slice(0,30);
   }catch(e){return localMatches;}
 }
@@ -1327,7 +1274,7 @@ async function cercaLoadPlaces(forceReload){
   const lng=userLng??CONFIG.DEFAULT_CENTER.lng;
   try{
     let placesData=[];
-    if(GEOAPIFY_READY){placesData=await cercaFetchGeoapify(lat,lng,cercaRadius);}
+    placesData=await cercaFetchPlaces(lat,lng,cercaRadius);
     if(!placesData.length){
       placesData=cercaBuildDemoPlaces(lat,lng);
       if(errBanner)errBanner.style.display='flex';
@@ -1379,7 +1326,7 @@ function cercaApplyFilters(){
     filtrados.sort((a,b)=>a.dist-b.dist);
     cercaFiltered=filtrados;
     cercaRenderList();
-    if(!cercaCitySearchInFlight&&GEOAPIFY_READY&&userLat!==null&&userLng!==null){
+    if(!cercaCitySearchInFlight&&userLat!==null&&userLng!==null){
       cercaCitySearchInFlight=true;
       const lat=userLat,lng=userLng;
       cercaFetchCitySearch(cercaSearchQ,lat,lng).then(results=>{cercaCitySearchInFlight=false;if(cercaSearchQ){cercaCitySearchResults=results;cercaApplyFilters();}}).catch(()=>{cercaCitySearchInFlight=false;});
@@ -1555,11 +1502,20 @@ async function handleGoogleTokenResponse(resp){
 }
 
 async function trySilentRenew(){
-  if(!GOOGLE_AUTH_READY)return;
+  // Solo intenta renovar si tenemos sesión activa Y el token expiró
+  if(!GOOGLE_AUTH_READY||!isLoggedIn)return;
+  const savedToken=loadTokenFromStorage();
+  if(savedToken)return; // Token aún válido, no hace falta renovar
   let attempts=0;
   while((!window.google||!google.accounts||!google.accounts.oauth2)&&attempts<20){await new Promise(r=>setTimeout(r,200));attempts++;}
   if(!initGoogleTokenClient())return;
-  try{tokenClient.requestAccessToken({prompt:''});}catch(e){console.warn('Silent renew falló:',e);}
+  try{
+    // prompt:'' intenta renovar silenciosamente; si falla, la sesión sigue activa igual
+    tokenClient.requestAccessToken({prompt:''});
+  }catch(e){
+    // Silencioso: la sesión de usuario sigue activa aunque el token OAuth haya expirado
+    console.log('Silent renew no disponible, sesión de usuario activa igual');
+  }
 }
 
 async function restoreSession(){
@@ -1567,10 +1523,12 @@ async function restoreSession(){
   if(!saved)return;
   try{currentUser=JSON.parse(saved);}catch{localStorage.removeItem(SESSION_STORAGE_KEY);currentUser=null;return;}
   if(!currentUser||!currentUser.email){localStorage.removeItem(SESSION_STORAGE_KEY);currentUser=null;return;}
-  const deviceEmail=localStorage.getItem(DEVICE_KEY);
-  if(deviceEmail&&deviceEmail!==currentUser.email){localStorage.removeItem(SESSION_STORAGE_KEY);currentUser=null;return;}
+  // NOTA: No verificamos DEVICE_KEY aquí para no perder la sesión por inconsistencias
+  // (el DEVICE_KEY se sigue escribiendo al hacer login para evitar cambios de cuenta)
   // Restaurar sesión inmediatamente sin necesitar token de acceso
   isLoggedIn=true;
+  // Asegurar que DEVICE_KEY esté sincronizado con el usuario restaurado
+  localStorage.setItem(DEVICE_KEY,currentUser.email);
   applyLoggedInUI();
   // Intentar obtener datos actualizados del backend si está disponible
   if(BACKEND_READY){
@@ -1586,20 +1544,8 @@ async function restoreSession(){
     }).catch(()=>{});
   }
   maybeStartOccupancySync();
-  // Intentar renovar token en segundo plano (sin bloquear la sesión)
-  const savedToken=loadTokenFromStorage();
-  if(savedToken){
-    fetchProfileFromToken(savedToken).then(profile=>{
-      if(profile&&profile.email===currentUser.email){
-        // Token aún válido, ok
-      }else{localStorage.removeItem(TOKEN_STORAGE_KEY);}
-    }).catch(()=>{
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
-      // Sesión sigue activa igual, solo el token expiró
-    });
-  }
-  // Intentar renovar token en segundo plano sin afectar la sesión
-  setTimeout(()=>trySilentRenew(),2000);
+  // Intentar renovar token OAuth en segundo plano (no afecta la sesión si falla)
+  setTimeout(()=>trySilentRenew(),3000);
 }
 
 function updateUserHUD(){
