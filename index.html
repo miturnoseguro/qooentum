@@ -610,7 +610,7 @@ const SEED_PRIZES = [
   {id:'p7',emoji:'🛍️',name:'Gift card $5000',        pts:2500,cat:'Compras',       partner:'Naranja X'},
   {id:'p8',emoji:'✈️',name:'Voucher de viaje',        pts:5000,cat:'Turismo',       partner:'Despegar'},
 ];
-POIS_JSON_URL: 'https://miturnoseguro.github.io/qooentum/pois.json',
+
 /* ── STATE ── */
 let userPts=0, currentUser=null;
 let places=[], placeIndex=new Map(), nearbyPlaces=[], rankingData=[];
@@ -1574,7 +1574,6 @@ window.addEventListener('DOMContentLoaded',()=>{
   initMap();
   loadCache();
   loadCooldownsFromStorage();
-  updateQueryCounterUI();
   pruneOldTiles();
   updateUserHUD();
   initGoogleTokenClient();
