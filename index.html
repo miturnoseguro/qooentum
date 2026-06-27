@@ -802,12 +802,16 @@ async function fsqSearch(lat,lng,radius){
   }catch(e){console.warn('fsqSearch falló:',e);return[];}
 }
 
+let fsqAutocompleteController = null;
 async function fsqAutocomplete(query,lat,lng){
   if(!query||query.length<2)return[];
+  // Cancelar request anterior si aún está en curso
+  if(fsqAutocompleteController)fsqAutocompleteController.abort();
+  fsqAutocompleteController=new AbortController();
   try{
     const params=new URLSearchParams({'query':query,'ll':`${lat},${lng}`,'limit':8});
     const res=await fetch(`${FOURSQUARE_CONFIG.API_BASE}/places/autocomplete?${params}`,
-      {headers:{'Authorization':FOURSQUARE_CONFIG.API_KEY,'Accept':'application/json'}});
+      {headers:{'Authorization':FOURSQUARE_CONFIG.API_KEY,'Accept':'application/json'},signal:fsqAutocompleteController.signal});
     if(!res.ok)return[];
     const data=await res.json();
     return(data.results||[])
@@ -826,7 +830,7 @@ async function fsqAutocomplete(query,lat,lng){
           dist:Math.round(distanceMeter(lat,lng,plat,plng))
         };
       });
-  }catch(e){console.warn('fsqAutocomplete falló:',e);return[];}
+  }catch(e){if(e.name==='AbortError')return[];console.warn('fsqAutocomplete falló:',e);return[];}
 }
 
 /* ─── CARGA DE LUGARES PARA TILES (mapa principal) ─── */
@@ -923,7 +927,7 @@ function onSearchInput(e){
   searchClear().classList.toggle('visible',val.length>0);
   if(val.length<2){searchDropdown().classList.remove('open');return;}
   clearTimeout(searchTimer);
-  searchTimer=setTimeout(()=>runSearch(val),380);
+  searchTimer=setTimeout(()=>runSearch(val),500);
 }
 
 async function runSearch(query){
@@ -1395,7 +1399,7 @@ function initCercaSearch(){
     const val=e.target.value.trim();
     clear.classList.toggle('visible',val.length>0);
     clearTimeout(cercaSearchTimer);
-    cercaSearchTimer=setTimeout(()=>{cercaSearchQ=val;cercaApplyFilters();},260);
+    cercaSearchTimer=setTimeout(()=>{cercaSearchQ=val;cercaApplyFilters();},500);
   });
 }
 
