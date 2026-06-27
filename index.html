@@ -1,6 +1,3 @@
-
-
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1721,6 +1718,12 @@ setInterval(()=>{pruneOldTiles();persistCache();},60*60*1000);
 
 /* ─── INIT ─── */
 window.addEventListener('DOMContentLoaded',()=>{
+  /* FORCE radius to 1000 — corrige cualquier versión vieja cacheada del HTML */
+  cercaRadius=1000;
+  document.querySelectorAll('.cerca-r-btn').forEach(b=>{
+    const r=parseInt(b.dataset.r,10);
+    b.classList.toggle('active', r===1000);
+  });
   loadCache();
   loadCooldownsFromStorage();
   pruneOldTiles();
