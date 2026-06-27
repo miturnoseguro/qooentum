@@ -1544,7 +1544,13 @@ function initGoogleTokenClient(){
   if(!GOOGLE_AUTH_READY)return false;
   if(tokenClient)return true;
   if(!window.google||!google.accounts||!google.accounts.oauth2)return false;
-  tokenClient=google.accounts.oauth2.initTokenClient({client_id:CONFIG.GOOGLE_CLIENT_ID,scope:'email profile',callback:handleGoogleTokenResponse,error_callback:(err)=>{console.warn('Google OAuth error:',err);resetLoginButton();if(!err||err.type!=='popup_closed')showToast('⚠️ No se pudo iniciar sesión con Google');}});
+  tokenClient=google.accounts.oauth2.initTokenClient({client_id:CONFIG.GOOGLE_CLIENT_ID,scope:'email profile',callback:handleGoogleTokenResponse,error_callback:(err)=>{
+    if(isLoggedIn){console.log('Google OAuth silent renew error (ignorado, sesión activa):',err?.type||err);return;}
+    console.warn('Google OAuth error:',err);
+    resetLoginButton();
+    const errType=err?.type||'';
+    if(errType!=='popup_closed'&&errType!=='access_denied'&&errType!=='immediate_failed'){showToast('⚠️ No se pudo iniciar sesión con Google');}
+  }});
   return true;
 }
 
@@ -1661,20 +1667,15 @@ async function restoreSession(){
     }).catch(()=>{});
   }
   maybeStartOccupancySync();
-  // Intentar renovar token en segundo plano (sin bloquear la sesión)
+  // Verificar si el token guardado aún es válido (solo limpieza, sin renovar)
   const savedToken=loadTokenFromStorage();
   if(savedToken){
     fetchProfileFromToken(savedToken).then(profile=>{
-      if(profile&&profile.email===currentUser.email){
-        // Token aún válido, ok
-      }else{localStorage.removeItem(TOKEN_STORAGE_KEY);}
-    }).catch(()=>{
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
-      // Sesión sigue activa igual, solo el token expiró
-    });
+      if(!profile||profile.email!==currentUser.email)localStorage.removeItem(TOKEN_STORAGE_KEY);
+    }).catch(()=>{localStorage.removeItem(TOKEN_STORAGE_KEY);});
   }
-  // Intentar renovar token en segundo plano sin afectar la sesión
-  setTimeout(()=>trySilentRenew(),2000);
+  // No intentamos silent renew automático: la sesión es persistente por localStorage
+  // El token OAuth se renueva solo cuando el usuario hace una acción que lo requiere (votar)
 }
 
 function updateUserHUD(){
