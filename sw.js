@@ -1,5 +1,5 @@
-/* Qooentum — Service Worker v6 (precache tolerante + Foursquare bypass) */
-const CACHE_NAME = 'qooentum-v6';
+/* Qooentum — Service Worker v7 (Google Places + precache tolerante) */
+const CACHE_NAME = 'qooentum-v7';
 const PRECACHE_URLS = [
   './',
   './index.html',
@@ -8,15 +8,15 @@ const PRECACHE_URLS = [
 /* ─── Dominios que NUNCA interceptamos ──────────────────────
    Para estos dominios NO llamamos event.respondWith() en absoluto.
    El browser los maneja directamente con CORS nativo completo,
-   lo que permite que los headers Authorization de Foursquare
+   lo que permite que los headers de API Key de Google Places
    y los tokens OAuth de Google pasen sin interferencia.
    ─────────────────────────────────────────────────────────── */
 const NEVER_INTERCEPT_DOMAINS = [
-  'api.foursquare.com',
-  'location.foursquare.com',
-  'googleapis.com',
-  'accounts.google.com',
-  'script.google.com',
+  'places.googleapis.com',       // Google Places API (New)
+  'maps.googleapis.com',         // Google Maps
+  'googleapis.com',              // Resto de Google APIs (incluye oauth2/userinfo)
+  'accounts.google.com',         // Google OAuth
+  'script.google.com',           // Apps Script (backend)
 ];
 
 function shouldNeverIntercept(url) {
@@ -27,7 +27,6 @@ function shouldNeverIntercept(url) {
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
-      // Cachear cada URL individualmente para que un fallo no rompa todo
       await Promise.allSettled(
         PRECACHE_URLS.map((url) =>
           cache.add(url).catch((err) => {
@@ -68,7 +67,8 @@ self.addEventListener('fetch', (event) => {
 
   /* 1. Dominios críticos → NO interceptar en absoluto.
         Hacemos return sin llamar event.respondWith().
-        El browser maneja el request nativamente con CORS completo. */
+        El browser maneja el request nativamente con CORS completo.
+        Crítico para que X-Goog-Api-Key pase correctamente. */
   if (shouldNeverIntercept(url)) return;
 
   /* 2. Navegación / HTML de mismo origen → network-first */
@@ -134,4 +134,4 @@ self.addEventListener('message', (event) => {
   }
 });
 
-console.log('✅ SW v6 activo — Foursquare bypass + precache tolerante');
+console.log('✅ SW v7 activo — Google Places bypass + precache tolerante');
