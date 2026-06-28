@@ -1431,7 +1431,7 @@ function initMap(){
     container:'maplibre-map',
     style:'./bright_patched.json',
     center:[CONFIG.DEFAULT_CENTER.lng,CONFIG.DEFAULT_CENTER.lat],
-    zoom:13,
+    zoom:5,
     attributionControl:false,
     // FIX: precargar tiles de los alrededores para evitar blancos al moverse
     trackResize:true,
@@ -1481,6 +1481,7 @@ function initMap(){
           // Cargar lugares en ubicación por defecto si no hay GPS
           if(!mapInitialLoaded){
             const{lat,lng}=CONFIG.DEFAULT_CENTER;
+            safeMapMove(()=>mlMap.flyTo({center:[lng,lat],zoom:13,duration:600}));
             ensurePlacesLoadedAt(lat,lng);
             mapInitialLoaded=true;
           }
@@ -1536,17 +1537,20 @@ function onGpsSuccess(pos){
   const{latitude:lat,longitude:lng,accuracy}=pos.coords;
   if(typeof lat!=='number'||typeof lng!=='number'||isNaN(lat)||isNaN(lng))return;
   const isFirstGps=!gpsEverReceived;
-  const isFirst=(userLat===null);
   // Ignorar lecturas muy imprecisas solo si ya tenemos una buena
-  if(!isFirst && accuracy>150)return;
+  if(!isFirstGps && accuracy>150)return;
   userLat=lat; userLng=lng;
   gpsEverReceived=true;
   if(mlReady)updateUserMarker(lat,lng);
-  // Mover el mapa si followMode está activo, o si es la primera vez que recibimos GPS
-  if(mlReady && mlMap && (followMode || isFirstGps)){
-    if(isValidCoord(lat,lng))safeMapMove(()=>mlMap.flyTo({center:[lng,lat],zoom:CONFIG.FOLLOW_ZOOM,duration:800}));
+  // Primera vez que llega GPS: siempre volar a la ubicación real del usuario
+  if(mlReady && mlMap && isValidCoord(lat,lng)){
+    if(isFirstGps){
+      safeMapMove(()=>mlMap.flyTo({center:[lng,lat],zoom:CONFIG.FOLLOW_ZOOM,duration:800}));
+    } else if(followMode){
+      safeMapMove(()=>mlMap.easeTo({center:[lng,lat],duration:600}));
+    }
   }
-  if(isFirst){
+  if(isFirstGps){
     updateGpsBtnUI();
     mapInitialLoaded=true;
     lastLoadTileKey=latLngToTileKey(lat,lng);
