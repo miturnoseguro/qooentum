@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -685,7 +687,14 @@ function distanceMeter(lat1,lng1,lat2,lng2){const R=6371000,toRad=d=>d*Math.PI/1
 /* ── CACHE ── */
 function latLngToTileKey(lat,lng){return`${Math.floor(lat/CONFIG.TILE_DEG)}:${Math.floor(lng/CONFIG.TILE_DEG)}`;}
 function persistCache(){try{localStorage.setItem(PLACE_CACHE_KEY,JSON.stringify({tiles:tileCache,places:placeStore,savedAt:Date.now()}));}catch(e){}}
-function loadCache(){try{const raw=localStorage.getItem(PLACE_CACHE_KEY);if(!raw)return;const data=JSON.parse(raw);if(!data||!data.tiles)return;tileCache=data.tiles||{};placeStore=data.places||{};Object.values(placeStore).forEach(p=>{if(!placeIndex.has(p.id)){placeIndex.set(p.id,p);places.push(p);}});}catch(e){}}
+function _todayStartMs(){const d=new Date();d.setHours(0,0,0,0);return d.getTime();}
+function pruneDailyReports(){// Resetear reporters de lugares cuyo reporte es de un día anterior
+  const todayStart=_todayStartMs();
+  Object.values(placeStore).forEach(p=>{
+    if(p.report_ts&&p.report_ts<todayStart){p.reporters=0;p.status=0;p.report_ts=null;}
+  });
+}
+function loadCache(){try{const raw=localStorage.getItem(PLACE_CACHE_KEY);if(!raw)return;const data=JSON.parse(raw);if(!data||!data.tiles)return;tileCache=data.tiles||{};placeStore=data.places||{};pruneDailyReports();Object.values(placeStore).forEach(p=>{if(!placeIndex.has(p.id)){placeIndex.set(p.id,p);places.push(p);}});}catch(e){}}
 function pruneOldTiles(){const now=Date.now();Object.keys(tileCache).forEach(k=>{if(now-tileCache[k].ts>CONFIG.PLACE_CACHE_TTL_MS)delete tileCache[k];});const allIds=new Set();Object.values(tileCache).forEach(t=>(t.placeIds||[]).forEach(id=>allIds.add(id)));Object.keys(placeStore).forEach(id=>{if(!allIds.has(id))delete placeStore[id];});}
 function markTileLoaded(tileKey,ids){tileCache[tileKey]={ts:Date.now(),placeIds:ids};}
 function isTileCached(tileKey){const t=tileCache[tileKey];return t&&(Date.now()-t.ts)<CONFIG.PLACE_CACHE_TTL_MS;}
@@ -1022,8 +1031,13 @@ async function _ensurePlacesLoadedAtNow(lat,lng){
   const cLat=userLat??lat, cLng=userLng??lng;
   const movedFar=lastCheckinLat===null||distanceMeter(cLat,cLng,lastCheckinLat,lastCheckinLng)>50;
   if((!checkinShown||movedFar)&&nearbyPlaces.length>0){
-    checkinShown=true;
-    setTimeout(()=>showCheckinModal(cLat,cLng),1000);
+    // Solo mostrar checkin si hay un lugar a menos de 20m
+    const veryNear=nearbyPlaces.filter(p=>isValidCoord(p.lat,p.lng)&&distanceMeter(cLat,cLng,p.lat,p.lng)<=20);
+    if(veryNear.length>0){
+      checkinShown=true;
+      lastCheckinLat=cLat;lastCheckinLng=cLng;
+      setTimeout(()=>showCheckinModal(cLat,cLng),1000);
+    }
   }
 }
 
@@ -1065,7 +1079,7 @@ function applySeedReports(allPlaces,userLat,userLng){
     seed={
       ids:shuffled.map(p=>p.id),
       statuses:shuffled.map((_,i)=>Math.floor(((dateNum*(i+3))%100)/34)), // 0,1,2 only
-      reporters:shuffled.map((_,i)=>2+Math.floor(((dateNum*(i+7))%100)/8))
+      reporters:shuffled.map((_,i)=>3+Math.floor(((dateNum*(i+7))%100)/6))
     };
     saveSeedData(seed);
   }
@@ -1129,25 +1143,20 @@ function clearSearch(){document.getElementById('map-search-input').value='';docu
    MAPLIBRE GL — MARKERS + MAP INIT + GPS
    ════════════════════════════════════════════════════════════ */
 
-const CLUSTER_ZOOM_THRESHOLD = 14; // agrupar cuando zoom<14 (~7+ manzanas visibles)
+const CLUSTER_ZOOM_THRESHOLD = 16; // agrupar cuando zoom<16 (~5 manzanas visibles) // agrupar cuando zoom<14 (~7+ manzanas visibles)
 let mlMap = null, mlReady = false, mlReadyCallbacks = [];
 let mlMarkers = {}; // id -> {marker, el}
 let mlClusterMarkers = [];
 let mlUserMarker = null;
 
 function getClusterGridDeg(zoom){
-  // Grid calculado para garantizar separación visual mínima de ~220px entre clusters
-  // Fórmula: tileDeg = 360/2^zoom; gridDeg = (220/256) * tileDeg / cos(lat≈-35°)
-  // cos(-35°)≈0.819 → factor≈1.05
-  // zoom 14: tileDeg=0.022 → grid≈0.019 (mostraremos individuales, threshold=15)
-  // zoom 13: tileDeg=0.044 → grid≈0.038
-  // zoom 12: tileDeg=0.088 → grid≈0.075
-  // zoom 11: tileDeg=0.176 → grid≈0.150
-  if(zoom>=14)return 0.020; // solo llega aquí si threshold cambia
-  if(zoom>=13)return 0.040;
-  if(zoom>=12)return 0.080;
-  if(zoom>=11)return 0.160;
-  return 0.35;
+  // ~5 manzanas visibles en móvil = zoom 15-16
+  if(zoom>=15)return 0.012; // solo llega si threshold cambia
+  if(zoom>=14)return 0.022;
+  if(zoom>=13)return 0.045;
+  if(zoom>=12)return 0.090;
+  if(zoom>=11)return 0.180;
+  return 0.38;
 }
 
 function densityClass(count){
@@ -1685,6 +1694,7 @@ async function handlePopupVoteSubmit(placeId,voteIdx){
   applyLocalCooldown(placeId);
   p.status=voteIdx;
   p.reporters=(p.reporters||0)+1;
+  p.report_ts=Date.now(); // timestamp del reporte para reset diario
   placeStore[p.id]=p;
   placeIndex.set(p.id,p); // keep both in sync
   // También actualizar en el array places
@@ -1692,8 +1702,11 @@ async function handlePopupVoteSubmit(placeId,voteIdx){
   if(pi>=0)places[pi]=p;
   // Forzar refresh del marker con estado actualizado
   requestAnimationFrame(()=>refreshMarkerIcon(p.id));
-  // Actualizar popup si sigue abierto
-  if(currentPopupPlace&&currentPopupPlace.id===p.id){Object.assign(currentPopupPlace,p);}
+  // Actualizar popup si sigue abierto con el nuevo estado
+  if(currentPopupPlace&&currentPopupPlace.id===p.id){
+    Object.assign(currentPopupPlace,p);
+    renderPopup(currentPopupPlace,isLoggedIn,currentUser);
+  }
   if(document.getElementById('panel-cerca').classList.contains('visible'))cercaUpdateFromStore();
   await submitVoteToBackend(p,voteIdx);
 }
