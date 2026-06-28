@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1105,11 +1106,14 @@ function refreshMarkerIcon(id){
 function updateUserMarker(lat,lng){
   if(!mlMap||!mlReady)return;
   if(mlUserMarker){
+    // FIX: usar easeTo en lugar de setLngLat directo para animar suavemente
+    mlMap.easeTo({center:[lng,lat],duration:600,easing:t=>t*(2-t)});
     mlUserMarker.setLngLat([lng,lat]);
   } else {
     const el=document.createElement('div');
-    el.style.cssText='width:18px;height:18px;border-radius:50%;background:#6366F1;border:3px solid #fff;box-shadow:0 0 0 4px rgba(99,102,241,.35);';
-    mlUserMarker=new maplibregl.Marker({element:el})
+    // FIX: transition CSS para que el elemento del marcador se mueva suavemente
+    el.style.cssText='width:18px;height:18px;border-radius:50%;background:#6366F1;border:3px solid #fff;box-shadow:0 0 0 4px rgba(99,102,241,.35);transition:transform 0.5s cubic-bezier(.25,.46,.45,.94);';
+    mlUserMarker=new maplibregl.Marker({element:el,pitchAlignment:'map'})
       .setLngLat([lng,lat])
       .addTo(mlMap);
   }
@@ -1145,6 +1149,10 @@ function initMap(){
     center:[CONFIG.DEFAULT_CENTER.lng,CONFIG.DEFAULT_CENTER.lat],
     zoom:13,
     attributionControl:false,
+    // FIX: precargar tiles de los alrededores para evitar blancos al moverse
+    trackResize:true,
+    maxTileCacheSize:150,
+    fadeDuration:100,
   });
 
   mlMap.addControl(new maplibregl.AttributionControl({compact:true}),'bottom-right');
@@ -1188,17 +1196,26 @@ function startGpsWatch(){
       ensurePlacesLoadedAt(lat,lng);
       mapInitialLoaded=true;
     }
-  },{enableHighAccuracy:true,timeout:10000,maximumAge:3000});
+  // FIX: maximumAge:500 — fuerza lecturas frescas cada 500ms para mayor fluidez
+  },{enableHighAccuracy:true,timeout:10000,maximumAge:500});
 }
 
 function onGpsSuccess(pos){
-  const{latitude:lat,longitude:lng}=pos.coords;
+  const{latitude:rawLat,longitude:rawLng,accuracy}=pos.coords;
+  // FIX: ignorar lecturas muy imprecisas (accuracy en metros, número alto = impreciso)
+  if(accuracy>80&&userLat!==null)return;
+  // FIX: filtro de suavizado — promedio ponderado 75% nueva / 25% anterior
+  const lat=userLat===null?rawLat:rawLat*0.75+userLat*0.25;
+  const lng=userLng===null?rawLng:rawLng*0.75+userLng*0.25;
   const isFirst=userLat===null;
   userLat=lat;userLng=lng;
   if(mlReady)updateUserMarker(lat,lng);
   if(followMode&&mlMap){
     if(isFirst){mlMap.flyTo({center:[lng,lat],zoom:CONFIG.FOLLOW_ZOOM,duration:600});}
-    else{mlMap.panTo([lng,lat]);}
+    else{
+      // FIX: easeTo en lugar de panTo para seguimiento suave sin saltos
+      mlMap.easeTo({center:[lng,lat],duration:800,easing:t=>t*(2-t)});
+    }
   }
   if(isFirst){updateGpsBtnUI();ensurePlacesLoadedAt(lat,lng);lastLoadTileKey=latLngToTileKey(lat,lng);}
   else{
