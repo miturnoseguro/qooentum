@@ -727,7 +727,15 @@ async function syncOccupancyStatus(){
     const result=await apiGet('sync_places',{lat,lng,radius:1000,status_only:1,place_ids:sorted.map(p=>p.id).join(',')});
     if(!result||!Array.isArray(result.places))return;
     let needsRefresh=false;
-    result.places.forEach(bp=>{const p=placeIndex.get(bp.id);if(!p)return;if(p.status!==bp.status||p.reporters!==bp.reporters)needsRefresh=true;p.status=bp.status??p.status;p.reporters=bp.reporters??p.reporters;placeStore[p.id]=p;});
+    result.places.forEach(bp=>{const p=placeIndex.get(bp.id);if(!p)return;
+      // Solo actualizar reporters si el backend trae un valor mayor (no permitir que el sync baje a 0 datos locales del día)
+      const newReporters=bp.reporters??p.reporters;
+      const newStatus=bp.status??p.status;
+      if(p.status!==newStatus||p.reporters!==newReporters)needsRefresh=true;
+      p.status=newStatus;
+      // Preservar reporters locales si el backend dice 0 pero tenemos datos locales del día
+      if(newReporters>0||p.reporters===0)p.reporters=newReporters;
+      placeStore[p.id]=p;});
     if(needsRefresh){buildMapMarkers(nearbyPlaces.length?nearbyPlaces:places);if(currentPopupPlace){const u=placeIndex.get(currentPopupPlace.id);if(u){Object.assign(currentPopupPlace,u);renderPopup(currentPopupPlace,isLoggedIn,currentUser);}}if(document.getElementById('panel-cerca').classList.contains('visible'))cercaUpdateFromStore();}
     persistCache();
   }catch(e){console.warn('syncOccupancyStatus:',e);}
@@ -943,6 +951,8 @@ function rebuildNearby(lat,lng){
   const maxDistM=CONFIG.TILE_DEG*111320*1.2;
   nearbyPlaces=[];
   placeIndex.forEach(p=>{if(distanceMeter(lat,lng,p.lat,p.lng)<=maxDistM)nearbyPlaces.push(p);});
+  // Re-aplicar seed reports tras reconstruir nearby para asegurar visibilidad en markers
+  if(nearbyPlaces.length)applySeedReports(nearbyPlaces,lat,lng);
 }
 
 /* ── DAILY SEEDED REPORTS ── 5 random nearby places (<300m) get fake activity each day */
@@ -1028,7 +1038,7 @@ function clearSearch(){document.getElementById('map-search-input').value='';docu
    MAPLIBRE GL — MARKERS + MAP INIT + GPS
    ════════════════════════════════════════════════════════════ */
 
-const CLUSTER_ZOOM_THRESHOLD = 16; // agrupar cuando se ven ~5 manzanas (zoom<16)
+const CLUSTER_ZOOM_THRESHOLD = 15; // agrupar cuando se ven ~5 manzanas (zoom<15)
 let mlMap = null, mlReady = false, mlReadyCallbacks = [];
 let mlMarkers = {}; // id -> {marker, el}
 let mlClusterMarkers = [];
@@ -1313,8 +1323,33 @@ function initMap(){
     initSearch();
     // Arrancar siempre con GPS siguiendo al usuario
     followMode=true;
-    startGpsWatch();
     updateGpsBtnUI();
+    // Solicitar GPS activamente al arrancar
+    if(navigator.geolocation){
+      const gpsBtn=document.getElementById('gps-btn');
+      if(gpsBtn)gpsBtn.classList.add('pulsing');
+      navigator.geolocation.getCurrentPosition(
+        pos=>{
+          if(gpsBtn)gpsBtn.classList.remove('pulsing');
+          onGpsSuccess(pos);
+          startGpsWatch();
+        },
+        err=>{
+          if(gpsBtn)gpsBtn.classList.remove('pulsing');
+          console.warn('GPS inicial denegado:',err.code);
+          // Cargar lugares en ubicación por defecto si no hay GPS
+          if(!mapInitialLoaded){
+            const{lat,lng}=CONFIG.DEFAULT_CENTER;
+            ensurePlacesLoadedAt(lat,lng);
+            mapInitialLoaded=true;
+          }
+          startGpsWatch(); // seguir intentando via watch
+        },
+        {enableHighAccuracy:true,timeout:8000,maximumAge:5000}
+      );
+    } else {
+      startGpsWatch();
+    }
   });
 
   // Resize cuando el contenedor cambia (orientación, DevTools, etc.)
@@ -1518,7 +1553,8 @@ async function handlePopupVoteSubmit(placeId,voteIdx){
   // También actualizar en el array places
   const pi=places.findIndex(x=>x.id===placeId);
   if(pi>=0)places[pi]=p;
-  refreshMarkerIcon(p.id);
+  // Forzar refresh del marker con estado actualizado
+  requestAnimationFrame(()=>refreshMarkerIcon(p.id));
   // Actualizar popup si sigue abierto
   if(currentPopupPlace&&currentPopupPlace.id===p.id){Object.assign(currentPopupPlace,p);}
   if(document.getElementById('panel-cerca').classList.contains('visible'))cercaUpdateFromStore();
