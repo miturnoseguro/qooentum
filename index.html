@@ -608,7 +608,7 @@ const CONFIG = {
   PLACE_CACHE_TTL_MS: 24 * 60 * 60 * 1000,
   LOAD_TRIGGER_M: 40,
   VOTE_COOLDOWN_MS: 24 * 60 * 60 * 1000,
-  FOLLOW_ZOOM: 17,
+  FOLLOW_ZOOM: 15,
 };
 
 const BACKEND_READY = !CONFIG.APPS_SCRIPT_URL.startsWith('PEGAR_AQUI');
@@ -1453,7 +1453,7 @@ function initMap(){
     container:'maplibre-map',
     style:'./bright_patched.json',
     center:[CONFIG.DEFAULT_CENTER.lng,CONFIG.DEFAULT_CENTER.lat],
-    zoom:5,
+    zoom:15,
     attributionControl:false,
     // FIX: precargar tiles de los alrededores para evitar blancos al moverse
     trackResize:true,
