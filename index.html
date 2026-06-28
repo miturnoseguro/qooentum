@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1450,16 +1449,13 @@ function onZoomOut(){if(!mlMap)return;mlMap.zoomOut({duration:300});}
 
 /* ── MAP INIT ── */
 function initMap(){
-  // Pre-fetch GPS so first render can use real location
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(pos=>{
-      if(!gpsEverReceived){ userLat=pos.coords.latitude; userLng=pos.coords.longitude; }
-    },()=>{},{enableHighAccuracy:true,timeout:5000,maximumAge:10000});
-  }
+  const startCenter = (userLat!==null && userLng!==null)
+    ? [userLng, userLat]
+    : [CONFIG.DEFAULT_CENTER.lng, CONFIG.DEFAULT_CENTER.lat];
   mlMap=new maplibregl.Map({
     container:'maplibre-map',
     style:'./bright_patched.json',
-    center:[CONFIG.DEFAULT_CENTER.lng,CONFIG.DEFAULT_CENTER.lat],
+    center: startCenter,
     zoom:17,
     attributionControl:false,
     // FIX: precargar tiles de los alrededores para evitar blancos al moverse
@@ -2134,7 +2130,6 @@ setInterval(pruneDailyReports,60*60*1000);
 
 /* ── INIT ── */
 window.addEventListener('DOMContentLoaded',()=>{
-  initMap();
   loadCache();
   loadCooldownsFromStorage();
   pruneOldTiles();
@@ -2142,9 +2137,33 @@ window.addEventListener('DOMContentLoaded',()=>{
   initGoogleTokenClient();
   restoreSession();
   maybeStartOccupancySync();
-  // Default to map panel open
   switchTab('map');
   setTimeout(()=>{if(!cercaLoaded)cercaLoadPlaces();},500);
+
+  // Pedir GPS ANTES de inicializar el mapa para tener las coordenadas reales desde el primer frame
+  if(navigator.geolocation){
+    let mapInited=false;
+    const gpsTimeout=setTimeout(()=>{
+      // Si el GPS tarda más de 2s, arrancar el mapa igual con el centro por defecto
+      if(!mapInited){ mapInited=true; initMap(); }
+    }, 2000);
+    navigator.geolocation.getCurrentPosition(
+      pos=>{
+        clearTimeout(gpsTimeout);
+        userLat=pos.coords.latitude;
+        userLng=pos.coords.longitude;
+        gpsEverReceived=true;
+        if(!mapInited){ mapInited=true; initMap(); }
+      },
+      ()=>{
+        clearTimeout(gpsTimeout);
+        if(!mapInited){ mapInited=true; initMap(); }
+      },
+      {enableHighAccuracy:true, timeout:2000, maximumAge:10000}
+    );
+  } else {
+    initMap();
+  }
 });
 
 /* ── PWA ── */
