@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -24,6 +22,27 @@
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<script>
+(function(){
+  const _origWorker = window.Worker;
+  window.Worker = function(url, opts) {
+    const patch = [
+      "const _oe = console.error.bind(console);",
+      "console.error = function(){",
+      "  if(typeof arguments[0]==='string' && arguments[0].includes('Expected value to be of type number')) return;",
+      "  _oe.apply(console, arguments);",
+      "};"
+    ].join("\n");
+    let patchedUrl = url;
+    if(typeof url === 'string') {
+      const blob = new Blob([patch + "\nimportScripts(" + JSON.stringify(url) + ");"], {type:"application/javascript"});
+      patchedUrl = URL.createObjectURL(blob);
+    }
+    return new _origWorker(patchedUrl, opts);
+  };
+  window.Worker.prototype = _origWorker.prototype;
+})();
+</script>
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
