@@ -155,14 +155,15 @@ html,body{height:100%;width:100%;overflow:hidden;background:#fff;color:var(--tex
 .search-spinner{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--green);animation:spin .7s linear infinite;flex-shrink:0;}
 .map-float-controls{position:absolute;top:14px;right:14px;z-index:999;display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
 .gps-float-btn{width:42px;height:42px;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .22s cubic-bezier(.34,1.56,.64,1);box-shadow:var(--shadow-float);}
-.gps-float-btn:hover{border-color:var(--blue);background:var(--blue-lt);transform:translateY(-2px) scale(1.06);}
-.gps-float-btn svg{width:18px;height:18px;color:var(--blue);}
+.gps-float-btn:hover{border-color:var(--text3);background:var(--surface2);transform:translateY(-2px) scale(1.06);}
+.gps-float-btn svg{width:18px;height:18px;color:var(--text3);}
 .gps-float-btn.pulsing{animation:gpsPulse .8s ease-in-out infinite;}
-.gps-float-btn.active{border-color:var(--green);background:var(--green-lt);}
-.gps-float-btn.active svg{color:var(--green);}
-.gps-float-btn.following{border-color:var(--green);background:linear-gradient(135deg,var(--green-lt),#D1FAF0);box-shadow:0 0 0 3px rgba(0,196,140,.18),var(--shadow-float);}
+.gps-float-btn.active{border-color:var(--border2);background:var(--surface);}
+.gps-float-btn.active svg{color:var(--text2);}
+.gps-float-btn.following{border-color:var(--green);background:linear-gradient(135deg,var(--green-lt),#D1FAF0);box-shadow:0 0 0 3px rgba(0,196,140,.18),var(--shadow-float);animation:followingPulse 1.4s ease-in-out infinite;}
 .gps-float-btn.following svg{color:var(--green-dk);}
 @keyframes gpsPulse{0%,100%{box-shadow:var(--shadow-float)}50%{box-shadow:0 0 0 6px rgba(99,102,241,.18),var(--shadow-float)}}
+@keyframes followingPulse{0%,100%{box-shadow:0 0 0 3px rgba(0,196,140,.18),var(--shadow-float);background:linear-gradient(135deg,var(--green-lt),#D1FAF0);}50%{box-shadow:0 0 0 6px rgba(0,196,140,.28),var(--shadow-float);background:linear-gradient(135deg,#D1FAF0,var(--green-lt));}}
 @keyframes rotate{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 .follow-pill{position:absolute;top:64px;left:50%;transform:translateX(-50%);z-index:998;background:rgba(0,196,140,.92);color:#fff;border-radius:99px;padding:5px 14px;font-size:11px;font-weight:800;display:none;align-items:center;gap:6px;pointer-events:none;box-shadow:0 3px 12px rgba(0,196,140,.35);white-space:nowrap;backdrop-filter:blur(8px);letter-spacing:.1px;}
 .follow-pill.show{display:flex;}
@@ -380,6 +381,10 @@ html,body{height:100%;width:100%;overflow:hidden;background:#fff;color:var(--tex
           <svg class="chip-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
         <div class="user-dropdown" id="user-dropdown">
+          <button class="user-dropdown-item" onclick="switchTab('ranking');toggleUserDropdown()" style="color:var(--gold);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;flex-shrink:0;color:var(--gold);"><polyline points="17 4 12 2 7 4"/><path d="M5 8.5A13 13 0 0 0 12 22a13 13 0 0 0 7-13.5V8l-7-3-7 3z"/></svg>
+            Ranking
+          </button>
           <button class="user-dropdown-item" onclick="switchTab('prizes');toggleUserDropdown()" style="color:var(--green-dk);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;flex-shrink:0;color:var(--green);"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
             Mis premios
@@ -422,10 +427,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:#fff;color:var(--tex
       <div class="follow-pill" id="follow-pill"><div class="follow-dot"></div>Siguiendo tu posición</div>
       <div class="pick-mode-banner" id="pick-mode-banner"><div class="pick-mode-dot"></div>Tocá el comercio donde estás</div>
 
-      <button class="map-refresh-btn" id="map-refresh-btn" onclick="manualRefresh()" title="Actualizar comercios visibles">
-        <svg id="refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        Actualizar
-      </button>
 
       <div class="install-banner" id="install-banner" style="display:none">
         <img src="./icons/icon-96.png" alt="Qooentum">
@@ -446,10 +447,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:#fff;color:var(--tex
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M11 8v3l2 2"/></svg>
         Cerca
       </button>
-      <button class="nav-btn" id="nav-ranking-map" onclick="switchTab('ranking')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 4 12 2 7 4"/><path d="M5 8.5A13 13 0 0 0 12 22a13 13 0 0 0 7-13.5V8l-7-3-7 3z"/></svg>
-        Ranking
-      </button>
     </nav>
     </div>
   </div>
@@ -460,6 +457,13 @@ html,body{height:100%;width:100%;overflow:hidden;background:#fff;color:var(--tex
       <svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><circle cx="11" cy="11" r="8"/><path d="M11 8v3l2 2"/></svg>
       Cerca mío
       <span class="panel-header-sub" id="cerca-updated-lbl"></span>
+    </div>
+    <div style="padding:10px 14px 0;flex-shrink:0;">
+      <div class="map-search-bar" style="border-radius:12px;padding:9px 14px;">
+        <svg class="map-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="map-search-input" id="cerca-search-input" type="text" placeholder="Buscar en la lista…" autocomplete="off" autocorrect="off" spellcheck="false" oninput="cercaSearchQ=this.value.trim();cercaApplyFilters();document.getElementById('cerca-search-clear').style.display=this.value?'flex':'none'">
+        <button id="cerca-search-clear" style="display:none;width:22px;height:22px;background:var(--surface2);border:none;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);font-size:13px;" onclick="document.getElementById('cerca-search-input').value='';cercaSearchQ='';cercaApplyFilters();this.style.display='none'">✕</button>
+      </div>
     </div>
     <div class="cerca-radius-row" id="cerca-radius-row">
       <span class="cerca-radius-lbl">Radio:</span>
@@ -496,10 +500,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:#fff;color:var(--tex
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M11 8v3l2 2"/></svg>
         Cerca
       </button>
-      <button class="nav-btn" onclick="switchTab('ranking')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 4 12 2 7 4"/><path d="M5 8.5A13 13 0 0 0 12 22a13 13 0 0 0 7-13.5V8l-7-3-7 3z"/></svg>
-        Ranking
-      </button>
     </nav>
   </div>
 
@@ -514,7 +514,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:#fff;color:var(--tex
     <nav class="bottom-nav" id="bottom-nav-ranking">
       <button class="nav-btn" onclick="switchTab('map')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>Mapa</button>
       <button class="nav-btn is-main" onclick="switchTab('cerca')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M11 8v3l2 2"/></svg>Cerca</button>
-      <button class="nav-btn active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 4 12 2 7 4"/><path d="M5 8.5A13 13 0 0 0 12 22a13 13 0 0 0 7-13.5V8l-7-3-7 3z"/></svg>Ranking</button>
     </nav>
   </div>
 
@@ -572,7 +571,7 @@ const CONFIG = {
   APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbySr-veSK4eoAtOR1vHYB--o-ngrQqG0JC7dEeIXDKw5wZJRSdhUe5iEN4wibhsPTEX2w/exec',
   GOOGLE_CLIENT_ID: '283820904318-leis6rl3mfhtve2amj59q8sq221dg3qf.apps.googleusercontent.com',
   DEFAULT_CENTER: { lat: -34.6083, lng: -58.3896 },
-  REPORT_RADIUS_M: 10,
+  REPORT_RADIUS_M: 20,
   GPS_ZOOM: 19,
   CHECKIN_RADIUS_M: 150,
   CHECKIN_NEAR_M: 50,
@@ -831,17 +830,20 @@ async function ensurePlacesLoadedAt(lat,lng){
   rebuildNearby(lat,lng);
   if(nearbyPlaces.length||places.length){buildMapMarkers(nearbyPlaces.length?nearbyPlaces:places);}
   if(missingKeys.length===0){
+    // No hay tiles nuevos — solo actualizar estados (no mover el usuario, solo sync de ocupación)
     syncBackendStatus(lat,lng).then(()=>{rebuildNearby(lat,lng);buildMapMarkers(nearbyPlaces);});
     if(!mapInitialLoaded){mapInitialLoaded=true;if(!checkinShown&&nearbyPlaces.length>0){checkinShown=true;setTimeout(()=>showCheckinModal(lat,lng),800);}}
     return;
   }
   if(!mapInitialLoaded)mapInitialLoaded=true;
+  // Cargar tiles faltantes de forma progresiva y guardar definitivamente en cache
   const[gpPlaces,backendResult]=await Promise.all([loadPlacesForTiles(missingKeys),BACKEND_READY?apiGet('sync_places',{lat,lng,radius:Math.round(CONFIG.TILE_DEG*111320*1.5)}):Promise.resolve(null)]);
   const backendPlaces=(backendResult&&Array.isArray(backendResult.places))?backendResult.places:[];
   const backendById=new Map(backendPlaces.map(p=>[p.id,p]));
   const merged=gpPlaces.map(p=>{const bp=backendById.get(p.id);return bp?{...p,...bp}:p;});
   const onlyBackend=backendPlaces.filter(p=>!gpPlaces.find(o=>o.id===p.id));
   const allNew=[...merged,...onlyBackend];
+  // Guardar definitivamente en cache (no expiran hasta pruneOldTiles)
   missingKeys.forEach(key=>{const[s,w,n,e]=tileToBbox(key);const forThisTile=allNew.filter(p=>p.lat>=s&&p.lat<=n&&p.lng>=w&&p.lng<=e);mergePlacesIntoCache(forThisTile,key);});
   persistCache();rebuildNearby(lat,lng);buildMapMarkers(nearbyPlaces);
   if(!checkinShown&&nearbyPlaces.length>0){checkinShown=true;setTimeout(()=>showCheckinModal(lat,lng),800);}
@@ -906,16 +908,17 @@ function clearSearch(){document.getElementById('map-search-input').value='';docu
    MAPLIBRE GL — MARKERS + MAP INIT + GPS
    ════════════════════════════════════════════════════════════ */
 
-const CLUSTER_ZOOM_THRESHOLD = 15;
+const CLUSTER_ZOOM_THRESHOLD = 16;
 let mlMap = null, mlReady = false, mlReadyCallbacks = [];
 let mlMarkers = {}; // id -> {marker, el}
 let mlClusterMarkers = [];
 let mlUserMarker = null;
 
 function getClusterGridDeg(zoom){
-  if(zoom>=15)return 0.003;
-  if(zoom>=13)return 0.008;
-  return 0.02;
+  if(zoom>=16)return 0.003;
+  if(zoom>=14)return 0.010;
+  if(zoom>=12)return 0.025;
+  return 0.05;
 }
 
 function densityClass(count){
@@ -1124,9 +1127,18 @@ function updateGpsBtnUI(){
   const btn=document.getElementById('gps-btn'),pill=document.getElementById('follow-pill');
   if(!btn)return;
   btn.classList.remove('pulsing','active','following');
-  if(followMode){btn.classList.add('following');pill.classList.add('show');}
-  else if(userLat!==null){btn.classList.add('active');pill.classList.remove('show');}
-  else{pill.classList.remove('show');}
+  if(followMode&&userLat!==null){
+    // Siguiendo activamente — verde con titileo
+    btn.classList.add('following');
+    pill.classList.add('show');
+  } else if(userLat!==null){
+    // Tiene GPS pero no sigue — gris neutro
+    btn.classList.add('active');
+    pill.classList.remove('show');
+  } else {
+    // Sin GPS — gris base
+    pill.classList.remove('show');
+  }
 }
 
 function onGpsBtnClick(){
@@ -1438,8 +1450,22 @@ async function cercaLoadPlaces(forceReload){
   const lat=userLat??CONFIG.DEFAULT_CENTER.lat;
   const lng=userLng??CONFIG.DEFAULT_CENTER.lng;
   try{
-    let placesData=await cercaFetchPlaces(lat,lng,cercaRadius);
+    // Primero intentar usar los datos ya cargados en el mapa (placeIndex)
+    let placesData=[];
+    if(placeIndex.size>0){
+      placeIndex.forEach(p=>{
+        const dist=Math.round(distanceMeter(lat,lng,p.lat,p.lng));
+        if(dist<=cercaRadius)placesData.push({...p,dist,cat:cercaGuessCategory(p.name,p.type)});
+      });
+      placesData.sort((a,b)=>a.dist-b.dist);
+    }
+    // Si no hay datos en placeIndex, cargar desde tiles
+    if(!placesData.length){
+      const fetched=await cercaFetchPlaces(lat,lng,cercaRadius);
+      placesData=fetched;
+    }
     if(!placesData.length)placesData=cercaBuildDemoPlaces(lat,lng);
+    // Sincronizar estados desde backend
     if(BACKEND_READY){
       const backendResult=await apiGet('sync_places',{lat,lng,radius:cercaRadius,status_only:1});
       if(backendResult&&Array.isArray(backendResult.places)){
