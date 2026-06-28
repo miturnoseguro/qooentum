@@ -627,6 +627,7 @@ const SEED_PRIZES = [
 ];
 
 /* ── STATE ── */
+function safeMapMove(fn){try{fn();}catch(e){console.warn('[MapCamera]',e.message);}}
 let userPts=0, currentUser=null;
 let places=[], placeIndex=new Map(), nearbyPlaces=[], rankingData=[];
 let prizesData=SEED_PRIZES.map(p=>({...p}));
@@ -851,8 +852,11 @@ function osmTagsToMeta(tags) {
 }
 
 function osmNodeToPlace(el, refLat, refLng) {
-  const lat = parseFloat(el.lat ?? el.center?.lat);
-  const lng = parseFloat(el.lon ?? el.center?.lon);
+  const rawLat = el.lat ?? el.center?.lat ?? null;
+  const rawLng = el.lon ?? el.center?.lon ?? null;
+  if(rawLat===null||rawLat===undefined||rawLng===null||rawLng===undefined)return null;
+  const lat = parseFloat(rawLat);
+  const lng = parseFloat(rawLng);
   if (!isValidCoord(lat, lng)) return null;
   const tags = el.tags || {};
   const name = tags.name || tags['name:es'] || null;
@@ -1082,7 +1086,7 @@ async function runSearch(query){
     const sc=(!p.reporters||p.reporters===0)?NO_REPORT_STATUS:STATUS_CFG[p.status];
     return`<div class="search-result-item" data-idx="${i}"><div class="search-result-logo">${p.logo}</div><div class="search-result-info"><div class="search-result-name">${p.name}</div><div class="search-result-sub">${p.type}${dist?' · '+dist:''}</div></div><div class="search-result-status" style="background:${sc.color}">${sc.label}</div></div>`;
   }).join('');
-  dropdown.querySelectorAll('.search-result-item').forEach((el,i)=>{el.addEventListener('click',()=>{document.getElementById('search-results-dropdown').classList.remove('open');document.getElementById('map-search-input').blur();const existing=places.find(p=>p.id===results[i].id);if(!existing)places.push(results[i]);openPlacePopup(results[i]);if(mlMap)mlMap.panTo([results[i].lng,results[i].lat]);});});
+  dropdown.querySelectorAll('.search-result-item').forEach((el,i)=>{el.addEventListener('click',()=>{document.getElementById('search-results-dropdown').classList.remove('open');document.getElementById('map-search-input').blur();const existing=places.find(p=>p.id===results[i].id);if(!existing)places.push(results[i]);openPlacePopup(results[i]);if(mlMap&&isValidCoord(results[i].lat,results[i].lng))safeMapMove(()=>mlMap.panTo([results[i].lng,results[i].lat]));});});
 }
 
 function clearSearch(){document.getElementById('map-search-input').value='';document.getElementById('map-search-clear').classList.remove('visible');document.getElementById('search-results-dropdown').classList.remove('open');}
@@ -1115,19 +1119,24 @@ function densityClass(count){
 function isValidCoord(lat,lng){return typeof lat==='number'&&typeof lng==='number'&&!isNaN(lat)&&!isNaN(lng)&&lat>=-90&&lat<=90&&lng>=-180&&lng<=180;}
 
 function computeClusters(placesToCluster,gridDeg){
+  if(!gridDeg||gridDeg<=0)return[];
   const cells={};
   placesToCluster.forEach(p=>{
     if(!isValidCoord(p.lat,p.lng))return;
     const cx=Math.floor(p.lat/gridDeg),cy=Math.floor(p.lng/gridDeg),key=`${cx}:${cy}`;
-    if(!cells[key])cells[key]={lat:(cx+0.5)*gridDeg,lng:(cy+0.5)*gridDeg,places:[]};
+    if(!cells[key])cells[key]={places:[]};
     cells[key].places.push(p);
   });
   return Object.values(cells)
-    .filter(c=>isValidCoord(c.lat,c.lng))
-    .map(c=>({
-      lat:c.lat,lng:c.lng,count:c.places.length,places:c.places,
-      totalReporters:c.places.reduce((s,p)=>s+(p.reporters||0),0),
-    }));
+    .map(c=>{
+      // Centroide real de los lugares en la celda
+      const n=c.places.length;
+      const avgLat=c.places.reduce((s,p)=>s+p.lat,0)/n;
+      const avgLng=c.places.reduce((s,p)=>s+p.lng,0)/n;
+      return{lat:avgLat,lng:avgLng,count:n,places:c.places,
+        totalReporters:c.places.reduce((s,p)=>s+(p.reporters||0),0)};
+    })
+    .filter(c=>isValidCoord(c.lat,c.lng));
 }
 
 function makePlaceMarkerEl(place){
@@ -1277,7 +1286,7 @@ function _buildMapMarkersNow(placesToShow){
       el.addEventListener('click',()=>{
         const currentZoom=mlMap.getZoom();
         const targetZoom=Math.min(currentZoom+3,CLUSTER_ZOOM_THRESHOLD+1);
-        mlMap.flyTo({center:[cluster.lng,cluster.lat],zoom:targetZoom,duration:400});
+        if(isValidCoord(cluster.lat,cluster.lng))safeMapMove(()=>mlMap.flyTo({center:[cluster.lng,cluster.lat],zoom:targetZoom,duration:400}));
       });
       if(!isValidCoord(cluster.lat,cluster.lng))return;
       const marker=new maplibregl.Marker({element:el,anchor:'bottom'})
@@ -1323,7 +1332,7 @@ function updateUserMarker(lat,lng){
   if(lat===null||lat===undefined||lng===null||lng===undefined)return;
   if(typeof lat!=='number'||typeof lng!=='number'||isNaN(lat)||isNaN(lng))return;
   if(mlUserMarker){
-    mlUserMarker.setLngLat([lng,lat]);
+    safeMapMove(()=>mlUserMarker.setLngLat([lng,lat]));
   } else {
     const el=document.createElement('div');
     el.style.cssText='width:18px;height:18px;border-radius:50%;background:#6366F1;border:3px solid #fff;box-shadow:0 0 0 4px rgba(99,102,241,.35);';
@@ -1332,6 +1341,7 @@ function updateUserMarker(lat,lng){
       .addTo(mlMap);
   }
 }
+
 
 /* ── GPS / FOLLOW ── */
 function updateGpsBtnUI(){
@@ -1356,7 +1366,7 @@ function onGpsBtnClick(){
   if(followMode){followMode=false;updateGpsBtnUI();showToast('📍 Seguimiento pausado');return;}
   if(userLat!==null){
     followMode=true;updateGpsBtnUI();
-    if(mlMap){mlMap.flyTo({center:[userLng,userLat],zoom:CONFIG.FOLLOW_ZOOM,duration:500});}
+    if(mlMap&&userLat!==null&&userLng!==null&&isValidCoord(userLat,userLng)){safeMapMove(()=>mlMap.flyTo({center:[userLng,userLat],zoom:CONFIG.FOLLOW_ZOOM,duration:500}));}
     showToast('📍 Siguiendo tu posición');return;
   }
   const btn=document.getElementById('gps-btn');btn.classList.add('pulsing');
@@ -1479,9 +1489,9 @@ function onGpsSuccess(pos){
   // Mover el mapa solo si followMode está activo
   if(mlReady && followMode && mlMap){
     if(isFirst){
-      mlMap.flyTo({center:[lng,lat],zoom:CONFIG.FOLLOW_ZOOM,duration:800});
+      if(isValidCoord(lat,lng))safeMapMove(()=>mlMap.flyTo({center:[lng,lat],zoom:CONFIG.FOLLOW_ZOOM,duration:800}));
     } else {
-      mlMap.easeTo({center:[lng,lat],duration:600});
+      if(isValidCoord(lat,lng))safeMapMove(()=>mlMap.easeTo({center:[lng,lat],duration:600}));
     }
   }
   if(isFirst){
@@ -1825,7 +1835,7 @@ function cercaRenderList(){
       const enriched=placeIndex.get(p.id)||p;
       openPlacePopup({...p,...enriched});
       switchTab('map');
-      if(mlMap)mlMap.panTo([p.lng,p.lat]);
+      if(mlMap&&isValidCoord(p.lat,p.lng))safeMapMove(()=>mlMap.panTo([p.lng,p.lat]));
     });
     card.addEventListener('mouseenter',()=>{
       const placeId=card.dataset.placeId;
