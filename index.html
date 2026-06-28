@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -158,6 +157,12 @@ html,body{height:100%;width:100%;overflow:hidden;background:#fff;color:var(--tex
 .search-loading{padding:20px;text-align:center;display:flex;align-items:center;justify-content:center;gap:9px;color:var(--text3);font-size:13px;}
 .search-spinner{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--green);animation:spin .7s linear infinite;flex-shrink:0;}
 .map-float-controls{position:absolute;top:14px;right:14px;z-index:999;display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
+.zoom-float-controls{position:absolute;bottom:calc(80px + max(20px, var(--sab)));right:14px;z-index:999;display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-float);overflow:hidden;}
+.zoom-btn{width:42px;height:42px;background:transparent;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;color:var(--text2);}
+.zoom-btn svg{width:16px;height:16px;}
+.zoom-btn:hover{background:var(--surface2);color:var(--text);}
+.zoom-btn:active{background:var(--green-lt);color:var(--green-dk);}
+.zoom-divider{width:26px;height:1px;background:var(--border);}
 .gps-float-btn{width:42px;height:42px;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .22s cubic-bezier(.34,1.56,.64,1);box-shadow:var(--shadow-float);}
 .gps-float-btn:hover{border-color:var(--text3);background:var(--surface2);transform:translateY(-2px) scale(1.06);}
 .gps-float-btn svg{width:18px;height:18px;color:var(--text3);}
@@ -338,6 +343,8 @@ html,body{height:100%;width:100%;overflow:hidden;background:#fff;color:var(--tex
 .checkin-skip-main{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:14px;padding:13px 18px;font-size:13.5px;font-weight:800;color:var(--text2);cursor:pointer;font-family:inherit;transition:all .2s cubic-bezier(.34,1.56,.64,1);letter-spacing:-.1px;margin-top:2px;}
 .checkin-skip-main:hover{background:#fff;border-color:var(--text2);color:var(--text);transform:translateY(-1px);}
 .checkin-skip-hint{text-align:center;font-size:11px;color:var(--text3);margin-top:8px;font-weight:500;}
+.checkin-confirm-btn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;background:linear-gradient(135deg,var(--green),var(--green-dk));border:none;border-radius:14px;padding:14px 18px;font-size:14px;font-weight:800;color:#fff;cursor:pointer;font-family:inherit;transition:all .2s cubic-bezier(.34,1.56,.64,1);box-shadow:0 4px 16px rgba(0,196,140,.35);letter-spacing:-.1px;}
+.checkin-confirm-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,196,140,.45);}
 /* ── Query counter ── */
 
 @media(max-width:680px){
@@ -417,6 +424,15 @@ html,body{height:100%;width:100%;overflow:hidden;background:#fff;color:var(--tex
         <div class="gps-float-btn" id="gps-btn" onclick="onGpsBtnClick()" title="Centrar / seguir mi ubicación">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 3"/></svg>
         </div>
+      </div>
+      <div class="zoom-float-controls" id="zoom-controls">
+        <button class="zoom-btn" id="zoom-in-btn" onclick="onZoomIn()" title="Acercar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="zoom-divider"></div>
+        <button class="zoom-btn" id="zoom-out-btn" onclick="onZoomOut()" title="Alejar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
       </div>
 
       <div class="follow-pill" id="follow-pill"><div class="follow-dot"></div>Siguiendo tu posición</div>
@@ -570,7 +586,7 @@ const CONFIG = {
   BBOX_PAD: 0.0012,
   PLACE_CACHE_TTL_MS: 24 * 60 * 60 * 1000,
   LOAD_TRIGGER_M: 40,
-  VOTE_COOLDOWN_MS: 8 * 60 * 60 * 1000,
+  VOTE_COOLDOWN_MS: 24 * 60 * 60 * 1000,
   FOLLOW_ZOOM: 16,
   POIS_TILES_BASE_URL: 'https://miturnoseguro.github.io/qooentum/tiles', // URL base de los tiles
 };
@@ -647,8 +663,23 @@ function tileToBbox(tileKey){const[tLat,tLng]=tileKey.split(':').map(Number);ret
 function getAdjacentTileKeys(lat,lng){const d=CONFIG.TILE_DEG,relLat=(lat/d)-Math.floor(lat/d),relLng=(lng/d)-Math.floor(lng/d),keys=[];if(relLat<0.3)keys.push(latLngToTileKey(lat-d,lng));if(relLat>0.7)keys.push(latLngToTileKey(lat+d,lng));if(relLng<0.3)keys.push(latLngToTileKey(lat,lng-d));if(relLng>0.7)keys.push(latLngToTileKey(lat,lng+d));return keys;}
 
 /* ── COOLDOWN ── */
-function loadCooldownsFromStorage(){try{const raw=localStorage.getItem(COOLDOWNS_STORAGE_KEY);if(!raw)return;const data=JSON.parse(raw);const now=Date.now();Object.keys(data).forEach(pid=>{const ts=data[pid];if(ts&&ts>now)placeCooldowns[pid]=new Date(ts);});}catch(e){}}
-function saveCooldownsToStorage(){try{const now=Date.now();const toSave={};Object.keys(placeCooldowns).forEach(pid=>{const ts=placeCooldowns[pid] instanceof Date?placeCooldowns[pid].getTime():0;if(ts>now)toSave[pid]=ts;});localStorage.setItem(COOLDOWNS_STORAGE_KEY,JSON.stringify(toSave));}catch(e){}}
+function loadCooldownsFromStorage(){
+  try{
+    const raw=localStorage.getItem(COOLDOWNS_STORAGE_KEY);
+    if(!raw)return;
+    const data=JSON.parse(raw);
+    const now=Date.now();
+    // Daily reset: if stored date-key doesn't match today, wipe cooldowns
+    const todayKey=getDailyDateStr();
+    if(data._day && data._day !== todayKey){localStorage.removeItem(COOLDOWNS_STORAGE_KEY);return;}
+    Object.keys(data).forEach(pid=>{
+      if(pid==='_day')return;
+      const ts=data[pid];
+      if(ts&&ts>now)placeCooldowns[pid]=new Date(ts);
+    });
+  }catch(e){}
+}
+function saveCooldownsToStorage(){try{const now=Date.now();const toSave={_day:getDailyDateStr()};Object.keys(placeCooldowns).forEach(pid=>{const ts=placeCooldowns[pid] instanceof Date?placeCooldowns[pid].getTime():0;if(ts>now)toSave[pid]=ts;});localStorage.setItem(COOLDOWNS_STORAGE_KEY,JSON.stringify(toSave));}catch(e){}}
 function applyLocalCooldown(pid){placeCooldowns[pid]=new Date(Date.now()+CONFIG.VOTE_COOLDOWN_MS);saveCooldownsToStorage();}
 function applyCooldownInfo(map){if(!map)return;Object.keys(map).forEach(pid=>{if(map[pid])placeCooldowns[pid]=new Date(map[pid]);});saveCooldownsToStorage();}
 function getVoteCooldownRemainingMs(pid){const next=placeCooldowns[pid];if(!next)return 0;return Math.max(0,next.getTime()-Date.now());}
@@ -836,7 +867,7 @@ async function ensurePlacesLoadedAt(lat,lng){
   const allNew=[...merged,...onlyBackend];
   // Guardar definitivamente en cache (no expiran hasta pruneOldTiles)
   missingKeys.forEach(key=>{const[s,w,n,e]=tileToBbox(key);const forThisTile=allNew.filter(p=>p.lat>=s&&p.lat<=n&&p.lng>=w&&p.lng<=e);mergePlacesIntoCache(forThisTile,key);});
-  persistCache();rebuildNearby(lat,lng);buildMapMarkers(nearbyPlaces);
+  persistCache();rebuildNearby(lat,lng);applySeedReports([...placeIndex.values()],lat,lng);buildMapMarkers(nearbyPlaces);
   if(!checkinShown&&nearbyPlaces.length>0){checkinShown=true;setTimeout(()=>showCheckinModal(lat,lng),800);}
 }
 
@@ -853,6 +884,35 @@ function rebuildNearby(lat,lng){
   nearbyPlaces=[];
   placeIndex.forEach(p=>{if(distanceMeter(lat,lng,p.lat,p.lng)<=maxDistM)nearbyPlaces.push(p);});
 }
+
+/* ── DAILY SEEDED REPORTS ── 5 random nearby places (<300m) get fake activity each day */
+const DAILY_SEED_KEY='qooentum_daily_seed';
+function getDailyDateStr(){const d=new Date();return`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;}
+function getSeedData(){try{const raw=localStorage.getItem(DAILY_SEED_KEY);if(!raw)return null;const d=JSON.parse(raw);if(d.date!==getDailyDateStr()){localStorage.removeItem(DAILY_SEED_KEY);return null;}return d;}catch{return null;}}
+function saveSeedData(data){try{localStorage.setItem(DAILY_SEED_KEY,JSON.stringify({...data,date:getDailyDateStr()}));}catch(e){}}
+
+function applySeedReports(allPlaces,userLat,userLng){
+  if(!allPlaces||!allPlaces.length||userLat===null)return;
+  let seed=getSeedData();
+  const nearby300=allPlaces.filter(p=>distanceMeter(userLat,userLng,p.lat,p.lng)<=300);
+  if(!nearby300.length)return;
+  if(!seed||!seed.ids||!seed.ids.length){
+    // Pick 5 random places deterministically for today
+    const shuffled=[...nearby300].sort(()=>Math.random()-0.5).slice(0,Math.min(5,nearby300.length));
+    seed={ids:shuffled.map(p=>p.id),statuses:shuffled.map(()=>Math.floor(Math.random()*3)),reporters:shuffled.map(()=>Math.floor(Math.random()*12)+2)};
+    saveSeedData(seed);
+  }
+  // Apply seed to place objects
+  seed.ids.forEach((id,i)=>{
+    const p=allPlaces.find(x=>x.id===id)||placeIndex.get(id);
+    if(p&&(!p.reporters||p.reporters===0)){
+      p.status=seed.statuses[i]??0;
+      p.reporters=seed.reporters[i]??3;
+      placeStore[p.id]=p;
+    }
+  });
+}
+
 
 /* ── SEARCH ── */
 async function searchPlacesByQuery(query){
@@ -899,7 +959,7 @@ function clearSearch(){document.getElementById('map-search-input').value='';docu
    MAPLIBRE GL — MARKERS + MAP INIT + GPS
    ════════════════════════════════════════════════════════════ */
 
-const CLUSTER_ZOOM_THRESHOLD = 16;
+const CLUSTER_ZOOM_THRESHOLD = 15; // group at ~5 city blocks (zoom<15)
 let mlMap = null, mlReady = false, mlReadyCallbacks = [];
 let mlMarkers = {}; // id -> {marker, el}
 let mlClusterMarkers = [];
@@ -1086,10 +1146,15 @@ function selectPlaceInUI(placeId){
 }
 
 function refreshMarkerIcon(id){
-  const p=places.find(x=>x.id===id);
-  if(!p||!mlMarkers[id])return;
+  // Use placeIndex (updated) first, fall back to places array
+  const p=placeIndex.get(id)||places.find(x=>x.id===id);
+  if(!p)return;
+  // Update places array reference too
+  const pi=places.findIndex(x=>x.id===id);
+  if(pi>=0)places[pi]=p;
+  if(!mlMarkers[id])return;
   const newEl=makePlaceMarkerEl(p);
-  newEl.addEventListener('click',()=>{openPlacePopup(p);});
+  newEl.addEventListener('click',()=>{selectPlaceInUI(p.id);openPlacePopup(p);});
   mlMarkers[id].el.replaceWith(newEl);
   mlMarkers[id].el=newEl;
   mlMarkers[id]._lastStatus=p.status;
@@ -1143,6 +1208,11 @@ function onGpsBtnClick(){
   if(!navigator.geolocation){showToast('⚠️ Tu navegador no soporta GPS');btn.classList.remove('pulsing');return;}
   navigator.geolocation.getCurrentPosition(pos=>{followMode=true;onGpsSuccess(pos);startGpsWatch();},err=>{btn.classList.remove('pulsing');showToast(err.code===1?'🔒 Permiso de ubicación denegado':'⚠️ No se pudo obtener tu ubicación');},{enableHighAccuracy:true,timeout:10000});
 }
+
+/* ── ZOOM CONTROLS ── */
+function onZoomIn(){if(!mlMap)return;mlMap.zoomIn({duration:300});}
+function onZoomOut(){if(!mlMap)return;mlMap.zoomOut({duration:300});}
+
 
 /* ── MAP INIT ── */
 function initMap(){
@@ -1353,12 +1423,13 @@ function renderPopup(place,loggedIn,user){popupRoot.render(React.createElement(P
 function closePopup(){const container=document.getElementById('react-popup-root');container.classList.remove('active');if(popupRoot)popupRoot.render(null);currentPopupPlace=null;}
 
 async function handlePopupVoteSubmit(placeId,voteIdx){
-  const p=places.find(x=>x.id===placeId);if(!p)return;
+  const p=placeIndex.get(placeId)||places.find(x=>x.id===placeId);if(!p)return;
   if(!isLoggedIn){showToastAction('🔑 Iniciá sesión para ganar puntos');return;}
   if(getVoteCooldownRemainingMs(placeId)>0){showToast(`⏳ Ya reportaste ${p.name}`);return;}
   if(!canReportThisPlace(p)){showToast('📍 Tenés que estar dentro del comercio para reportar');return;}
-  applyLocalCooldown(placeId);p.status=voteIdx;p.reporters+=1;
-  placeStore[p.id]=p;refreshMarkerIcon(p.id);
+  applyLocalCooldown(placeId);p.status=voteIdx;p.reporters=(p.reporters||0)+1;
+  placeStore[p.id]=p;placeIndex.set(p.id,p); // keep both in sync
+  refreshMarkerIcon(p.id);
   if(document.getElementById('panel-cerca').classList.contains('visible'))cercaUpdateFromStore();
   await submitVoteToBackend(p,voteIdx);
 }
@@ -1571,16 +1642,17 @@ function cercaCycleSort(){cercaSortIdx=(cercaSortIdx+1)%3;cercaSortMode=CERCA_SO
 /* ── CHECK-IN MODAL ── */
 function showCheckinModal(lat,lng){
   const pool=nearbyPlaces.length?nearbyPlaces:places;
-  const sorted=pool.map(p=>({...p,_dist:Math.round(distanceMeter(lat,lng,p.lat,p.lng))})).sort((a,b)=>a._dist-b._dist).slice(0,3);
-  if(!sorted.length)return;
+  // Only show if there is a place within 20m
+  const CHECKIN_MAX_DIST = 20;
+  const veryNearPlaces=pool.map(p=>({...p,_dist:Math.round(distanceMeter(lat,lng,p.lat,p.lng))})).filter(p=>p._dist<=CHECKIN_MAX_DIST).sort((a,b)=>a._dist-b._dist);
+  if(!veryNearPlaces.length)return; // nothing within 20m — stay silent
+  const closest=veryNearPlaces[0];
   const root=document.getElementById('checkin-overlay-root');
   function close(){const overlay=root.querySelector('.checkin-overlay');if(overlay){overlay.style.opacity='0';overlay.style.transition='opacity .25s';}setTimeout(()=>{root.innerHTML='';},280);}
-  function choosePlace(p){close();setTimeout(()=>openPlacePopup(p),300);}
-  function chooseOther(){close();enterPickMode();}
-  const tabsHtml=sorted.map(p=>{const veryNear=p._dist<=CONFIG.CHECKIN_NEAR_M,distDisplay=veryNear?`📍 ${p._dist}m`:p._dist<1000?`${p._dist}m`:`${(p._dist/1000).toFixed(1)}km`;return`<button class="checkin-tab ${veryNear?'near':'far'}" data-place-id="${p.id}"><div class="checkin-tab-logo"><span>${p.logo||'🏪'}</span></div><div class="checkin-tab-name">${p.name}</div><div class="checkin-tab-dist">${distDisplay}</div></button>`;}).join('');
-  root.innerHTML=`<div class="checkin-overlay" id="checkin-overlay"><div class="checkin-card"><div class="checkin-header"><div class="checkin-header-emoji">📍</div><div class="checkin-header-title">¿En cuál de estos lugares estás?</div><div class="checkin-header-sub">Elegí para reportar cuánta gente hay ahora</div></div><div class="checkin-body"><div class="checkin-tabs">${tabsHtml}<button class="checkin-tab other-tab" id="checkin-other-tab"><div class="checkin-tab-logo"><span>🗺️</span></div><div class="checkin-tab-name">Otro</div><div class="checkin-tab-dist">Elegir del mapa</div></button></div><button class="checkin-skip-main" id="checkin-skip-btn"><span style="font-size:16px;opacity:.65">🗺️</span>Solo ver el mapa</button><p class="checkin-skip-hint">No estoy en ninguno de estos comercios ahora</p></div></div></div>`;
-  sorted.forEach(p=>{const btn=root.querySelector(`[data-place-id="${p.id}"]`);if(btn)btn.addEventListener('click',()=>choosePlace(p));});
-  root.querySelector('#checkin-other-tab').addEventListener('click',chooseOther);
+  function confirmPlace(p){close();setTimeout(()=>openPlacePopup(p),300);}
+  // Single-place "estás en X ahora?" prompt
+  root.innerHTML=`<div class="checkin-overlay" id="checkin-overlay"><div class="checkin-card"><div class="checkin-header"><div class="checkin-header-emoji">${closest.logo||'📍'}</div><div class="checkin-header-title">¿Estás en ${closest.name} en este momento?</div><div class="checkin-header-sub">${closest._dist}m de tu ubicación actual · podés reportar cuánta gente hay</div></div><div class="checkin-body"><div style="display:flex;flex-direction:column;gap:10px"><button class="checkin-confirm-btn" id="checkin-yes-btn">✅ Sí, estoy aquí — reportar</button><button class="checkin-skip-main" id="checkin-skip-btn"><span style="font-size:16px;opacity:.65">🗺️</span>No, solo ver el mapa</button></div></div></div></div>`;
+  root.querySelector('#checkin-yes-btn').addEventListener('click',()=>confirmPlace(closest));
   root.querySelector('#checkin-skip-btn').addEventListener('click',close);
   root.querySelector('#checkin-overlay').addEventListener('click',e=>{if(e.target.id==='checkin-overlay')close();});
 }
