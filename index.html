@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1015,7 +1013,7 @@ function saveSeedData(data){try{localStorage.setItem(DAILY_SEED_KEY,JSON.stringi
 function applySeedReports(allPlaces,userLat,userLng){
   if(!allPlaces||!allPlaces.length||userLat===null)return;
   let seed=getSeedData();
-  const nearby300=allPlaces.filter(p=>distanceMeter(userLat,userLng,p.lat,p.lng)<=300);
+  const nearby300=allPlaces.filter(p=>isValidCoord(p.lat,p.lng)&&distanceMeter(userLat,userLng,p.lat,p.lng)<=300);
   if(!nearby300.length)return;
   if(!seed||!seed.ids||!seed.ids.length){
     // Shuffle determinista por fecha usando índices
@@ -1033,13 +1031,16 @@ function applySeedReports(allPlaces,userLat,userLng){
     };
     saveSeedData(seed);
   }
-  // Apply seed to place objects
+  // Apply seed to place objects y refrescar markers si ya están en el mapa
   seed.ids.forEach((id,i)=>{
     const p=allPlaces.find(x=>x.id===id)||placeIndex.get(id);
     if(p&&(!p.reporters||p.reporters===0)){
       p.status=seed.statuses[i]??0;
       p.reporters=seed.reporters[i]??3;
       placeStore[p.id]=p;
+      placeIndex.set(p.id,p);
+      // Refrescar marker si ya existe en el mapa
+      if(mlMarkers&&mlMarkers[p.id])refreshMarkerIcon(p.id);
     }
   });
 }
@@ -1097,10 +1098,11 @@ let mlClusterMarkers = [];
 let mlUserMarker = null;
 
 function getClusterGridDeg(zoom){
-  if(zoom>=15)return 0.0015; // ~150m — no debería llegar aquí con threshold=16
-  if(zoom>=13)return 0.006;  // ~600m
-  if(zoom>=11)return 0.018;  // ~2km
-  return 0.05;
+  // Threshold=15: zoom>=15 muestra minicards individuales
+  // Para zoom<15, agrupar en celdas grandes para evitar solapamiento
+  if(zoom>=13)return 0.012;  // ~1.3km — separa bien a zoom 13-14
+  if(zoom>=11)return 0.030;  // ~3km
+  return 0.08;
 }
 
 function densityClass(count){
@@ -1234,9 +1236,11 @@ function _buildMapMarkersNow(placesToShow){
       chunk.forEach(p=>{
         if(mlMarkers[p.id]){
           if(mlMarkers[p.id]._lastStatus!==p.status||mlMarkers[p.id]._lastReporters!==p.reporters){
-            const newEl=makePlaceMarkerEl(p);
-            mlMarkers[p.id].el.replaceWith(newEl);
-            mlMarkers[p.id].el=newEl;
+            // Actualizar solo el bloque de status (sin replaceWith que desvincula de MapLibre)
+            const el=mlMarkers[p.id].el;
+            const s=(!p.reporters||p.reporters===0)?NO_REPORT_STATUS:STATUS_CFG[p.status];
+            const statusEl=el.querySelector('.fc-card-status');
+            if(statusEl){statusEl.style.background=s.color;const lbl=statusEl.querySelector('.s-label-sm');if(lbl)lbl.textContent=s.label;}
             mlMarkers[p.id]._lastStatus=p.status;
             mlMarkers[p.id]._lastReporters=p.reporters;
           }
@@ -1294,17 +1298,21 @@ function selectPlaceInUI(placeId){
 }
 
 function refreshMarkerIcon(id){
-  // Use placeIndex (updated) first, fall back to places array
   const p=placeIndex.get(id)||places.find(x=>x.id===id);
   if(!p)return;
-  // Update places array reference too
   const pi=places.findIndex(x=>x.id===id);
   if(pi>=0)places[pi]=p;
   if(!mlMarkers[id])return;
-  const newEl=makePlaceMarkerEl(p);
-  newEl.addEventListener('click',()=>{selectPlaceInUI(p.id);openPlacePopup(p);});
-  mlMarkers[id].el.replaceWith(newEl);
-  mlMarkers[id].el=newEl;
+  const el=mlMarkers[id].el;
+  // Actualizar SOLO el bloque de status dentro del elemento existente
+  // (sin replaceWith que rompe el vínculo con MapLibre)
+  const s=(!p.reporters||p.reporters===0)?NO_REPORT_STATUS:STATUS_CFG[p.status];
+  const statusEl=el.querySelector('.fc-card-status');
+  if(statusEl){
+    statusEl.style.background=s.color;
+    const lbl=statusEl.querySelector('.s-label-sm');
+    if(lbl)lbl.textContent=s.label;
+  }
   mlMarkers[id]._lastStatus=p.status;
   mlMarkers[id]._lastReporters=p.reporters;
 }
@@ -1399,6 +1407,9 @@ function initMap(){
         err=>{
           if(gpsBtn)gpsBtn.classList.remove('pulsing');
           console.warn('GPS inicial denegado:',err.code);
+          // Si no hay GPS, desactivar followMode para que el botón no mienta
+          followMode=false;
+          updateGpsBtnUI();
           // Cargar lugares en ubicación por defecto si no hay GPS
           if(!mapInitialLoaded){
             const{lat,lng}=CONFIG.DEFAULT_CENTER;
