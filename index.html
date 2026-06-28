@@ -853,38 +853,41 @@ async function ensurePlacesLoadedAt(lat,lng){
   const adjacentKeys=getAdjacentTileKeys(lat,lng);
   const allKeys=[tileKey,...adjacentKeys];
   const missingKeys=allKeys.filter(k=>!isTileCached(k));
+
+  // Si ya tenemos lugares en cache, mostrarlos de inmediato
   rebuildNearby(lat,lng);
-  if(nearbyPlaces.length||places.length){buildMapMarkers(nearbyPlaces.length?nearbyPlaces:places);}
-  if(missingKeys.length===0){
-    // No hay tiles nuevos — solo actualizar estados (no mover el usuario, solo sync de ocupación)
-    syncBackendStatus(lat,lng).then(()=>{rebuildNearby(lat,lng);buildMapMarkers(nearbyPlaces);});
-    if(!mapInitialLoaded){
-      mapInitialLoaded=true;
-      // Use real GPS coords if available, otherwise map center
-      const cLat=userLat??lat, cLng=userLng??lng;
-      const _moved2 = lastCheckinLat===null || distanceMeter(cLat,cLng,lastCheckinLat,lastCheckinLng)>50;
-      if((!checkinShown||_moved2)&&nearbyPlaces.length>0){checkinShown=true;setTimeout(()=>showCheckinModal(cLat,cLng),800);}
-    }
-    return;
+  if(nearbyPlaces.length||places.length){
+    buildMapMarkers(nearbyPlaces.length?nearbyPlaces:places);
   }
-  if(!mapInitialLoaded)mapInitialLoaded=true;
-  // Cargar tiles faltantes de forma progresiva y guardar definitivamente en cache
-  const[gpPlaces,backendResult]=await Promise.all([loadPlacesForTiles(missingKeys),BACKEND_READY?apiGet('sync_places',{lat,lng,radius:Math.round(CONFIG.TILE_DEG*111320*1.5)}):Promise.resolve(null)]);
-  const backendPlaces=(backendResult&&Array.isArray(backendResult.places))?backendResult.places:[];
-  const backendById=new Map(backendPlaces.map(p=>[p.id,p]));
-  const merged=gpPlaces.map(p=>{const bp=backendById.get(p.id);return bp?{...p,...bp}:p;});
-  const onlyBackend=backendPlaces.filter(p=>!gpPlaces.find(o=>o.id===p.id));
-  const allNew=[...merged,...onlyBackend];
-  // Guardar definitivamente en cache (no expiran hasta pruneOldTiles)
-  missingKeys.forEach(key=>{const[s,w,n,e]=tileToBbox(key);const forThisTile=allNew.filter(p=>p.lat>=s&&p.lat<=n&&p.lng>=w&&p.lng<=e);mergePlacesIntoCache(forThisTile,key);});
-  persistCache();rebuildNearby(lat,lng);applySeedReports([...placeIndex.values()],lat,lng);buildMapMarkers(nearbyPlaces);
-  // Checkin: usar coords GPS reales si están disponibles
-  const _cLat=userLat??lat, _cLng=userLng??lng;
-  // Allow re-trigger if user moved >50m from where checkin last showed
-  const _movedFar = lastCheckinLat===null || distanceMeter(_cLat,_cLng,lastCheckinLat,lastCheckinLng)>50;
-  if((!checkinShown||_movedFar)&&nearbyPlaces.length>0){
+
+  if(missingKeys.length===0){
+    // Tiles ya en cache — sync de estado en background
+    syncBackendStatus(lat,lng).then(()=>{rebuildNearby(lat,lng);buildMapMarkers(nearbyPlaces);});
+  } else {
+    // Cargar tiles faltantes
+    const[gpPlaces,backendResult]=await Promise.all([
+      loadPlacesForTiles(missingKeys),
+      BACKEND_READY?apiGet('sync_places',{lat,lng,radius:Math.round(CONFIG.TILE_DEG*111320*1.5)}):Promise.resolve(null)
+    ]);
+    const backendPlaces=(backendResult&&Array.isArray(backendResult.places))?backendResult.places:[];
+    const backendById=new Map(backendPlaces.map(p=>[p.id,p]));
+    const merged=gpPlaces.map(p=>{const bp=backendById.get(p.id);return bp?{...p,...bp}:p;});
+    const onlyBackend=backendPlaces.filter(p=>!gpPlaces.find(o=>o.id===p.id));
+    const allNew=[...merged,...onlyBackend];
+    missingKeys.forEach(key=>{const[s,w,n,e]=tileToBbox(key);const forThisTile=allNew.filter(p=>p.lat>=s&&p.lat<=n&&p.lng>=w&&p.lng<=e);mergePlacesIntoCache(forThisTile,key);});
+    persistCache();
+    rebuildNearby(lat,lng);
+    applySeedReports([...placeIndex.values()],lat,lng);
+    buildMapMarkers(nearbyPlaces);
+  }
+
+  // Checkin: siempre intentar mostrar después de cargar/recibir lugares
+  // usando las coords GPS reales del usuario
+  const cLat=userLat??lat, cLng=userLng??lng;
+  const movedFar=lastCheckinLat===null||distanceMeter(cLat,cLng,lastCheckinLat,lastCheckinLng)>50;
+  if((!checkinShown||movedFar)&&nearbyPlaces.length>0){
     checkinShown=true;
-    setTimeout(()=>showCheckinModal(_cLat,_cLng),900);
+    setTimeout(()=>showCheckinModal(cLat,cLng),1000);
   }
 }
 
@@ -1278,63 +1281,44 @@ function initMap(){
 
 function startGpsWatch(){
   if(!navigator.geolocation){
-    // No GPS support — load default location
     if(!mapInitialLoaded){const{lat,lng}=CONFIG.DEFAULT_CENTER;ensurePlacesLoadedAt(lat,lng);mapInitialLoaded=true;}
     return;
   }
-  if(gpsWatchId!==null)navigator.geolocation.clearWatch(gpsWatchId);
-
-  function onErr(err){
-    if(!mapInitialLoaded){
-      const{lat,lng}=CONFIG.DEFAULT_CENTER;
-      ensurePlacesLoadedAt(lat,lng);
-      mapInitialLoaded=true;
-    }
-    console.warn('GPS error:',err.code,err.message);
-  }
-
-  const gpsOpts={enableHighAccuracy:true,timeout:12000,maximumAge:0};
-
-  // Pedir posición inmediata — no esperar al watch
-  navigator.geolocation.getCurrentPosition(pos=>{
-    onGpsSuccess(pos);
-  }, onErr, gpsOpts);
-
-  // Continuar escuchando cambios de posición
-  gpsWatchId=navigator.geolocation.watchPosition(pos=>onGpsSuccess(pos), onErr, {enableHighAccuracy:true,timeout:12000,maximumAge:2000});
+  if(gpsWatchId!==null){navigator.geolocation.clearWatch(gpsWatchId);gpsWatchId=null;}
+  gpsWatchId=navigator.geolocation.watchPosition(
+    pos=>onGpsSuccess(pos),
+    err=>{
+      console.warn('GPS error:',err.code,err.message);
+      if(!mapInitialLoaded){const{lat,lng}=CONFIG.DEFAULT_CENTER;ensurePlacesLoadedAt(lat,lng);mapInitialLoaded=true;}
+    },
+    {enableHighAccuracy:true,timeout:15000,maximumAge:0}
+  );
 }
 
 function onGpsSuccess(pos){
-  const{latitude:rawLat,longitude:rawLng,accuracy}=pos.coords;
-  // Solo ignorar lecturas muy imprecisas en updates posteriores (no en la primera)
-  if(accuracy>120&&userLat!==null)return;
-  // Suavizado solo en updates, primer fix se toma tal cual
-  const lat=userLat===null?rawLat:rawLat*0.8+userLat*0.2;
-  const lng=userLng===null?rawLng:rawLng*0.8+userLng*0.2;
-  const isFirst=userLat===null;
-  userLat=lat;userLng=lng;
+  const{latitude:lat,longitude:lng,accuracy}=pos.coords;
+  const isFirst=(userLat===null);
+  // Ignorar lecturas muy imprecisas solo si ya tenemos una buena
+  if(!isFirst && accuracy>150)return;
+  userLat=lat; userLng=lng;
   if(mlReady)updateUserMarker(lat,lng);
-  if(mlReady&&followMode&&mlMap){
-    if(isFirst){mlMap.flyTo({center:[lng,lat],zoom:CONFIG.FOLLOW_ZOOM,duration:600});}
-    else{mlMap.easeTo({center:[lng,lat],duration:800,easing:t=>t*(2-t)});}
-  } else if(!mlReady&&isFirst&&followMode){
-    // Mapa todavía no cargó — registrar callback para mover cuando esté listo
-    mlReadyCallbacks.push(()=>{
-      if(mlMap)mlMap.flyTo({center:[lng,lat],zoom:CONFIG.FOLLOW_ZOOM,duration:600});
-      updateGpsBtnUI();
-    });
+  // Zoom a la ubicación del usuario
+  if(mlReady && followMode && mlMap){
+    if(isFirst){
+      mlMap.flyTo({center:[lng,lat],zoom:CONFIG.FOLLOW_ZOOM,duration:800});
+    } else {
+      mlMap.easeTo({center:[lng,lat],duration:600});
+    }
   }
   if(isFirst){
     updateGpsBtnUI();
+    mapInitialLoaded=true;
     lastLoadTileKey=latLngToTileKey(lat,lng);
-    if(mlReady){ensurePlacesLoadedAt(lat,lng);}
-    else{mlReadyCallbacks.push(()=>ensurePlacesLoadedAt(lat,lng));}
+    ensurePlacesLoadedAt(lat,lng);
   } else {
-    const currentTileKey=latLngToTileKey(lat,lng);
-    if(currentTileKey!==lastLoadTileKey){lastLoadTileKey=currentTileKey;ensurePlacesLoadedAt(lat,lng);}
+    const tileKey=latLngToTileKey(lat,lng);
+    if(tileKey!==lastLoadTileKey){lastLoadTileKey=tileKey;ensurePlacesLoadedAt(lat,lng);}
   }
-  // Nota: el checkin se dispara desde ensurePlacesLoadedAt cuando los lugares ya están cargados
-  // Así evitamos race conditions donde showCheckinModal se llama con pool vacío
 }
 
 async function manualRefresh(){
