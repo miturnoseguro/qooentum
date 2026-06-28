@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -608,7 +609,7 @@ const CONFIG = {
   PLACE_CACHE_TTL_MS: 24 * 60 * 60 * 1000,
   LOAD_TRIGGER_M: 40,
   VOTE_COOLDOWN_MS: 24 * 60 * 60 * 1000,
-  FOLLOW_ZOOM: 15,
+  FOLLOW_ZOOM: 17,
 };
 
 const BACKEND_READY = !CONFIG.APPS_SCRIPT_URL.startsWith('PEGAR_AQUI');
@@ -1449,11 +1450,17 @@ function onZoomOut(){if(!mlMap)return;mlMap.zoomOut({duration:300});}
 
 /* ── MAP INIT ── */
 function initMap(){
+  // Pre-fetch GPS so first render can use real location
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      if(!gpsEverReceived){ userLat=pos.coords.latitude; userLng=pos.coords.longitude; }
+    },()=>{},{enableHighAccuracy:true,timeout:5000,maximumAge:10000});
+  }
   mlMap=new maplibregl.Map({
     container:'maplibre-map',
     style:'./bright_patched.json',
     center:[CONFIG.DEFAULT_CENTER.lng,CONFIG.DEFAULT_CENTER.lat],
-    zoom:15,
+    zoom:17,
     attributionControl:false,
     // FIX: precargar tiles de los alrededores para evitar blancos al moverse
     trackResize:true,
