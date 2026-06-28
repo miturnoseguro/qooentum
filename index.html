@@ -1405,7 +1405,7 @@ function onZoomOut(){if(!mlMap)return;mlMap.zoomOut({duration:300});}
 function initMap(){
   mlMap=new maplibregl.Map({
     container:'maplibre-map',
-    style:'https://tiles.openfreemap.org/styles/bright',
+    style:'./bright_patched.json',
     center:[CONFIG.DEFAULT_CENTER.lng,CONFIG.DEFAULT_CENTER.lat],
     zoom:13,
     attributionControl:false,
