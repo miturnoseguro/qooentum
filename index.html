@@ -1183,14 +1183,12 @@ function refreshMarkerIcon(id){
 /* ── USER POSITION MARKER ── */
 function updateUserMarker(lat,lng){
   if(!mlMap||!mlReady)return;
+  if(lat===null||lat===undefined||lng===null||lng===undefined)return;
   if(mlUserMarker){
-    // FIX: usar easeTo en lugar de setLngLat directo para animar suavemente
-    mlMap.easeTo({center:[lng,lat],duration:600,easing:t=>t*(2-t)});
     mlUserMarker.setLngLat([lng,lat]);
   } else {
     const el=document.createElement('div');
-    // FIX: transition CSS para que el elemento del marcador se mueva suavemente
-    el.style.cssText='width:18px;height:18px;border-radius:50%;background:#6366F1;border:3px solid #fff;box-shadow:0 0 0 4px rgba(99,102,241,.35);transition:transform 0.5s cubic-bezier(.25,.46,.45,.94);';
+    el.style.cssText='width:18px;height:18px;border-radius:50%;background:#6366F1;border:3px solid #fff;box-shadow:0 0 0 4px rgba(99,102,241,.35);';
     mlUserMarker=new maplibregl.Marker({element:el,pitchAlignment:'map'})
       .setLngLat([lng,lat])
       .addTo(mlMap);
@@ -1302,7 +1300,7 @@ function onGpsSuccess(pos){
   if(!isFirst && accuracy>150)return;
   userLat=lat; userLng=lng;
   if(mlReady)updateUserMarker(lat,lng);
-  // Zoom a la ubicación del usuario
+  // Mover el mapa solo si followMode está activo
   if(mlReady && followMode && mlMap){
     if(isFirst){
       mlMap.flyTo({center:[lng,lat],zoom:CONFIG.FOLLOW_ZOOM,duration:800});
