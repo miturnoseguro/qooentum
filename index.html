@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -616,10 +614,6 @@ const CONFIG = {
 const BACKEND_READY = !CONFIG.APPS_SCRIPT_URL.startsWith('PEGAR_AQUI');
 const GOOGLE_AUTH_READY = !CONFIG.GOOGLE_CLIENT_ID.startsWith('PEGAR_AQUI');
 
-
-
-
-
 const SESSION_STORAGE_KEY = 'qooentum_user';
 const DEVICE_KEY = 'qooentum_device_email';
 const COOLDOWNS_STORAGE_KEY = 'qooentum_cooldowns';
@@ -694,7 +688,7 @@ function pruneDailyReports(){// Resetear reporters de lugares cuyo reporte es de
     if(p.report_ts&&p.report_ts<todayStart){p.reporters=0;p.status=0;p.report_ts=null;}
   });
 }
-function loadCache(){try{const raw=localStorage.getItem(PLACE_CACHE_KEY);if(!raw)return;const data=JSON.parse(raw);if(!data||!data.tiles)return;tileCache=data.tiles||{};placeStore=data.places||{};pruneDailyReports();Object.values(placeStore).forEach(p=>{if(!placeIndex.has(p.id)){placeIndex.set(p.id,p);places.push(p);}});}catch(e){}}
+function loadCache(){try{const raw=localStorage.getItem(PLACE_CACHE_KEY);if(!raw)return;const data=JSON.parse(raw);if(!data||!data.tiles)return;tileCache=data.tiles||{};placeStore=data.places||{};pruneDailyReports();Object.values(placeStore).forEach(p=>{if(!placeIndex.has(p.id)){placeIndex.set(p.id,p);places.push(p);}else{Object.assign(placeIndex.get(p.id),p);}});}catch(e){}}
 function pruneOldTiles(){const now=Date.now();Object.keys(tileCache).forEach(k=>{if(now-tileCache[k].ts>CONFIG.PLACE_CACHE_TTL_MS)delete tileCache[k];});const allIds=new Set();Object.values(tileCache).forEach(t=>(t.placeIds||[]).forEach(id=>allIds.add(id)));Object.keys(placeStore).forEach(id=>{if(!allIds.has(id))delete placeStore[id];});}
 function markTileLoaded(tileKey,ids){tileCache[tileKey]={ts:Date.now(),placeIds:ids};}
 function isTileCached(tileKey){const t=tileCache[tileKey];return t&&(Date.now()-t.ts)<CONFIG.PLACE_CACHE_TTL_MS;}
@@ -1143,20 +1137,22 @@ function clearSearch(){document.getElementById('map-search-input').value='';docu
    MAPLIBRE GL — MARKERS + MAP INIT + GPS
    ════════════════════════════════════════════════════════════ */
 
-const CLUSTER_ZOOM_THRESHOLD = 16; // agrupar cuando zoom<16 (~5 manzanas visibles) // agrupar cuando zoom<14 (~7+ manzanas visibles)
+// Ajuste de agrupación: grid más fino para que a 5 cuadras (zoom ~15) se vean clústeres más compactos
+const CLUSTER_ZOOM_THRESHOLD = 16; // por encima de 16 se muestran individuales
 let mlMap = null, mlReady = false, mlReadyCallbacks = [];
 let mlMarkers = {}; // id -> {marker, el}
 let mlClusterMarkers = [];
 let mlUserMarker = null;
 
 function getClusterGridDeg(zoom){
-  // ~5 manzanas visibles en móvil = zoom 15-16
-  if(zoom>=15)return 0.012; // solo llega si threshold cambia
-  if(zoom>=14)return 0.022;
-  if(zoom>=13)return 0.045;
-  if(zoom>=12)return 0.090;
-  if(zoom>=11)return 0.180;
-  return 0.38;
+  // grid más pequeño para agrupar más finamente a nivel de manzanas
+  if(zoom>=16) return 0.006;   // muy fino (no se usa porque threshold=16)
+  if(zoom>=15) return 0.010;   // ~1.1km
+  if(zoom>=14) return 0.018;   // ~2km
+  if(zoom>=13) return 0.035;
+  if(zoom>=12) return 0.070;
+  if(zoom>=11) return 0.140;
+  return 0.30;
 }
 
 function densityClass(count){
@@ -1179,7 +1175,6 @@ function computeClusters(placesToCluster,gridDeg){
   });
   return Object.values(cells)
     .map(c=>{
-      // Centroide real de los lugares en la celda
       const n=c.places.length;
       const avgLat=c.places.reduce((s,p)=>s+p.lat,0)/n;
       const avgLng=c.places.reduce((s,p)=>s+p.lng,0)/n;
@@ -1922,15 +1917,15 @@ function cercaCycleSort(){cercaSortIdx=(cercaSortIdx+1)%3;cercaSortMode=CERCA_SO
 /* ── CHECK-IN MODAL ── */
 function showCheckinModal(lat,lng){
   const pool=nearbyPlaces.length?nearbyPlaces:places;
-  // Only show if there is a place within 20m
+  // Solo mostrar si hay un lugar a menos de 20m
   const CHECKIN_MAX_DIST = 20;
   const veryNearPlaces=pool.map(p=>({...p,_dist:Math.round(distanceMeter(lat,lng,p.lat,p.lng))})).filter(p=>p._dist<=CHECKIN_MAX_DIST).sort((a,b)=>a._dist-b._dist);
-  if(!veryNearPlaces.length)return; // nothing within 20m — stay silent
+  if(!veryNearPlaces.length)return; // nada a menos de 20m
   const closest=veryNearPlaces[0];
   const root=document.getElementById('checkin-overlay-root');
   function close(){const overlay=root.querySelector('.checkin-overlay');if(overlay){overlay.style.opacity='0';overlay.style.transition='opacity .25s';}setTimeout(()=>{root.innerHTML='';},280);}
   function confirmPlace(p){close();setTimeout(()=>openPlacePopup(p),300);}
-  // Single-place "estás en X ahora?" prompt
+  // Texto exacto: "¿Estás en [nombre del lugar] en este momento?"
   root.innerHTML=`<div class="checkin-overlay" id="checkin-overlay"><div class="checkin-card"><div class="checkin-header"><div class="checkin-header-emoji">${closest.logo||'📍'}</div><div class="checkin-header-title">¿Estás en ${closest.name} en este momento?</div><div class="checkin-header-sub">${closest._dist}m de tu ubicación actual · podés reportar cuánta gente hay</div></div><div class="checkin-body"><div style="display:flex;flex-direction:column;gap:10px"><button class="checkin-confirm-btn" id="checkin-yes-btn">✅ Sí, estoy aquí — reportar</button><button class="checkin-skip-main" id="checkin-skip-btn"><span style="font-size:16px;opacity:.65">🗺️</span>No, solo ver el mapa</button></div></div></div></div>`;
   lastCheckinLat=lat; lastCheckinLng=lng;
   root.querySelector('#checkin-yes-btn').addEventListener('click',()=>confirmPlace(closest));
@@ -2090,6 +2085,8 @@ function switchTab(tab){
 /* ── INTERVALS ── */
 setInterval(pruneOldTiles,60*60*1000);
 setInterval(persistCache,5*60*1000);
+// Reset diario de reportes (cada hora)
+setInterval(pruneDailyReports,60*60*1000);
 
 /* ── INIT ── */
 window.addEventListener('DOMContentLoaded',()=>{
