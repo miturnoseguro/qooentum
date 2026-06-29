@@ -107,7 +107,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#fff;color:var(--tex
 @keyframes panelIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 #panel-map{flex-direction:row !important;animation:none;}
 .map-pane{position:relative;flex:1;overflow:hidden;min-width:0;}
-#maplibre-map{width:100%;height:100%;z-index:1;}
+#maplibre-map{width:100%;height:100%;z-index:1;touch-action:none;}
 
 /* ── Custom Marker Cards ── */
 .fc-card-wrap{display:flex;flex-direction:column;align-items:center;cursor:pointer;filter:drop-shadow(0 3px 10px rgba(15,23,42,.16));transition:transform .18s cubic-bezier(.34,1.56,.64,1),filter .18s;}
@@ -1453,22 +1453,18 @@ function initMap(){
     center: startCenter,
     zoom:17,
     attributionControl:false,
-    // FIX: precargar tiles de los alrededores para evitar blancos al moverse
     trackResize:true,
     maxTileCacheSize:150,
     fadeDuration:100,
+    scrollZoom:true,
+    touchZoomRotate:true,
+    dragPan:true,
   });
 
   mlMap.addControl(new maplibregl.AttributionControl({compact:true}),'bottom-right');
   // Silenciar errores internos de estilo (null values en features OSM del tile)
   mlMap.on('error',(e)=>{
     const msg=(e&&e.error&&e.error.message)||'';
-    if(msg.includes('Expected value to be of type number'))return;
-    console.warn('[Map error]',msg);
-  });
-  // Silenciar errores internos de estilo de MapLibre (null values en features OSM)
-  mlMap.on('error',(e)=>{
-    const msg=e&&e.error&&e.error.message||'';
     if(msg.includes('Expected value to be of type number'))return;
     console.warn('[Map error]',msg);
   });
@@ -2167,7 +2163,8 @@ window.addEventListener('DOMContentLoaded',()=>{
         clearTimeout(gpsTimeout);
         userLat=pos.coords.latitude;
         userLng=pos.coords.longitude;
-        gpsEverReceived=true;
+        // NO marcar gpsEverReceived aquí: dejamos que onGpsSuccess lo haga
+        // para que el flyTo inicial dentro del mapa funcione correctamente
         if(!mapInited){ mapInited=true; initMap(); }
       },
       ()=>{
