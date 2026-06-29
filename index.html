@@ -925,9 +925,10 @@ let _syncInterval = null;
 let pickModeActive = false;
 let _toastActionTimer = null;
 let _gpsTimeout = null;
+let mapInitialized = false;
 
 /* ============================================================
-   FUNCIONES PRINCIPALES (optimizadas, con feedback háptico)
+   FUNCIONES PRINCIPALES
    ============================================================ */
 function vibrate(ms=10) { if (navigator.vibrate) navigator.vibrate(ms); }
 
@@ -965,7 +966,6 @@ const loadLastLocation = () => {
     if (!raw) return null;
     const data = JSON.parse(raw);
     if (!data || !data.lat || !data.lng) return null;
-    // Solo usar si es de hace menos de 1 hora
     if (Date.now() - data.timestamp > 3600000) return null;
     return { lat: data.lat, lng: data.lng };
   } catch(e) { return null; }
@@ -1166,7 +1166,6 @@ const _loadPlaces = async (lat,lng) => {
   const merged = osms.map(p => { const bp = bm.get(p.id); return bp ? {...p,...bp} : p; });
   const onlyBackend = (backend?.places||[]).filter(p => !osms.find(o=>o.id===p.id));
   const all = [...merged, ...onlyBackend];
-  // Guardar en cache
   const ids = [];
   all.forEach(p => { placeStore[p.id] = p; ids.push(p.id); });
   tileCache[key] = { ts: Date.now(), placeIds: ids };
@@ -1223,8 +1222,7 @@ const applySeed = (lat,lng) => {
   });
 };
 
-// MAPLIBRE - INIT con splash
-let mapInitialized = false;
+// MAPLIBRE - INIT
 const initMap = (center) => {
   if (mapInitialized) return;
   mapInitialized = true;
@@ -1247,12 +1245,12 @@ const initMap = (center) => {
     updateGpsUI();
     // Ocultar splash
     document.getElementById('splash').classList.add('hidden');
-    // Si ya teníamos GPS, actualizar marcador y centrar
+    // Asegurar que el panel mapa esté visible
+    switchTab('map');
     if (userLat != null && userLng != null) {
       updateUserMarker(userLat, userLng);
       safeMove(() => mlMap.flyTo({ center:[userLng, userLat], zoom: CONFIG.GPS_ZOOM, duration: 600 }));
     }
-    // Iniciar watch GPS si no está corriendo
     if (navigator.geolocation && gpsWatchId == null) {
       startGpsWatch();
     }
@@ -1312,21 +1310,17 @@ const onGps = pos => {
     if (key !== window._lastTileKey) { window._lastTileKey = key; ensurePlaces(lat,lng).then(() => maybeCheckin(lat,lng)); }
     else maybeCheckin(lat,lng);
   }
-  // Si el splash sigue visible, ocultarlo
   document.getElementById('splash').classList.add('hidden');
 };
 
-// Función para obtener ubicación antes de iniciar el mapa
+// Obtener ubicación antes del mapa
 const requestGpsBeforeMap = () => {
-  // Primero intentar cargar última ubicación guardada
   const last = loadLastLocation();
   if (last && validCoord(last.lat, last.lng)) {
     userLat = last.lat;
     userLng = last.lng;
     gpsEverReceived = true;
-    // Iniciar mapa con esa ubicación
     initMap([last.lng, last.lat]);
-    // Luego pedir GPS para actualizar
     if (navigator.geolocation) {
       const btn = document.getElementById('gps-btn');
       if (btn) btn.classList.add('pulsing');
@@ -1341,16 +1335,13 @@ const requestGpsBeforeMap = () => {
     return;
   }
 
-  // No hay ubicación guardada: pedir GPS antes de mostrar el mapa
   if (navigator.geolocation) {
     const splashText = document.getElementById('splash-text');
     splashText.textContent = 'Obteniendo tu ubicación…';
     const btn = document.getElementById('gps-btn');
     if (btn) btn.classList.add('pulsing');
-    // Timeout para no quedarse colgado
     _gpsTimeout = setTimeout(() => {
       if (!gpsEverReceived) {
-        // Fallback a centro por defecto
         splashText.textContent = 'Usando ubicación predeterminada';
         setTimeout(() => {
           initMap([CONFIG.DEFAULT_CENTER.lng, CONFIG.DEFAULT_CENTER.lat]);
@@ -1364,7 +1355,6 @@ const requestGpsBeforeMap = () => {
         if (_gpsTimeout) clearTimeout(_gpsTimeout);
         if (btn) btn.classList.remove('pulsing');
         onGps(pos);
-        // Iniciar mapa si no se inició aún
         if (!mapInitialized) {
           initMap([pos.coords.longitude, pos.coords.latitude]);
         }
@@ -1374,7 +1364,6 @@ const requestGpsBeforeMap = () => {
         if (_gpsTimeout) clearTimeout(_gpsTimeout);
         if (btn) btn.classList.remove('pulsing');
         handleGpsErr(err);
-        // Iniciar mapa con default si no se inició
         if (!mapInitialized) {
           initMap([CONFIG.DEFAULT_CENTER.lng, CONFIG.DEFAULT_CENTER.lat]);
           document.getElementById('splash').classList.add('hidden');
@@ -1383,7 +1372,6 @@ const requestGpsBeforeMap = () => {
       { enableHighAccuracy: true, timeout: CONFIG.GPS_TIMEOUT_MS }
     );
   } else {
-    // Sin geolocalización, usar default
     initMap([CONFIG.DEFAULT_CENTER.lng, CONFIG.DEFAULT_CENTER.lat]);
     document.getElementById('splash').classList.add('hidden');
     startGpsWatch();
@@ -1451,7 +1439,7 @@ const onGpsBtnClick = () => {
 const onZoomIn = () => { if (mlMap) { vibrate(5); mlMap.zoomIn({duration:300}); } };
 const onZoomOut = () => { if (mlMap) { vibrate(5); mlMap.zoomOut({duration:300}); } };
 
-// MARKERS (sin cambios, igual que antes)
+// MARKERS (sin cambios)
 const clusterGrid = z => {
   if (z>=18) return 0.003;
   if (z>=17) return 0.005;
@@ -1632,7 +1620,7 @@ const runSearch = async q => {
   });
 };
 
-// REACT POPUP (igual que antes, sin cambios)
+// REACT POPUP
 const {useState, useEffect, useRef} = React;
 const PHOTOS = {
   default: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&q=70&fm=webp',
@@ -1878,7 +1866,6 @@ const closePopup = () => {
   currentPopupPlace = null;
 };
 
-// Submit vote
 const submitVote = async (place, statusIdx) => {
   const pts = VOTE_PTS[statusIdx];
   const res = await apiPost('vote', {
@@ -1898,13 +1885,12 @@ const submitVote = async (place, statusIdx) => {
     showToast(`🎉 +${pts} puntos ganados`);
     return true;
   }
-  // fallback local
   addPoints(pts);
   showToast(`🎉 +${pts} ganados`);
   return true;
 };
 
-// CERCA (sin cambios)
+// CERCA (resumido)
 const cercaLoadPlaces = async () => {
   if (cercaLoaded) { cercaApplyFilters(); return; }
   cercaShowSkeleton();
@@ -2064,7 +2050,7 @@ const selectPlaceInUI = id => {
   if (card) card.classList.add('selected');
 };
 
-// CHECK-IN (sin cambios)
+// CHECK-IN
 const maybeCheckin = (lat,lng) => {
   if (document.querySelector('.checkin-overlay')) return;
   const pool = Object.values(placeStore).filter(p => validCoord(p.lat,p.lng) && dist(lat,lng,p.lat,p.lng) <= CONFIG.CHECKIN_RADIUS_M);
@@ -2091,7 +2077,7 @@ const showCheckin = (place) => {
   root.querySelector('.checkin-overlay').addEventListener('click', e => { if (e.target.classList.contains('checkin-overlay')) close(); });
 };
 
-// GOOGLE OAUTH (sin cambios)
+// GOOGLE OAUTH
 let tokenClient = null;
 const initToken = () => {
   if (!GOOGLE_AUTH_READY || tokenClient) return tokenClient;
@@ -2373,7 +2359,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initToken();
   restoreSession();
   maybeStartSync();
-  // Mostrar splash y solicitar GPS antes de iniciar el mapa
   requestGpsBeforeMap();
 });
 
@@ -2394,7 +2379,6 @@ setInterval(() => {
   });
 }, 60*60*1000);
 
-// Exponer funciones globales
 window.switchTab = switchTab;
 window.toggleUserDropdown = toggleUserDropdown;
 window.doGoogleLogin = doGoogleLogin;
