@@ -106,7 +106,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#fff;color:var(--tex
 .panel.visible{display:flex;flex-direction:column;animation:panelIn .28s cubic-bezier(.34,1.2,.64,1);}
 @keyframes panelIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 #panel-map{flex-direction:row !important;animation:none;}
-.map-pane{position:relative;flex:1;overflow:hidden;min-width:0;}
+.map-pane{position:relative;flex:1;overflow:hidden;min-width:0;touch-action:none;}
 #maplibre-map{width:100%;height:100%;z-index:1;touch-action:none;}
 
 /* ── Custom Marker Cards ── */
@@ -667,6 +667,7 @@ let prizesData=SEED_PRIZES.map(p=>({...p}));
 let isLoggedIn=false, pendingVote=null;
 let placeCooldowns={}, gpsWatchId=null;
 let mapInitialLoaded=false, userLat=null, userLng=null;
+let gpsEverReceived=false; // declarado aquí para evitar TDZ al usarlo antes de initMap
 let checkinShown=false, pickModeActive=false;
 let lastCheckinLat=null, lastCheckinLng=null;
 let searchTimer=null;
@@ -1453,6 +1454,7 @@ function initMap(){
     center: startCenter,
     zoom:17,
     attributionControl:false,
+    // FIX: precargar tiles de los alrededores para evitar blancos al moverse
     trackResize:true,
     maxTileCacheSize:150,
     fadeDuration:100,
@@ -1483,7 +1485,7 @@ function initMap(){
       // El toast se muestra en onGpsSuccess la primera vez que llega la ubicación
       window._showWelcomeToast=true;
     }
-    // Solicitar GPS activamente al arrancar
+    // Solicitar GPS activamente al arrancar — UNA SOLA solicitud para todo el ciclo de vida
     if(navigator.geolocation){
       const gpsBtn=document.getElementById('gps-btn');
       if(gpsBtn)gpsBtn.classList.add('pulsing');
@@ -1492,25 +1494,30 @@ function initMap(){
           if(gpsBtn)gpsBtn.classList.remove('pulsing');
           onGpsSuccess(pos);
           startGpsWatch();
+          // FIX BUG 4: recargar cerca con coordenadas reales si todavía no se cargó
+          if(!cercaLoaded){cercaLoadPlaces();}
         },
         err=>{
           if(gpsBtn)gpsBtn.classList.remove('pulsing');
           console.warn('GPS inicial denegado:',err.code);
-          // Si no hay GPS, desactivar followMode para que el botón no mienta
+          // Sin GPS: cargar cerca con ubicación por defecto y arrancar desde allí
           followMode=false;
           updateGpsBtnUI();
-          // Cargar lugares en ubicación por defecto si no hay GPS
           if(!mapInitialLoaded){
             const{lat,lng}=CONFIG.DEFAULT_CENTER;
             safeMapMove(()=>mlMap.flyTo({center:[lng,lat],zoom:13,duration:600}));
             ensurePlacesLoadedAt(lat,lng);
             mapInitialLoaded=true;
           }
+          // FIX BUG 3: cargar cerca con default center si GPS no disponible
+          if(!cercaLoaded){cercaLoadPlaces();}
           startGpsWatch(); // seguir intentando via watch
         },
-        {enableHighAccuracy:true,timeout:8000,maximumAge:5000}
+        {enableHighAccuracy:true,timeout:10000,maximumAge:5000}
       );
     } else {
+      // Sin API de geolocalización
+      if(!cercaLoaded){cercaLoadPlaces();}
       startGpsWatch();
     }
   });
@@ -1553,7 +1560,6 @@ function startGpsWatch(){
   );
 }
 
-let gpsEverReceived=false;
 function onGpsSuccess(pos){
   const{latitude:lat,longitude:lng,accuracy}=pos.coords;
   if(typeof lat!=='number'||typeof lng!=='number'||isNaN(lat)||isNaN(lng))return;
@@ -1583,6 +1589,10 @@ function onGpsSuccess(pos){
       window._showWelcomeToast=false;
       setTimeout(()=>showToast('📍 Ubicación encontrada — mostrando tu zona'),600);
     }
+    // FIX BUG 4: recargar cerca con las coordenadas reales del usuario
+    // (puede que cercaLoadPlaces ya fue llamado con default center)
+    cercaLoaded=false;
+    cercaLoadPlaces();
   } else {
     const tileKey=latLngToTileKey(lat,lng);
     if(tileKey!==lastLoadTileKey){lastLoadTileKey=tileKey;ensurePlacesLoadedAt(lat,lng).then(()=>maybeShowCheckin(lat,lng));}
@@ -1984,8 +1994,7 @@ function showCheckinModal(lat,lng){
   root.querySelector('#checkin-overlay').addEventListener('click',e=>{if(e.target.id==='checkin-overlay')close();});
 }
 
-function enterPickMode(){pickModeActive=true;switchTab('map');document.getElementById('pick-mode-banner').classList.add('show');document.getElementById('maplibre-map').style.cursor='crosshair';}
-function exitPickMode(){pickModeActive=false;document.getElementById('pick-mode-banner').classList.remove('show');document.getElementById('maplibre-map').style.cursor='';}
+// enterPickMode y exitPickMode definidas más arriba (no duplicar)
 
 /* ── GOOGLE AUTH ── */
 let tokenClient=null;
@@ -2149,33 +2158,9 @@ window.addEventListener('DOMContentLoaded',()=>{
   restoreSession();
   maybeStartOccupancySync();
   switchTab('map');
-  setTimeout(()=>{if(!cercaLoaded)cercaLoadPlaces();},500);
-
-  // Pedir GPS ANTES de inicializar el mapa para tener las coordenadas reales desde el primer frame
-  if(navigator.geolocation){
-    let mapInited=false;
-    const gpsTimeout=setTimeout(()=>{
-      // Si el GPS tarda más de 2s, arrancar el mapa igual con el centro por defecto
-      if(!mapInited){ mapInited=true; initMap(); }
-    }, 2000);
-    navigator.geolocation.getCurrentPosition(
-      pos=>{
-        clearTimeout(gpsTimeout);
-        userLat=pos.coords.latitude;
-        userLng=pos.coords.longitude;
-        // NO marcar gpsEverReceived aquí: dejamos que onGpsSuccess lo haga
-        // para que el flyTo inicial dentro del mapa funcione correctamente
-        if(!mapInited){ mapInited=true; initMap(); }
-      },
-      ()=>{
-        clearTimeout(gpsTimeout);
-        if(!mapInited){ mapInited=true; initMap(); }
-      },
-      {enableHighAccuracy:true, timeout:2000, maximumAge:10000}
-    );
-  } else {
-    initMap();
-  }
+  // El GPS y la carga de cerca se disparan desde initMap > evento 'load'
+  // para garantizar un único pedido de permiso y coordenadas reales en toda la app
+  initMap();
 });
 
 /* ── PWA ── */
