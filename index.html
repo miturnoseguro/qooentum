@@ -42,7 +42,23 @@
 html, body { height: 100%; width: 100%; overflow: hidden; background: #fff; color: var(--text); font-family: 'Inter', system-ui, -apple-system, sans-serif; font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
 .app { display: flex; flex-direction: column; height: 100dvh; width: 100%; overflow: hidden; position: relative; }
 
-/* ===== TOPBAR (slim, con blur) ===== */
+/* ===== SPLASH DE CARGA ===== */
+#splash {
+  position: fixed; inset: 0; z-index: 99999;
+  background: #fff; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  transition: opacity 0.5s ease;
+}
+#splash.hidden { opacity: 0; pointer-events: none; }
+#splash-spinner {
+  width: 40px; height: 40px; border: 4px solid var(--surface2);
+  border-top-color: var(--green); border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+#splash-text { margin-top: 16px; font-size: 14px; font-weight: 600; color: var(--text2); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== TOPBAR ===== */
 .topbar {
   display: flex; align-items: center; gap: 12px;
   padding: max(var(--safe-top), 10px) 16px 10px;
@@ -127,9 +143,8 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: #fff; colo
   animation: spin .7s linear infinite; display: none;
   flex-shrink: 0;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
 
-/* ===== PANELS (slide transition) ===== */
+/* ===== PANELS ===== */
 .panel {
   display: none; flex: 1; min-height: 0; overflow: hidden;
   position: relative;
@@ -317,7 +332,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: #fff; colo
 .install-banner-btn { background: var(--green); color: #fff; border: none; border-radius: 8px; padding: 5px 10px; font-size: 10px; font-weight: 800; cursor: pointer; white-space: nowrap; font-family: inherit; }
 .install-banner-close { background: none; border: none; color: rgba(255,255,255,.45); font-size: 14px; cursor: pointer; padding: 2px; line-height: 1; }
 
-/* ===== BOTTOM NAV (floating, con sombra) ===== */
+/* ===== BOTTOM NAV ===== */
 .bottom-nav {
   position: absolute; bottom: max(16px, calc(var(--safe-bottom) + 12px));
   left: 50%; transform: translateX(-50%);
@@ -560,7 +575,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: #fff; colo
 .levelup-title { font-size: 12px; font-weight: 700; color: #D8B4FE; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
 .levelup-close { margin-top: 18px; background: linear-gradient(135deg, #A855F7, #7C3AED); color: #fff; border: none; border-radius: 40px; padding: 8px 22px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; }
 
-/* ===== CHECK-IN MODAL (bottom sheet) ===== */
+/* ===== CHECK-IN MODAL ===== */
 .checkin-overlay {
   position: fixed; inset: 0; background: rgba(15,23,42,.5);
   backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
@@ -628,6 +643,12 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: #fff; colo
 </style>
 </head>
 <body>
+<!-- SPLASH DE CARGA -->
+<div id="splash">
+  <div id="splash-spinner"></div>
+  <div id="splash-text">Obteniendo tu ubicación…</div>
+</div>
+
 <div class="app">
   <!-- TOPBAR -->
   <header class="topbar">
@@ -820,7 +841,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: #fff; colo
 
 <script>
 /* ============================================================
-   CONFIGURACIÓN (no cambia)
+   CONFIGURACIÓN
    ============================================================ */
 const CONFIG = {
   APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbw2t_W59ZVJvKxPwZEhoCgWiU9LXyEDMz_q8Km187L7Ihxxu8hJ27SmJXMHhvpjGNuxaQ/exec',
@@ -834,6 +855,7 @@ const CONFIG = {
   BBOX_PAD: 0.0012,
   PLACE_CACHE_TTL_MS: 24 * 60 * 60 * 1000,
   VOTE_COOLDOWN_MS: 24 * 60 * 60 * 1000,
+  GPS_TIMEOUT_MS: 10000,
 };
 
 const BACKEND_READY = !CONFIG.APPS_SCRIPT_URL.startsWith('PEGAR_AQUI');
@@ -843,7 +865,7 @@ const SESSION_KEY = 'qooentum_user';
 const DEVICE_KEY = 'qooentum_device_email';
 const COOLDOWN_KEY = 'qooentum_cooldowns';
 const CACHE_KEY = 'qooentum_place_cache_v2';
-const FIRST_OPEN_KEY = 'qooentum_first_open_date';
+const LAST_LOCATION_KEY = 'qooentum_last_location';
 
 const STATUS_CFG = [
   { label: 'Poca gente', sub: 'Entrá tranquilo', color: '#00C48C' },
@@ -870,7 +892,7 @@ const SEED_PRIZES = [
 ];
 
 /* ============================================================
-   UTILIDADES + ESTADO GLOBAL
+   UTILIDADES Y ESTADO GLOBAL
    ============================================================ */
 const dist = (lat1,lng1,lat2,lng2) => {
   const R=6371000, toRad=d=>d*Math.PI/180;
@@ -902,6 +924,7 @@ const OVERPASS_CACHE_TTL = 2*60*60*1000;
 let _syncInterval = null;
 let pickModeActive = false;
 let _toastActionTimer = null;
+let _gpsTimeout = null;
 
 /* ============================================================
    FUNCIONES PRINCIPALES (optimizadas, con feedback háptico)
@@ -930,6 +953,22 @@ const pruneTiles = () => {
   const all = new Set();
   Object.values(tileCache).forEach(t => (t.placeIds||[]).forEach(id => all.add(id)));
   Object.keys(placeStore).forEach(id => { if (!all.has(id)) delete placeStore[id]; });
+};
+
+// Última ubicación guardada
+const saveLastLocation = (lat,lng) => {
+  try { localStorage.setItem(LAST_LOCATION_KEY, JSON.stringify({ lat, lng, timestamp: Date.now() })); } catch(e) {}
+};
+const loadLastLocation = () => {
+  try {
+    const raw = localStorage.getItem(LAST_LOCATION_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || !data.lat || !data.lng) return null;
+    // Solo usar si es de hace menos de 1 hora
+    if (Date.now() - data.timestamp > 3600000) return null;
+    return { lat: data.lat, lng: data.lng };
+  } catch(e) { return null; }
 };
 
 // Overpass
@@ -1184,13 +1223,15 @@ const applySeed = (lat,lng) => {
   });
 };
 
-// MAPLIBRE
-const initMap = () => {
-  const center = (userLat!=null && userLng!=null) ? [userLng, userLat] : [CONFIG.DEFAULT_CENTER.lng, CONFIG.DEFAULT_CENTER.lat];
+// MAPLIBRE - INIT con splash
+let mapInitialized = false;
+const initMap = (center) => {
+  if (mapInitialized) return;
+  mapInitialized = true;
   mlMap = new maplibregl.Map({
     container: 'maplibre-map',
     style: './bright_patched.json',
-    center,
+    center: center || [CONFIG.DEFAULT_CENTER.lng, CONFIG.DEFAULT_CENTER.lat],
     zoom: 17,
     attributionControl: false,
     trackResize: true,
@@ -1204,15 +1245,17 @@ const initMap = () => {
     initSearch();
     followMode = true;
     updateGpsUI();
-    if (navigator.geolocation) {
-      const btn = document.getElementById('gps-btn');
-      if (btn) btn.classList.add('pulsing');
-      navigator.geolocation.getCurrentPosition(
-        pos => { if (btn) btn.classList.remove('pulsing'); onGps(pos); startGpsWatch(); },
-        err => { if (btn) btn.classList.remove('pulsing'); handleGpsErr(err); },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
-      );
-    } else { startGpsWatch(); }
+    // Ocultar splash
+    document.getElementById('splash').classList.add('hidden');
+    // Si ya teníamos GPS, actualizar marcador y centrar
+    if (userLat != null && userLng != null) {
+      updateUserMarker(userLat, userLng);
+      safeMove(() => mlMap.flyTo({ center:[userLng, userLat], zoom: CONFIG.GPS_ZOOM, duration: 600 }));
+    }
+    // Iniciar watch GPS si no está corriendo
+    if (navigator.geolocation && gpsWatchId == null) {
+      startGpsWatch();
+    }
     if (!cercaLoaded) cercaLoadPlaces();
   });
   mlMap.on('zoomend', () => { if (nearbyPlaces.length) buildMapMarkers(nearbyPlaces); });
@@ -1227,6 +1270,7 @@ const initMap = () => {
   });
   new ResizeObserver(() => { if (mlMap) mlMap.resize(); }).observe(document.getElementById('maplibre-map'));
 };
+
 const startGpsWatch = () => {
   if (!navigator.geolocation) {
     if (!window._mapLoaded) { const c=CONFIG.DEFAULT_CENTER; ensurePlaces(c.lat,c.lng); window._mapLoaded=true; }
@@ -1239,11 +1283,13 @@ const startGpsWatch = () => {
     { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
   );
 };
+
 const onGps = pos => {
   const {latitude:lat, longitude:lng, accuracy} = pos.coords;
   if (!validCoord(lat,lng)) return;
   if (gpsEverReceived && accuracy > 150) return;
   userLat = lat; userLng = lng; gpsEverReceived = true;
+  saveLastLocation(lat,lng);
   if (mlReady) updateUserMarker(lat,lng);
   if (mlReady && mlMap && validCoord(lat,lng)) {
     if (!window._mapLoaded || document.getElementById('panel-map').classList.contains('visible')) {
@@ -1266,7 +1312,84 @@ const onGps = pos => {
     if (key !== window._lastTileKey) { window._lastTileKey = key; ensurePlaces(lat,lng).then(() => maybeCheckin(lat,lng)); }
     else maybeCheckin(lat,lng);
   }
+  // Si el splash sigue visible, ocultarlo
+  document.getElementById('splash').classList.add('hidden');
 };
+
+// Función para obtener ubicación antes de iniciar el mapa
+const requestGpsBeforeMap = () => {
+  // Primero intentar cargar última ubicación guardada
+  const last = loadLastLocation();
+  if (last && validCoord(last.lat, last.lng)) {
+    userLat = last.lat;
+    userLng = last.lng;
+    gpsEverReceived = true;
+    // Iniciar mapa con esa ubicación
+    initMap([last.lng, last.lat]);
+    // Luego pedir GPS para actualizar
+    if (navigator.geolocation) {
+      const btn = document.getElementById('gps-btn');
+      if (btn) btn.classList.add('pulsing');
+      navigator.geolocation.getCurrentPosition(
+        pos => { if (btn) btn.classList.remove('pulsing'); onGps(pos); startGpsWatch(); },
+        err => { if (btn) btn.classList.remove('pulsing'); handleGpsErr(err); },
+        { enableHighAccuracy: true, timeout: CONFIG.GPS_TIMEOUT_MS, maximumAge: 5000 }
+      );
+    } else {
+      startGpsWatch();
+    }
+    return;
+  }
+
+  // No hay ubicación guardada: pedir GPS antes de mostrar el mapa
+  if (navigator.geolocation) {
+    const splashText = document.getElementById('splash-text');
+    splashText.textContent = 'Obteniendo tu ubicación…';
+    const btn = document.getElementById('gps-btn');
+    if (btn) btn.classList.add('pulsing');
+    // Timeout para no quedarse colgado
+    _gpsTimeout = setTimeout(() => {
+      if (!gpsEverReceived) {
+        // Fallback a centro por defecto
+        splashText.textContent = 'Usando ubicación predeterminada';
+        setTimeout(() => {
+          initMap([CONFIG.DEFAULT_CENTER.lng, CONFIG.DEFAULT_CENTER.lat]);
+          document.getElementById('splash').classList.add('hidden');
+        }, 400);
+      }
+    }, CONFIG.GPS_TIMEOUT_MS);
+
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        if (_gpsTimeout) clearTimeout(_gpsTimeout);
+        if (btn) btn.classList.remove('pulsing');
+        onGps(pos);
+        // Iniciar mapa si no se inició aún
+        if (!mapInitialized) {
+          initMap([pos.coords.longitude, pos.coords.latitude]);
+        }
+        startGpsWatch();
+      },
+      err => {
+        if (_gpsTimeout) clearTimeout(_gpsTimeout);
+        if (btn) btn.classList.remove('pulsing');
+        handleGpsErr(err);
+        // Iniciar mapa con default si no se inició
+        if (!mapInitialized) {
+          initMap([CONFIG.DEFAULT_CENTER.lng, CONFIG.DEFAULT_CENTER.lat]);
+          document.getElementById('splash').classList.add('hidden');
+        }
+      },
+      { enableHighAccuracy: true, timeout: CONFIG.GPS_TIMEOUT_MS }
+    );
+  } else {
+    // Sin geolocalización, usar default
+    initMap([CONFIG.DEFAULT_CENTER.lng, CONFIG.DEFAULT_CENTER.lat]);
+    document.getElementById('splash').classList.add('hidden');
+    startGpsWatch();
+  }
+};
+
 const handleGpsErr = err => {
   const banner = document.getElementById('gps-blocked-banner');
   const sub = document.getElementById('gps-blocked-sub');
@@ -1285,7 +1408,9 @@ const handleGpsErr = err => {
     window._mapLoaded = true;
   }
   if (!cercaLoaded) cercaLoadPlaces();
+  document.getElementById('splash').classList.add('hidden');
 };
+
 const safeMove = fn => { try { fn(); } catch(e) { console.warn('[Map]', e.message); } };
 const updateGpsUI = () => {
   const btn = document.getElementById('gps-btn'), pill = document.getElementById('follow-pill');
@@ -1326,7 +1451,7 @@ const onGpsBtnClick = () => {
 const onZoomIn = () => { if (mlMap) { vibrate(5); mlMap.zoomIn({duration:300}); } };
 const onZoomOut = () => { if (mlMap) { vibrate(5); mlMap.zoomOut({duration:300}); } };
 
-// MARKERS
+// MARKERS (sin cambios, igual que antes)
 const clusterGrid = z => {
   if (z>=18) return 0.003;
   if (z>=17) return 0.005;
@@ -1507,7 +1632,7 @@ const runSearch = async q => {
   });
 };
 
-// REACT POPUP
+// REACT POPUP (igual que antes, sin cambios)
 const {useState, useEffect, useRef} = React;
 const PHOTOS = {
   default: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&q=70&fm=webp',
@@ -1779,7 +1904,7 @@ const submitVote = async (place, statusIdx) => {
   return true;
 };
 
-// CERCA
+// CERCA (sin cambios)
 const cercaLoadPlaces = async () => {
   if (cercaLoaded) { cercaApplyFilters(); return; }
   cercaShowSkeleton();
@@ -1939,7 +2064,7 @@ const selectPlaceInUI = id => {
   if (card) card.classList.add('selected');
 };
 
-// CHECK-IN
+// CHECK-IN (sin cambios)
 const maybeCheckin = (lat,lng) => {
   if (document.querySelector('.checkin-overlay')) return;
   const pool = Object.values(placeStore).filter(p => validCoord(p.lat,p.lng) && dist(lat,lng,p.lat,p.lng) <= CONFIG.CHECKIN_RADIUS_M);
@@ -1966,7 +2091,7 @@ const showCheckin = (place) => {
   root.querySelector('.checkin-overlay').addEventListener('click', e => { if (e.target.classList.contains('checkin-overlay')) close(); });
 };
 
-// GOOGLE OAUTH
+// GOOGLE OAUTH (sin cambios)
 let tokenClient = null;
 const initToken = () => {
   if (!GOOGLE_AUTH_READY || tokenClient) return tokenClient;
@@ -2248,8 +2373,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initToken();
   restoreSession();
   maybeStartSync();
-  switchTab('map');
-  initMap();
+  // Mostrar splash y solicitar GPS antes de iniciar el mapa
+  requestGpsBeforeMap();
 });
 
 document.addEventListener('click', e => {
