@@ -1,8 +1,10 @@
-/* Qooentum — Service Worker v7 (Google Places + precache tolerante) */
-const CACHE_NAME = 'qooentum-v7';
+/* Qooentum — Service Worker v8 (Google Places bypass + precache tolerante + mapa offline) */
+const CACHE_NAME = 'qooentum-v8';
+const TILE_CACHE_NAME = 'qooentum-tiles-v1'; // ← cache del mapa offline. NUNCA se borra al actualizar la app.
 const PRECACHE_URLS = [
   './',
   './index.html',
+  './bright_patched.json',
 ];
 
 /* ─── Dominios que NUNCA interceptamos ──────────────────────
@@ -16,11 +18,19 @@ const NEVER_INTERCEPT_DOMAINS = [
   'maps.googleapis.com',         // Google Maps
   'googleapis.com',              // Resto de Google APIs (incluye oauth2/userinfo)
   'accounts.google.com',         // Google OAuth
-  'script.google.com',           // Apps Script (backend)
+  'script.google.com',           // Apps Script (backend) — reportes en tiempo real
+  'overpass-api.de',             // Overpass (lugares OSM en vivo)
+  'overpass.kumi.systems',
 ];
 
-function shouldNeverIntercept(url) {
-  return NEVER_INTERCEPT_DOMAINS.some((d) => url.hostname.includes(d));
+/* ─── Dominios del mapa base (OpenFreeMap) → cache-first PURO ──
+   Tiles, sprites y glyphs son inmutables en la práctica: una vez
+   descargados (por el botón "Descargar mi zona" o de a poco mientras
+   se navega), se sirven SIEMPRE desde el celular, sin red. ─────── */
+const MAP_TILE_DOMAINS = ['tiles.openfreemap.org'];
+
+function hostMatches(hostname, list) {
+  return list.some((d) => hostname === d || hostname.endsWith('.' + d));
 }
 
 /* ─── INSTALL — precacheo tolerante a errores ──────────────── */
@@ -38,14 +48,16 @@ self.addEventListener('install', (event) => {
   );
 });
 
-/* ─── ACTIVATE — limpiar cachés viejas ─────────────────────── */
+/* ─── ACTIVATE — limpiar cachés viejas del SHELL únicamente.
+       La cache de tiles del mapa (TILE_CACHE_NAME) se preserva
+       siempre, aunque la app se actualice de versión. ─────────── */
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
       .then((keys) =>
         Promise.all(
           keys
-            .filter((k) => k !== CACHE_NAME)
+            .filter((k) => k !== CACHE_NAME && k !== TILE_CACHE_NAME)
             .map((k) => {
               console.log(`SW: eliminando caché vieja: ${k}`);
               return caches.delete(k);
@@ -65,13 +77,31 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(req.url);
 
-  /* 1. Dominios críticos → NO interceptar en absoluto.
-        Hacemos return sin llamar event.respondWith().
-        El browser maneja el request nativamente con CORS completo.
-        Crítico para que X-Goog-Api-Key pase correctamente. */
-  if (shouldNeverIntercept(url)) return;
+  /* 1. Dominios críticos → NO interceptar en absoluto. */
+  if (hostMatches(url.hostname, NEVER_INTERCEPT_DOMAINS)) return;
 
-  /* 2. Navegación / HTML de mismo origen → network-first */
+  /* 2. Mapa base (OpenFreeMap: tiles vectoriales, sprites, glyphs)
+        → cache-first puro, sin revalidar. Si ya está descargado
+        (por el botón "Descargar mi zona" o por uso normal), nunca
+        se vuelve a pedir a internet. */
+  if (hostMatches(url.hostname, MAP_TILE_DOMAINS)) {
+    event.respondWith(
+      caches.open(TILE_CACHE_NAME).then(async (cache) => {
+        const cached = await cache.match(req);
+        if (cached) return cached;
+        try {
+          const res = await fetch(req);
+          if (res && res.ok) cache.put(req, res.clone());
+          return res;
+        } catch (err) {
+          return new Response('Offline', { status: 503 });
+        }
+      })
+    );
+    return;
+  }
+
+  /* 3. Navegación / HTML de mismo origen → network-first */
   if (
     req.mode === 'navigate' ||
     (url.origin === self.location.origin &&
@@ -93,7 +123,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  /* 3. Assets estáticos de mismo origen → cache-first */
+  /* 4. Assets estáticos de mismo origen → cache-first */
   if (url.origin === self.location.origin) {
     event.respondWith(
       caches.match(req).then((cached) => {
@@ -110,7 +140,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  /* 4. Cross-origin (fonts, Leaflet tiles, CDN) → stale-while-revalidate */
+  /* 5. Cross-origin restante (fonts de Google, CDN de React/MapLibre) →
+        stale-while-revalidate, porque esos SÍ pueden actualizar versión. */
   event.respondWith(
     caches.match(req).then((cached) => {
       const fetchPromise = fetch(req)
@@ -134,4 +165,4 @@ self.addEventListener('message', (event) => {
   }
 });
 
-console.log('✅ SW v7 activo — Google Places bypass + precache tolerante');
+console.log('✅ SW v8 activo — Google Places bypass + mapa offline persistente');
