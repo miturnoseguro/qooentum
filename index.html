@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1476,18 +1477,7 @@ const syncBackend = async (lat,lng) => {
   if (!BACKEND_READY) return;
   const res = await apiGet('sync_places', {lat,lng,radius:300,status_only:1});
   if (!res?.places) return;
-  res.places.forEach(bp => {
-    const p = placeStore[bp.id];
-    if (!p) return;
-    p.status = bp.status ?? p.status;
-    p.reporters = bp.reporters ?? p.reporters;
-    const sponsorChanged = JSON.stringify(p.sponsor||null) !== JSON.stringify(bp.sponsor||null);
-    if (sponsorChanged) {
-      p.sponsor = bp.sponsor || null;
-      if (bp.sponsor) p.verified = true;
-      forceMarkerRebuild(p.id);
-    }
-  });
+  res.places.forEach(bp => { const p = placeStore[bp.id]; if (p) { p.status = bp.status ?? p.status; p.reporters = bp.reporters ?? p.reporters; } });
   persistCache();
 };
 
@@ -1895,11 +1885,6 @@ const makeCluster = c => {
 };
 const clearClusterMarkers = () => { mlClusterMarkers.forEach(m=>m.remove()); mlClusterMarkers=[]; };
 const clearPlaceMarkers = () => { Object.values(mlMarkers).forEach(({marker}) => marker.remove()); mlMarkers={}; };
-  const forceMarkerRebuild = id => {
-  const m = mlMarkers[id];
-  if (m) { m.marker.remove(); delete mlMarkers[id]; }
-  if (nearbyPlaces.length) buildMapMarkers(nearbyPlaces);
-};
 const refreshMarker = id => {
   const p = placeStore[id]; if (!p || !mlMarkers[id]) return;
   const m = mlMarkers[id];
@@ -2237,22 +2222,27 @@ const submitVote = async (place, statusIdx) => {
 // ============================================================
 // CERCA (resumido - igual que antes)
 // ============================================================
-if (BACKEND_READY) {
-    const backend = await apiGet('sync_places', {lat,lng,radius:cercaRadius,status_only:1});
-    if (backend?.places) {
-      const bm = new Map(backend.places.map(p=>[p.id,p]));
-      cercaAllPlaces = cercaAllPlaces.map(p => {
-        const bp = bm.get(p.id);
-        if (!bp) return p;
-        return {
-          ...p,
-          status: bp.status ?? p.status,
-          reporters: bp.reporters ?? p.reporters,
-          sponsor: bp.sponsor ?? p.sponsor ?? null,
-          verified: bp.sponsor ? true : p.verified,
-        };
-      });
-    }
+const cercaLoadPlaces = async () => {
+  const lat = userLat ?? CONFIG.DEFAULT_CENTER.lat;
+  const lng = userLng ?? CONFIG.DEFAULT_CENTER.lng;
+
+  // 1. Mostrar hardcodeados inmediatamente (sin skeletons)
+  const hardcoded = demoData(lat, lng);
+  cercaAllPlaces = hardcoded;
+  cercaApplyFilters();
+  document.getElementById('cerca-updated-lbl').textContent = 'Actualizado ahora';
+
+  // 2. Cargar reales en segundo plano
+  let data = Object.values(placeStore)
+    .filter(p => validCoord(p.lat,p.lng) && dist(lat,lng,p.lat,p.lng) <= cercaRadius)
+    .map(p => ({ ...p, dist: Math.round(dist(lat,lng,p.lat,p.lng)), cat: p.cat || guessCat(p.name,p.type) }));
+  if (data.length < 3) {
+    const fetched = await overpassSearch(lat, lng, Math.min(cercaRadius, 600));
+    data = fetched.map(p => ({ ...p, dist: Math.round(dist(lat,lng,p.lat,p.lng)), cat: p.cat || guessCat(p.name,p.type) }));
+  }
+  if (data.length > 0) {
+    // Reemplazar hardcodeados por reales (los reales van arriba)
+    cercaAllPlaces = data;
   }
   // Si no hay reales, se mantienen los hardcodeados
 
@@ -2620,18 +2610,8 @@ const syncOccupancy = () => {
       let changed = false;
       res.places.forEach(bp => {
         const p = placeStore[bp.id];
-        if (!p) return;
-        if (p.status !== bp.status || p.reporters !== (bp.reporters??p.reporters)) changed = true;
-        p.status = bp.status ?? p.status;
-        p.reporters = bp.reporters ?? p.reporters;
-        const sponsorChanged = JSON.stringify(p.sponsor||null) !== JSON.stringify(bp.sponsor||null);
-        if (sponsorChanged) {
-          p.sponsor = bp.sponsor || null;
-          if (bp.sponsor) p.verified = true;
-          forceMarkerRebuild(p.id);
-          changed = true;
-        }
-        placeStore[p.id] = p;
+        if (p) { if (p.status !== bp.status || p.reporters !== (bp.reporters??p.reporters)) changed = true;
+          p.status = bp.status ?? p.status; p.reporters = bp.reporters ?? p.reporters; placeStore[p.id] = p; }
       });
       if (changed) {
         persistCache();
