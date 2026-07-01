@@ -343,11 +343,11 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: #fff; colo
   padding: 12px 14px; box-shadow: var(--shadow-lg);
   animation: adSlideIn .4s cubic-bezier(.34,1.56,.64,1);
 }
-.offline-panel.show { display: block; position: absolute; top: 10px; height: 100px; background: white; box-shadow: var(--shadow-lg);}
+.offline-panel.show { display: block; position: absolute; top: 10px; height: 107px; background: white; box-shadow: var(--shadow-lg);}
 .offline-panel-head { display: flex; align-items: center; gap: 10px; }
 .offline-panel-icon { font-size: 18px; flex-shrink: 0; }
 .offline-panel-body { flex: 1; min-width: 0; }
-.offline-panel-title { font-size: 12px; font-weight: 800; color: var(--text2); }
+.offline-panel-title { font-size: 14px; font-weight: 600; color: var(--text2); }
 .offline-panel-sub { font-size: 10.5px; color: var(--text2); margin-top: 1px; }
 .offline-panel-close { background: none; border: none; color: rgba(255,255,255,.45); font-size: 14px; cursor: pointer; padding: 2px; line-height: 1; flex-shrink: 0; }
 .offline-panel-bar-track { margin-top: 10px; height: 6px; border-radius: 40px; background: rgba(255,255,255,.14); overflow: hidden; }
@@ -1236,8 +1236,8 @@ const onOfflineBtnClick = () => {
       `<button class="offline-panel-btn secondary" onclick="closeOfflinePanel()">Cerrar</button>
        <button class="offline-panel-btn primary" onclick="startOfflineDownloadFromUI()">Actualizar</button>`;
   } else {
-    document.getElementById('offline-panel-icon').textContent = '⬇️';
-    document.getElementById('offline-panel-title').textContent = 'Descargar tu zona';
+   
+    document.getElementById('offline-panel-title').textContent = 'Descarga tu zona';
     document.getElementById('offline-panel-sub').textContent = `Vas a poder usar el mapa sin conexión (radio de ${CONFIG.OFFLINE_DEFAULT_RADIUS_KM} km)`;
     document.getElementById('offline-panel-bar-track').style.display = 'none';
     document.getElementById('offline-panel-actions').innerHTML =
