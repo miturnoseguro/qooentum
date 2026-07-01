@@ -1895,6 +1895,11 @@ const makeCluster = c => {
 };
 const clearClusterMarkers = () => { mlClusterMarkers.forEach(m=>m.remove()); mlClusterMarkers=[]; };
 const clearPlaceMarkers = () => { Object.values(mlMarkers).forEach(({marker}) => marker.remove()); mlMarkers={}; };
+  const forceMarkerRebuild = id => {
+  const m = mlMarkers[id];
+  if (m) { m.marker.remove(); delete mlMarkers[id]; }
+  if (nearbyPlaces.length) buildMapMarkers(nearbyPlaces);
+};
 const refreshMarker = id => {
   const p = placeStore[id]; if (!p || !mlMarkers[id]) return;
   const m = mlMarkers[id];
