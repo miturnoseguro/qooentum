@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -2039,66 +2037,64 @@ const _buildMarkers = (placesToShow) => {
   if (!mlMap || !mlReady) return;
   placesToShow = placesToShow || nearbyPlaces;
   placesToShow = placesToShow.filter(p => validCoord(p.lat,p.lng));
-  if (!placesToShow.length) { hidePlacesLoading(0); return; }
+  // Ya no agrupamos en clusters: siempre se muestran las cards individuales,
+  // en cualquier nivel de zoom.
+  clearClusterMarkers();
+  if (!placesToShow.length) { clearPlaceMarkers(); hidePlacesLoading(0); return; }
   const isMobile = window.innerWidth < 768;
-  const MAX = isMobile ? 30 : 80;
-  const zoom = mlMap.getZoom();
-  if (zoom >= 18) {
-    clearClusterMarkers();
-    const center = mlMap.getCenter();
-    const toRender = [...placesToShow].sort((a,b) => (a.lat-center.lat)**2+(a.lng-center.lng)**2 - (b.lat-center.lat)**2-(b.lng-center.lng)**2).slice(0, MAX);
-    const token = ++_markerBatchToken;
-    const BATCH = isMobile ? 8 : 20;
-    const half = Math.ceil(toRender.length / 2);
-    const pending = toRender.filter(p => !mlMarkers[p.id]).length;
-    let renderedNew = 0;
-    if (pending > 0) showPlacesLoading(`Cargando cards de establecimientos… 0%`);
-    else hidePlacesLoading(0);
-    const add = i => {
-      if (_markerBatchToken !== token) return;
-      const chunk = toRender.slice(i, i+BATCH);
-      chunk.forEach(p => {
-        if (mlMarkers[p.id]) {
-          const m = mlMarkers[p.id];
-          if (m._lastStatus !== p.status || m._lastReporters !== p.reporters) {
-            const s = getStatus(p);
-            const el = m.el.querySelector('.fc-card-status');
-            if (el) { el.style.background = s.color; const lbl = el.querySelector('.s-label-sm'); if (lbl) lbl.textContent = s.label; }
-            m._lastStatus = p.status; m._lastReporters = p.reporters;
-          }
-          return;
+  const MAX = isMobile ? 60 : 150;
+  const center = mlMap.getCenter();
+  const toRender = [...placesToShow]
+    .sort((a,b) => ((a.lat-center.lat)**2+(a.lng-center.lng)**2) - ((b.lat-center.lat)**2+(b.lng-center.lng)**2))
+    .slice(0, MAX);
+  const renderIds = new Set(toRender.map(p => p.id));
+
+  // Sacamos del mapa solo las cards que ya no corresponden (lugares que
+  // quedaron fuera de rango). Las que siguen vigentes NO se tocan, así se
+  // evita el destruir-y-recrear que causaba el titileo al hacer zoom.
+  Object.keys(mlMarkers).forEach(id => {
+    if (!renderIds.has(id)) { mlMarkers[id].marker.remove(); delete mlMarkers[id]; }
+  });
+
+  const token = ++_markerBatchToken;
+  const BATCH = isMobile ? 8 : 20;
+  const half = Math.ceil(toRender.length / 2);
+  const pending = toRender.filter(p => !mlMarkers[p.id]).length;
+  let renderedNew = 0;
+  if (pending > 0) showPlacesLoading(`Cargando cards de establecimientos… 0%`);
+  else hidePlacesLoading(0);
+  const add = i => {
+    if (_markerBatchToken !== token) return;
+    const chunk = toRender.slice(i, i+BATCH);
+    chunk.forEach(p => {
+      if (mlMarkers[p.id]) {
+        const m = mlMarkers[p.id];
+        if (m._lastStatus !== p.status || m._lastReporters !== p.reporters) {
+          const s = getStatus(p);
+          const el = m.el.querySelector('.fc-card-status');
+          if (el) { el.style.background = s.color; const lbl = el.querySelector('.s-label-sm'); if (lbl) lbl.textContent = s.label; }
+          m._lastStatus = p.status; m._lastReporters = p.reporters;
         }
-        const el = makeMarker(p);
-        el.addEventListener('click', () => { vibrate(10); selectPlaceInUI(p.id); if (pickModeActive) { exitPickMode(); openPopup(p); } else openPopup(p); });
-        const marker = new maplibregl.Marker({ element:el, anchor:'bottom' }).setLngLat([p.lng,p.lat]).addTo(mlMap);
-        mlMarkers[p.id] = { marker, el, _lastStatus:p.status, _lastReporters:p.reporters };
-        renderedNew++;
-      });
-      if (pending > 0) {
-        const pct = Math.min(100, Math.round((renderedNew/pending)*100));
-        showPlacesLoading(`Cargando cards de establecimientos… ${pct}%`);
+        return;
       }
-      if (i + BATCH < toRender.length) {
-        const delay = i >= half ? 500 : 100;
-        setTimeout(() => add(i+BATCH), delay);
-      } else {
-        hidePlacesLoading();
-      }
-    };
-    requestAnimationFrame(() => add(0));
-  } else {
-    hidePlacesLoading(0);
-    clearPlaceMarkers();
-    clearClusterMarkers();
-    const grid = clusterGrid(zoom);
-    const clusters = computeClusters(placesToShow, grid);
-    clusters.forEach(c => {
-      const el = makeCluster(c);
-      el.addEventListener('click', () => { vibrate(10); if (validCoord(c.lat,c.lng)) safeMove(() => mlMap.flyTo({ center:[c.lng,c.lat], zoom:18, duration:400 })); });
-      const marker = new maplibregl.Marker({ element:el, anchor:'bottom' }).setLngLat([c.lng,c.lat]).addTo(mlMap);
-      mlClusterMarkers.push(marker);
+      const el = makeMarker(p);
+      el.addEventListener('click', () => { vibrate(10); selectPlaceInUI(p.id); if (pickModeActive) { exitPickMode(); openPopup(p); } else openPopup(p); });
+      const marker = new maplibregl.Marker({ element:el, anchor:'bottom' }).setLngLat([p.lng,p.lat]).addTo(mlMap);
+      mlMarkers[p.id] = { marker, el, _lastStatus:p.status, _lastReporters:p.reporters };
+      renderedNew++;
     });
-  }
+    if (pending > 0) {
+      const pct = Math.min(100, Math.round((renderedNew/pending)*100));
+      showPlacesLoading(`Cargando cards de establecimientos… ${pct}%`);
+    }
+    if (i + BATCH < toRender.length) {
+      const delay = i >= half ? 500 : 100;
+      setTimeout(() => add(i+BATCH), delay);
+    } else {
+      hidePlacesLoading();
+    }
+  };
+  requestAnimationFrame(() => add(0));
 };
 const computeClusters = (places, gridDeg) => {
   if (!gridDeg || gridDeg<=0) return [];
