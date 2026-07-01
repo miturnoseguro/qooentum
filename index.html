@@ -318,6 +318,19 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: #fff; colo
 .pick-mode-banner.show { display: flex; }
 .pick-mode-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: gpsPulse .9s ease-in-out infinite; }
 
+.places-loading-pill {
+  position: absolute; bottom: calc(76px + max(16px, var(--safe-bottom)) + 14px); left: 50%; transform: translateX(-50%);
+  z-index: 996; background: rgba(15,23,42,.88); color: #fff;
+  border-radius: 40px; padding: 7px 16px 7px 12px; font-size: 11.5px; font-weight: 700;
+  display: none; align-items: center; gap: 8px;
+  pointer-events: none; box-shadow: 0 6px 20px rgba(15,23,42,.28);
+  white-space: nowrap; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  transition: opacity .25s ease;
+}
+.places-loading-pill.show { display: flex; }
+.places-loading-spinner { width: 13px; height: 13px; border-radius: 50%; border: 2px solid rgba(255,255,255,.25); border-top-color: var(--green); animation: spin .7s linear infinite; flex-shrink: 0; }
+.places-loading-pct { font-weight: 900; color: var(--green); }
+
 .install-banner {
   position: absolute; top: 64px; left: 12px; z-index: 999;
   background: rgba(15,23,42,.92); backdrop-filter: blur(12px);
@@ -499,6 +512,19 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: #fff; colo
 }
 .nc-report-btn:hover { background: var(--green); color: #fff; }
 .nc-card.selected { border-color: var(--green); background: var(--green-lt); box-shadow: 0 4px 16px rgba(0,196,140,.15); }
+.nc-card.is-sponsor {
+  margin-top: 10px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--sponsor-color, #6366F1) 10%, #fff) 0%, rgba(255,255,255,.98) 55%);
+  border-color: color-mix(in srgb, var(--sponsor-color, #6366F1) 45%, var(--border));
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--sponsor-color, #6366F1) 18%, transparent);
+}
+.nc-card.is-sponsor:hover { border-color: var(--sponsor-color, var(--green)); }
+.nc-card.is-sponsor .nc-logo { position: relative; overflow: visible; }
+.nc-sponsor-badge {
+  margin-left: auto; font-size: 8px; font-weight: 800; color: #fff;
+  background: var(--sponsor-color, #6366F1); padding: 2px 7px; border-radius: 40px;
+  white-space: nowrap; flex-shrink: 0;
+}
 .nc-group { margin-bottom: 16px; }
 .nc-group-title { font-size: 10px; font-weight: 900; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; padding: 6px 4px; margin-bottom: 6px; }
 .nc-skeleton { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px; display: flex; gap: 10px; }
@@ -752,6 +778,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: #fff; colo
       </div>
       <div class="follow-pill" id="follow-pill"><div class="follow-dot"></div>Siguiendo tu posición</div>
       <div class="pick-mode-banner" id="pick-mode-banner"><div class="pick-mode-dot"></div>Tocá el comercio donde estás</div>
+      <div class="places-loading-pill" id="places-loading-pill"><div class="places-loading-spinner"></div><span id="places-loading-text">Cargando comercios…</span></div>
       <div class="gps-blocked-banner" id="gps-blocked-banner">
         <span class="gps-blocked-banner-icon">📍</span>
         <div class="gps-blocked-banner-body">
@@ -811,7 +838,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: #fff; colo
     <div class="cerca-radius-row">
       <span class="cerca-radius-lbl">Radio:</span>
       <button class="cerca-r-btn active" data-r="1000" onclick="cercaSetRadius(1000,this)">1 km</button>
-      <button class="cerca-r-btn active" data-r="100" onclick="cercaSetRadius(100,this)">100 m</button>
+      <button class="cerca-r-btn" data-r="100" onclick="cercaSetRadius(100,this)">100 m</button>
     </div>
     <div class="cerca-filter-row">
       <button class="cerca-f-chip active" data-cat="all" onclick="cercaSetCat('all',this)">Todo</button>
@@ -969,6 +996,25 @@ const validCoord = (lat,lng) => typeof lat==='number' && typeof lng==='number' &
 const getLevel = pts => ({ level: Math.floor(pts/XP_PER_LEVEL)+1, xp: pts%XP_PER_LEVEL, pct: Math.round(((pts%XP_PER_LEVEL)/XP_PER_LEVEL)*100) });
 const today = () => new Date().toISOString().slice(0,10);
 const fmtDist = m => m<1000 ? m+'m' : (m/1000).toFixed(1)+'km';
+const normTxt = s => (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+
+// ── Indicador de carga de comercios/cards ──
+let _placesLoadingHideTimer = null;
+const showPlacesLoading = text => {
+  clearTimeout(_placesLoadingHideTimer);
+  const pill = document.getElementById('places-loading-pill');
+  const lbl = document.getElementById('places-loading-text');
+  if (!pill || !lbl) return;
+  lbl.textContent = text;
+  pill.classList.add('show');
+};
+const hidePlacesLoading = (delay = 250) => {
+  clearTimeout(_placesLoadingHideTimer);
+  _placesLoadingHideTimer = setTimeout(() => {
+    const pill = document.getElementById('places-loading-pill');
+    if (pill) pill.classList.remove('show');
+  }, delay);
+};
 const fmtCooldown = ms => { const m=Math.ceil(ms/60000); const h=Math.floor(m/60); const r=m%60; return h? (r?h+'h '+r+'min':h+'h') : r+'min'; };
 
 let userPts = 0, currentUser = null, isLoggedIn = false;
@@ -977,7 +1023,7 @@ let userLat = null, userLng = null, gpsEverReceived = false, followMode = true;
 let mlMap = null, mlReady = false, mlMarkers = {}, mlClusterMarkers = [], mlUserMarker = null;
 let gpsWatchId = null, placeCooldowns = {};
 let currentPopupPlace = null, popupRoot = null;
-let cercaAllPlaces = [], cercaFiltered = [], cercaRadius=1000, cercaCat='all', cercaSearchQ='', cercaSortMode='distance', cercaSortIdx=0;
+let cercaAllPlaces = [], cercaFiltered = [], cercaRadius=1000, cercaCat='all', cercaSearchQ='', cercaSortMode='distance', cercaSortIdx=0, cercaLoading=false;
 let cercaLoaded = false;
 let rankingData = [], prizesData = SEED_PRIZES.map(p=>({...p}));
 let _markerBatchToken = 0, _buildMarkersTimer = null;
@@ -1460,21 +1506,27 @@ const _loadPlaces = async (lat,lng) => {
     syncBackend(lat,lng);
     return;
   }
-  const [osms, backend] = await Promise.all([
-    overpassSearch(lat,lng,600),
-    BACKEND_READY ? apiGet('sync_places', {lat,lng,radius:600}) : null,
-  ]);
-  const bm = new Map((backend?.places||[]).map(p=>[p.id,p]));
-  const merged = osms.map(p => { const bp = bm.get(p.id); return bp ? {...p,...bp} : p; });
-  const onlyBackend = (backend?.places||[]).filter(p => !osms.find(o=>o.id===p.id));
-  const all = [...merged, ...onlyBackend];
-  const ids = [];
-  all.forEach(p => { placeStore[p.id] = p; ids.push(p.id); });
-  tileCache[key] = { ts: Date.now(), placeIds: ids };
-  persistCache();
-  rebuildNearby(lat,lng);
-  applySeed(lat,lng);
-  buildMapMarkers(nearbyPlaces);
+  showPlacesLoading('Buscando comercios cercanos…');
+  try {
+    const [osms, backend] = await Promise.all([
+      overpassSearch(lat,lng,600),
+      BACKEND_READY ? apiGet('sync_places', {lat,lng,radius:600}) : null,
+    ]);
+    const bm = new Map((backend?.places||[]).map(p=>[p.id,p]));
+    const merged = osms.map(p => { const bp = bm.get(p.id); return bp ? {...p,...bp} : p; });
+    const onlyBackend = (backend?.places||[]).filter(p => !osms.find(o=>o.id===p.id));
+    const all = [...merged, ...onlyBackend];
+    const ids = [];
+    all.forEach(p => { placeStore[p.id] = p; ids.push(p.id); });
+    tileCache[key] = { ts: Date.now(), placeIds: ids };
+    persistCache();
+    rebuildNearby(lat,lng);
+    applySeed(lat,lng);
+    buildMapMarkers(nearbyPlaces);
+  } catch (e) {
+    console.warn('[_loadPlaces]', e);
+    hidePlacesLoading(0);
+  }
 };
 const rebuildNearby = (lat,lng) => {
   const maxDist = CONFIG.TILE_DEG * 111320 * 1.2;
@@ -1799,7 +1851,7 @@ const _buildMarkers = (placesToShow) => {
   if (!mlMap || !mlReady) return;
   placesToShow = placesToShow || nearbyPlaces;
   placesToShow = placesToShow.filter(p => validCoord(p.lat,p.lng));
-  if (!placesToShow.length) return;
+  if (!placesToShow.length) { hidePlacesLoading(0); return; }
   const isMobile = window.innerWidth < 768;
   const MAX = isMobile ? 30 : 80;
   const zoom = mlMap.getZoom();
@@ -1810,6 +1862,10 @@ const _buildMarkers = (placesToShow) => {
     const token = ++_markerBatchToken;
     const BATCH = isMobile ? 8 : 20;
     const half = Math.ceil(toRender.length / 2);
+    const pending = toRender.filter(p => !mlMarkers[p.id]).length;
+    let renderedNew = 0;
+    if (pending > 0) showPlacesLoading(`Cargando cards de establecimientos… 0%`);
+    else hidePlacesLoading(0);
     const add = i => {
       if (_markerBatchToken !== token) return;
       const chunk = toRender.slice(i, i+BATCH);
@@ -1828,14 +1884,22 @@ const _buildMarkers = (placesToShow) => {
         el.addEventListener('click', () => { vibrate(10); selectPlaceInUI(p.id); if (pickModeActive) { exitPickMode(); openPopup(p); } else openPopup(p); });
         const marker = new maplibregl.Marker({ element:el, anchor:'bottom' }).setLngLat([p.lng,p.lat]).addTo(mlMap);
         mlMarkers[p.id] = { marker, el, _lastStatus:p.status, _lastReporters:p.reporters };
+        renderedNew++;
       });
+      if (pending > 0) {
+        const pct = Math.min(100, Math.round((renderedNew/pending)*100));
+        showPlacesLoading(`Cargando cards de establecimientos… ${pct}%`);
+      }
       if (i + BATCH < toRender.length) {
         const delay = i >= half ? 500 : 100;
         setTimeout(() => add(i+BATCH), delay);
+      } else {
+        hidePlacesLoading();
       }
     };
     requestAnimationFrame(() => add(0));
   } else {
+    hidePlacesLoading(0);
     clearPlaceMarkers();
     clearClusterMarkers();
     const grid = clusterGrid(zoom);
@@ -1949,26 +2013,43 @@ const onSearch = e => {
 const runSearch = async q => {
   const drop = document.getElementById('search-results-dropdown');
   if (!drop) return;
-  drop.innerHTML = `<div class="search-loading"><div class="search-spinner"></div>Buscando lugares…</div>`;
-  drop.classList.add('open');
-  const results = Object.values(placeStore).filter(p => p.name.toLowerCase().includes(q.toLowerCase()) || p.type.toLowerCase().includes(q.toLowerCase())).slice(0,8);
-  if (!results.length) { drop.innerHTML = `<div class="search-empty">😕 No encontramos "${q}" cerca.</div>`; return; }
-  drop.innerHTML = results.map((p,i) => {
-    const d = userLat != null ? fmtDist(dist(userLat,userLng,p.lat,p.lng)) : '';
-    const s = (!p.reporters || p.reporters===0) ? NO_REPORT : STATUS_CFG[p.status];
-    return `<div class="search-result-item" data-idx="${i}"><div class="search-result-logo">${p.logo}</div><div class="search-result-info"><div class="search-result-name">${p.name}</div><div class="search-result-sub">${p.type}${d ? ' · '+d : ''}</div></div><div class="search-result-status" style="background:${s.color}">${s.label}</div></div>`;
-  }).join('');
-  drop.querySelectorAll('.search-result-item').forEach((el,i) => {
-    el.addEventListener('click', () => {
-      vibrate(10);
-      drop.classList.remove('open');
-      const input = document.getElementById('map-search-input');
-      if (input) input.blur();
-      const p = results[i];
-      if (p) openPopup(p);
-      if (mlMap && validCoord(p.lat,p.lng)) safeMove(() => mlMap.panTo([p.lng,p.lat]));
+  try {
+    drop.innerHTML = `<div class="search-loading"><div class="search-spinner"></div>Buscando lugares…</div>`;
+    drop.classList.add('open');
+
+    const nq = normTxt(q);
+    // Fuente principal: comercios reales ya cargados en el mapa.
+    let pool = Object.values(placeStore);
+    // Fallback: si todavía no cargaron comercios reales (o hay muy pocos),
+    // sumamos los lugares demo para que el buscador siempre responda algo.
+    if (pool.length < 5) {
+      const lat = userLat ?? CONFIG.DEFAULT_CENTER.lat, lng = userLng ?? CONFIG.DEFAULT_CENTER.lng;
+      const demo = demoData(lat, lng).filter(d => !pool.find(p => p.id === d.id));
+      pool = [...pool, ...demo];
+    }
+
+    const results = pool.filter(p => normTxt(p.name).includes(nq) || normTxt(p.type).includes(nq)).slice(0,8);
+    if (!results.length) { drop.innerHTML = `<div class="search-empty">😕 No encontramos "${q}" cerca.</div>`; return; }
+    drop.innerHTML = results.map((p,i) => {
+      const d = userLat != null ? fmtDist(dist(userLat,userLng,p.lat,p.lng)) : '';
+      const s = (!p.reporters || p.reporters===0) ? NO_REPORT : STATUS_CFG[p.status];
+      return `<div class="search-result-item" data-idx="${i}"><div class="search-result-logo">${p.logo||'🏪'}</div><div class="search-result-info"><div class="search-result-name">${p.name}</div><div class="search-result-sub">${p.type}${d ? ' · '+d : ''}</div></div><div class="search-result-status" style="background:${s.color}">${s.label}</div></div>`;
+    }).join('');
+    drop.querySelectorAll('.search-result-item').forEach((el,i) => {
+      el.addEventListener('click', () => {
+        vibrate(10);
+        drop.classList.remove('open');
+        const input = document.getElementById('map-search-input');
+        if (input) input.blur();
+        const p = results[i];
+        if (p) openPopup(p);
+        if (p && mlMap && validCoord(p.lat,p.lng)) safeMove(() => mlMap.flyTo({ center:[p.lng,p.lat], zoom:18, duration:500 }));
+      });
     });
-  });
+  } catch (e) {
+    console.warn('[runSearch]', e);
+    drop.innerHTML = `<div class="search-empty">😕 No encontramos "${q}" cerca.</div>`;
+  }
 };
 
 // ============================================================
@@ -2043,6 +2124,20 @@ const PlacePopup = ({ place, onClose }) => {
   const badgeText = sponsor?.badge_text || null;
   const promo = sponsor?.promo || null;
   const website = sponsor?.website || null;
+  const isPremium = sponsor?.tier === 'premium';
+  // Paleta "black premium" para comercios sponsor de nivel premium
+  const T = isPremium ? {
+    cardBg: `linear-gradient(165deg, #0A0A0D 0%, #17171C 48%, #0A0A0D 100%)`,
+    statBg: 'rgba(255,255,255,.06)',
+    statBorder: `1px solid color-mix(in srgb, ${sponsorColor} 35%, rgba(255,255,255,.1))`,
+    text: '#F5F1E6',
+    text2: 'rgba(245,241,230,.64)',
+    text3: 'rgba(245,241,230,.42)',
+    btnBg: 'rgba(255,255,255,.05)',
+    btnBorder: 'rgba(255,255,255,.14)',
+    divider: 'rgba(255,255,255,.08)',
+    pad: '20px 18px 22px',
+  } : null;
 
   const overlayStyle = {
     position:'fixed', inset:0,
@@ -2054,9 +2149,9 @@ const PlacePopup = ({ place, onClose }) => {
     zIndex:10000, padding:'20px',
   };
   const cardStyle = {
-    width:'100%', maxWidth:'370px', background:'#fff', borderRadius:'22px',
+    width:'100%', maxWidth:'370px', background: T ? T.cardBg : '#fff', borderRadius:'22px',
     overflow:'hidden',
-    boxShadow: sponsor ? `0 24px 64px rgba(15,23,42,.28), 0 0 0 2px ${sponsorColor}40` : '0 24px 64px rgba(15,23,42,.28)',
+    boxShadow: isPremium ? `0 24px 70px rgba(0,0,0,.55), 0 0 0 2px ${sponsorColor}70` : (sponsor ? `0 24px 64px rgba(15,23,42,.28), 0 0 0 2px ${sponsorColor}40` : '0 24px 64px rgba(15,23,42,.28)'),
     transform: cardVisible ? 'translateY(0) scale(1)' : 'translateY(40px) scale(0.93)',
     opacity: cardVisible ? 1 : 0,
     transition: 'transform 0.38s cubic-bezier(0.34,1.56,0.64,1), opacity 0.28s ease',
@@ -2120,16 +2215,16 @@ const PlacePopup = ({ place, onClose }) => {
             )
           )
         ),
-        React.createElement('div', {style:{padding:'14px 14px 16px'}},
+        React.createElement('div', {style:{padding: T ? T.pad : '14px 14px 16px'}},
           React.createElement('div', {style:{display:'flex',gap:8,marginBottom:14}},
             ...[{val:place.reporters,lbl:'Reportes'}, {val:WAIT[place.status],lbl:'Espera'}, {val:TREND[place.status],lbl:'Tendencia'}].map(({val,lbl}) =>
-              React.createElement('div', {key:lbl,style:{flex:1,background:'#F1F5F9',borderRadius:10,padding:'8px 10px',textAlign:'center'}},
-                React.createElement('p', {style:{margin:0,fontSize:16,fontWeight:900,color:'#0F172A',letterSpacing:'-0.5px'}}, val),
-                React.createElement('p', {style:{margin:'1px 0 0',fontSize:9,color:'#64748B',textTransform:'uppercase',letterSpacing:'0.5px',fontWeight:600}}, lbl)
+              React.createElement('div', {key:lbl,style:{flex:1,background: T ? T.statBg : '#F1F5F9',border: T ? T.statBorder : 'none',borderRadius:10,padding:'8px 10px',textAlign:'center'}},
+                React.createElement('p', {style:{margin:0,fontSize:16,fontWeight:900,color: T ? T.text : '#0F172A',letterSpacing:'-0.5px'}}, val),
+                React.createElement('p', {style:{margin:'1px 0 0',fontSize:9,color: T ? T.text3 : '#64748B',textTransform:'uppercase',letterSpacing:'0.5px',fontWeight:600}}, lbl)
               )
             )
           ),
-          promo && React.createElement('div', {style:{display:'flex',alignItems:'center',gap:8,background:`${sponsorColor}14`,border:`1px solid ${sponsorColor}44`,borderRadius:10,padding:'8px 10px',marginBottom:10}},
+          promo && React.createElement('div', {style:{display:'flex',alignItems:'center',gap:8,background: T ? `color-mix(in srgb, ${sponsorColor} 14%, transparent)` : `${sponsorColor}14`,border:`1px solid ${sponsorColor}44`,borderRadius:10,padding:'8px 10px',marginBottom:10}},
             React.createElement('span', {style:{fontSize:16,flexShrink:0}},'🎁'),
             React.createElement('span', {style:{fontSize:12,fontWeight:800,color:sponsorColor}}, promo)
           ),
@@ -2159,12 +2254,12 @@ const PlacePopup = ({ place, onClose }) => {
                 key:idx,
                 onClick:()=>handleVote(idx),
                 style:{
-                  border: isSel ? `2px solid ${color}` : '1.5px solid #E2E8F0',
-                  borderRadius:10, background:isSel?color:'#fff',
+                  border: isSel ? `2px solid ${color}` : (T ? `1.5px solid ${T.btnBorder}` : '1.5px solid #E2E8F0'),
+                  borderRadius:10, background:isSel ? color : (T ? T.btnBg : '#fff'),
                   padding:'9px 8px', cursor:'pointer',
                   display:'flex', alignItems:'center', gap:6,
                   fontSize:11, fontWeight:700,
-                  color: isSel ? '#fff' : '#0F172A',
+                  color: isSel ? '#fff' : (T ? T.text : '#0F172A'),
                   textAlign:'left', fontFamily:'inherit',
                   transition:'all 0.18s cubic-bezier(0.34,1.56,0.64,1)',
                   transform: isSel ? 'translateY(-1px)' : 'none',
@@ -2189,8 +2284,8 @@ const PlacePopup = ({ place, onClose }) => {
             disabled: selected == null,
             style:{
               width:'100%',
-              background: selected != null ? `linear-gradient(135deg, ${STATUS_CFG[selected].color}, ${STATUS_CFG[selected].color}cc)` : '#E2E8F0',
-              color: selected != null ? '#fff' : '#94A3B8',
+              background: selected != null ? `linear-gradient(135deg, ${STATUS_CFG[selected].color}, ${STATUS_CFG[selected].color}cc)` : (T ? T.btnBg : '#E2E8F0'),
+              color: selected != null ? '#fff' : (T ? T.text3 : '#94A3B8'),
               border:'none', borderRadius:12, padding:'12px',
               fontSize:13, fontWeight:800,
               cursor: selected != null ? 'pointer' : 'not-allowed',
@@ -2200,7 +2295,7 @@ const PlacePopup = ({ place, onClose }) => {
               transform: selected != null ? 'translateY(-1px)' : 'none',
             }
           }, 'Reportar estado'),
-          React.createElement('p', {style:{margin:'8px 0 0',fontSize:10,color:'#94A3B8',display:'flex',alignItems:'center',gap:4,fontWeight:500}},
+          React.createElement('p', {style:{margin:'8px 0 0',fontSize:10,color: T ? T.text3 : '#94A3B8',display:'flex',alignItems:'center',gap:4,fontWeight:500}},
             React.createElement('svg', {viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2,strokeLinecap:'round',strokeLinejoin:'round',style:{width:11,height:11,flexShrink:0}},
               React.createElement('path', {d:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'}),
               React.createElement('circle', {cx:9,cy:7,r:4}),
@@ -2211,8 +2306,15 @@ const PlacePopup = ({ place, onClose }) => {
           ),
           website && React.createElement('a', {
             href: website, target:'_blank', rel:'noopener noreferrer',
-            style:{display:'block',marginTop:8,fontSize:11,fontWeight:800,color:sponsorColor,textAlign:'center',textDecoration:'none', border:`1px solid ${sponsorColor}`}
-          }, website)
+            style:{
+              display:'block', marginTop:10, fontSize:11.5, fontWeight:800,
+              color: T ? sponsorColor : sponsorColor, textAlign:'center', textDecoration:'none',
+              border:`1.5px solid ${sponsorColor}`, borderRadius:40,
+              padding:'9px 14px',
+              background: T ? `color-mix(in srgb, ${sponsorColor} 12%, transparent)` : `${sponsorColor}0D`,
+              letterSpacing:'.2px',
+            }
+          }, website.replace(/^https?:\/\//,'').replace(/\/$/,''))
         )
       )
     )
@@ -2265,6 +2367,7 @@ const cercaLoadPlaces = async () => {
   const lng = userLng ?? CONFIG.DEFAULT_CENTER.lng;
 
   // 1. Mostrar hardcodeados inmediatamente (sin skeletons)
+  cercaLoading = true;
   const hardcoded = demoData(lat, lng);
   cercaAllPlaces = hardcoded;
   cercaApplyFilters();
@@ -2283,6 +2386,7 @@ const cercaLoadPlaces = async () => {
     cercaAllPlaces = data;
   }
   // Si no hay reales, se mantienen los hardcodeados
+  cercaLoading = false;
 
   // Sincronizar con backend (actualiza estados)
   if (BACKEND_READY) {
@@ -2312,7 +2416,8 @@ const guessCat = (name,type) => {
 };
 const demoData = (lat,lng) => {
   const demos = [
-    { name:'Carrefour Express', type:'Supermercado', emoji:'🛒', cat:'supermarket', addr:'Av. Corrientes 1234', dlat:0.0012, dlng:0.0008, status:2, reporters:14, rating:'4.2', reviewsN:1200 },
+    { name:'Kiosco 24h', type:'Kiosco', emoji:'🏪', cat:'shopping', addr:'A la vuelta', dlat:0.0002, dlng:0.0002, status:0, reporters:2, rating:'4.1', reviewsN:64 },
+    { name:'Carrefour Express', type:'Supermercado', emoji:'🛒', cat:'supermarket', addr:'Av. Corrientes 1234', dlat:0.0012, dlng:0.0008, status:2, reporters:14, rating:'4.2', reviewsN:1200, sponsor:{tier:'premium', badge_color:'#D4AF37', badge_text:'Sponsor'} },
     { name:'Farmacity', type:'Farmacia', emoji:'💊', cat:'health', addr:'Florida 340', dlat:0.0004, dlng:0.0015, status:0, reporters:5, rating:'4.0', reviewsN:856 },
     { name:'Banco Nación', type:'Banco', emoji:'🏦', cat:'bank', addr:'Florida 236', dlat:-0.0006, dlng:0.0010, status:2, reporters:18, rating:'3.2', reviewsN:430 },
     { name:'Starbucks', type:'Cafetería', emoji:'☕', cat:'food', addr:'Av. Santa Fe 800', dlat:-0.0003, dlng:0.0018, status:0, reporters:3, rating:'4.4', reviewsN:2100 },
@@ -2322,7 +2427,7 @@ const demoData = (lat,lng) => {
   return demos.map(d => {
     const plat = lat + d.dlat, plng = lng + d.dlng;
     const d2 = Math.round(dist(lat,lng,plat,plng));
-    return { id:`demo_${d.name.replace(/\s/g,'')}`, name:d.name, type:d.type, logo:d.emoji, cat:d.cat, addr:d.addr, lat:plat, lng:plng, dist:d2, open:true, verified:false, rating:d.rating, reviewsN:d.reviewsN, status:d.status, reporters:d.reporters, sponsor:null };
+    return { id:`demo_${d.name.replace(/\s/g,'')}`, name:d.name, type:d.type, logo:d.emoji, cat:d.cat, addr:d.addr, lat:plat, lng:plng, dist:d2, open:true, verified:false, rating:d.rating, reviewsN:d.reviewsN, status:d.status, reporters:d.reporters, sponsor:d.sponsor || null };
   }).filter(p => p.dist <= cercaRadius);
 };
 const cercaShowSkeleton = () => {
@@ -2332,8 +2437,8 @@ const cercaApplyFilters = () => {
   let list = [...cercaAllPlaces];
   if (cercaCat !== 'all') list = list.filter(p => p.cat === cercaCat);
   if (cercaSearchQ) {
-    const q = cercaSearchQ.toLowerCase();
-    list = list.filter(p => p.name.toLowerCase().includes(q) || p.type.toLowerCase().includes(q) || (p.addr||'').toLowerCase().includes(q));
+    const q = normTxt(cercaSearchQ);
+    list = list.filter(p => normTxt(p.name).includes(q) || normTxt(p.type).includes(q) || normTxt(p.addr).includes(q));
   }
   if (cercaSortMode === 'distance') list.sort((a,b) => a.dist - b.dist);
   else if (cercaSortMode === 'status') list.sort((a,b) => b.reporters - a.reporters || b.status - a.status);
@@ -2347,7 +2452,11 @@ const cercaRenderList = () => {
   document.getElementById('cerca-count').textContent = n;
   document.getElementById('cerca-count-lbl').textContent = n === 1 ? ' lugar encontrado' : ' lugares encontrados';
   if (!n) {
-    list.innerHTML = `<div class="nc-empty"><div class="nc-empty-icon">🔍</div><div class="nc-empty-title">Sin resultados</div><div class="nc-empty-sub">Probá aumentando el radio o cambiando el filtro.</div></div>`;
+    if (cercaLoading) {
+      list.innerHTML = `<div class="nc-empty"><div class="nc-empty-icon"><div class="search-spinner" style="margin:0 auto;width:20px;height:20px;"></div></div><div class="nc-empty-title" style="margin-top:8px;">Buscando comercios cercanos…</div><div class="nc-empty-sub">Esto puede tardar unos segundos.</div></div>`;
+    } else {
+      list.innerHTML = `<div class="nc-empty"><div class="nc-empty-icon">🔍</div><div class="nc-empty-title">Sin resultados</div><div class="nc-empty-sub">Probá aumentando el radio o cambiando el filtro.</div></div>`;
+    }
     return;
   }
   const groups = {};
@@ -2359,10 +2468,13 @@ const cercaRenderList = () => {
       const s = (!p.reporters || p.reporters===0) ? NO_REPORT : STATUS_CFG[p.status];
       const logo = (p.sponsor?.logo_url) ? `<img src="${p.sponsor.logo_url}" alt="${p.name}">` : (p.logo || '🏪');
       const rev = typeof p.reviewsN === 'number' ? p.reviewsN.toLocaleString('es-AR') : p.reviewsN;
-      html += `<div class="nc-card" data-place-id="${p.id}" style="animation-delay:${Math.min(idx*0.025,0.3)}s">
+      const isSponsor = p.sponsor?.tier === 'premium';
+      const sponsorStyle = isSponsor && p.sponsor?.badge_color ? `--sponsor-color:${p.sponsor.badge_color};` : '';
+      const sponsorBadge = isSponsor && p.sponsor?.badge_text ? `<span class="nc-sponsor-badge">${p.sponsor.badge_text}</span>` : '';
+      html += `<div class="nc-card${isSponsor ? ' is-sponsor' : ''}" data-place-id="${p.id}" style="animation-delay:${Math.min(idx*0.025,0.3)}s;${sponsorStyle}">
         <div class="nc-logo">${logo}</div>
         <div class="nc-body">
-          <div class="nc-top"><div class="nc-name">${p.name}</div><span class="nc-badge-open ${p.open?'open':'closed'}">${p.open?'Abierto':'Cerrado'}</span></div>
+          <div class="nc-top"><div class="nc-name">${p.name}</div>${sponsorBadge}<span class="nc-badge-open ${p.open?'open':'closed'}">${p.open?'Abierto':'Cerrado'}</span></div>
           <div class="nc-meta"><span class="nc-type">${p.type}</span><div class="nc-dot"></div><span class="nc-dist">📍 ${fmtDist(p.dist)}</span>${p.addr ? `<div class="nc-dot"></div><span class="nc-addr">${p.addr}</span>` : ''}</div>
           <div class="nc-status" style="background:${s.color}"><div class="nc-sdot"></div><span class="nc-slabel">${s.label}</span><span class="nc-ssub">${s.sub}</span></div>
         </div>
