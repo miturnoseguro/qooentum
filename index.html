@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -199,6 +200,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: #fff; colo
 
 /* ===== MAP OVERLAYS ===== */
 .map-search-wrap { position: absolute; top: 12px; left: 12px; right: 64px; z-index: 999; }
+.map-search-wrap.inline { position: relative; top: auto; left: auto; right: auto; z-index: auto; }
 .map-search-bar {
   display: flex; align-items: center; gap: 8px;
   background: rgba(255,255,255,.96); backdrop-filter: blur(16px);
@@ -829,10 +831,13 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: #fff; colo
   <div id="panel-cerca" class="panel" style="position:relative;">
 
     <div style="padding:10px 14px 0;flex-shrink:0;">
-      <div class="map-search-bar" style="border-radius:12px;padding:8px 12px;">
-        <svg class="map-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input class="map-search-input" id="cerca-search-input" type="text" placeholder="Buscar en la lista…" autocomplete="off" autocorrect="off" spellcheck="false" oninput="cercaSearchQ=this.value.trim();cercaApplyFilters();document.getElementById('cerca-search-clear').style.display=this.value?'flex':'none'">
-        <button id="cerca-search-clear" style="display:none;width:20px;height:20px;background:var(--surface2);border:none;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);font-size:12px;" onclick="document.getElementById('cerca-search-input').value='';cercaSearchQ='';cercaApplyFilters();this.style.display='none'">✕</button>
+      <div class="map-search-wrap inline" id="cerca-search-wrap">
+        <div class="map-search-bar" style="border-radius:12px;padding:8px 12px;">
+          <svg class="map-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="map-search-input" id="cerca-search-input" type="text" placeholder="Buscar comercios…" autocomplete="off" autocorrect="off" spellcheck="false">
+          <button class="map-search-clear" id="cerca-search-clear" onclick="document.getElementById('cerca-search-input').value='';document.getElementById('cerca-search-results-dropdown').classList.remove('open');this.classList.remove('visible');cercaSearchQ='';cercaApplyFilters();">✕</button>
+        </div>
+        <div class="search-results-dropdown" id="cerca-search-results-dropdown"></div>
       </div>
     </div>
     <div class="cerca-radius-row">
@@ -968,6 +973,9 @@ const STATUS_CFG = [
 const NO_REPORT = { label: 'Sin reportes hoy', sub: 'Sé el primero', color: '#94A3B8' };
 const WAIT  = ['Sin espera','~5 min','~15 min','+30 min'];
 const TREND = ['↘ Baja','→ Estable','↗ Sube','↗ Sube'];
+// Tono gold fijo para sponsors premium (no depende del badge_color que traiga el comercio) — la marca (verde) se reserva solo para login y link al sitio
+const SPONSOR_GOLD = '#D4AF37';
+const BRAND_GREEN = '#00C48C';
 const VOTE_PTS = [10,10,15,20];
 const LEVEL_TITLES = ['Novato','Explorador','Cazador de Filas','Maestro del Mapa','Leyenda Urbana'];
 const XP_PER_LEVEL = 150;
@@ -1936,7 +1944,8 @@ const makeMarker = p => {
   const isPremium = p.sponsor?.tier === 'premium';
   const el = document.createElement('div');
   el.className = 'fc-card-wrap' + (isPremium ? ' is-sponsor' : '');
-  if (p.sponsor?.badge_color) el.style.setProperty('--sponsor-color', p.sponsor.badge_color);
+  if (isPremium) el.style.setProperty('--sponsor-color', SPONSOR_GOLD);
+  else if (p.sponsor?.badge_color) el.style.setProperty('--sponsor-color', p.sponsor.badge_color);
   el.innerHTML = `
     <div class="fc-card">
       <div class="fc-card-head">
@@ -1983,35 +1992,43 @@ const updateUserMarker = (lat,lng) => {
 };
 
 // ============================================================
-// BUSCADOR
+// BUSCADOR (compartido entre el mapa y la lista "Cerca" — mismo componente y misma lógica)
 // ============================================================
+const SEARCH_INSTANCES = [
+  { inputId:'map-search-input', dropdownId:'search-results-dropdown', wrapId:'map-search-wrap', clearId:'map-search-clear' },
+  { inputId:'cerca-search-input', dropdownId:'cerca-search-results-dropdown', wrapId:'cerca-search-wrap', clearId:'cerca-search-clear' },
+];
 const initSearch = () => {
-  const input = document.getElementById('map-search-input');
-  const dropdown = document.getElementById('search-results-dropdown');
-  const wrap = document.getElementById('map-search-wrap');
-  if (!input || !dropdown || !wrap) {
-    console.warn('[initSearch] Elementos del buscador no encontrados, se omite inicialización');
-    return;
-  }
-  input.addEventListener('input', onSearch);
-  input.addEventListener('focus', () => { if (input.value.length>1) dropdown.classList.add('open'); });
-  document.addEventListener('click', e => {
-    if (!wrap.contains(e.target)) dropdown.classList.remove('open');
+  SEARCH_INSTANCES.forEach(cfg => {
+    const input = document.getElementById(cfg.inputId);
+    const dropdown = document.getElementById(cfg.dropdownId);
+    const wrap = document.getElementById(cfg.wrapId);
+    if (!input || !dropdown || !wrap) {
+      console.warn('[initSearch] Elementos del buscador no encontrados, se omite inicialización', cfg.inputId);
+      return;
+    }
+    input.addEventListener('input', e => onSearch(e, cfg));
+    input.addEventListener('focus', () => { if (input.value.length>1) dropdown.classList.add('open'); });
+    document.addEventListener('click', e => {
+      if (!wrap.contains(e.target)) dropdown.classList.remove('open');
+    });
   });
 };
 let _searchTimer = null;
-const onSearch = e => {
+const onSearch = (e, cfg) => {
   const val = e.target.value.trim();
-  const clearBtn = document.getElementById('map-search-clear');
+  const clearBtn = document.getElementById(cfg.clearId);
   if (clearBtn) clearBtn.classList.toggle('visible', val.length>0);
-  const dropdown = document.getElementById('search-results-dropdown');
+  // La lista "Cerca" además re-filtra el listado agrupado de abajo con el mismo texto
+  if (cfg.inputId === 'cerca-search-input') { cercaSearchQ = val; cercaApplyFilters(); }
+  const dropdown = document.getElementById(cfg.dropdownId);
   if (!dropdown) return;
   if (val.length < 2) { dropdown.classList.remove('open'); return; }
   clearTimeout(_searchTimer);
-  _searchTimer = setTimeout(() => runSearch(val), 380);
+  _searchTimer = setTimeout(() => runSearch(val, cfg), 380);
 };
-const runSearch = async q => {
-  const drop = document.getElementById('search-results-dropdown');
+const runSearch = async (q, cfg) => {
+  const drop = document.getElementById(cfg.dropdownId);
   if (!drop) return;
   try {
     drop.innerHTML = `<div class="search-loading"><div class="search-spinner"></div>Buscando lugares…</div>`;
@@ -2039,7 +2056,7 @@ const runSearch = async q => {
       el.addEventListener('click', () => {
         vibrate(10);
         drop.classList.remove('open');
-        const input = document.getElementById('map-search-input');
+        const input = document.getElementById(cfg.inputId);
         if (input) input.blur();
         const p = results[i];
         if (p) openPopup(p);
@@ -2120,11 +2137,11 @@ const PlacePopup = ({ place, onClose }) => {
   const s = (!place.reporters || place.reporters===0) ? NO_REPORT : STATUS_CFG[place.status];
   const photo = getPhoto(place);
   const sponsor = place.sponsor || null;
-  const sponsorColor = sponsor?.badge_color || '#6366F1';
+  const isPremium = sponsor?.tier === 'premium';
+  const sponsorColor = isPremium ? SPONSOR_GOLD : (sponsor?.badge_color || '#6366F1');
   const badgeText = sponsor?.badge_text || null;
   const promo = sponsor?.promo || null;
   const website = sponsor?.website || null;
-  const isPremium = sponsor?.tier === 'premium';
   // Paleta "gold premium" para comercios sponsor de nivel premium — mismo lineamiento que la mini card y la card de lista
   const T = isPremium ? {
     cardBg: `linear-gradient(180deg, color-mix(in srgb, ${sponsorColor} 14%, #fff) 0%, rgba(255,255,255,1) 48%)`,
@@ -2307,10 +2324,10 @@ const PlacePopup = ({ place, onClose }) => {
             href: website, target:'_blank', rel:'noopener noreferrer',
             style:{
               display:'block', marginTop:10, fontSize:11.5, fontWeight:800,
-              color: T ? sponsorColor : sponsorColor, textAlign:'center', textDecoration:'none',
-              border:`1.5px solid ${sponsorColor}`, borderRadius:40,
+              color: BRAND_GREEN, textAlign:'center', textDecoration:'none',
+              border:`1.5px solid ${BRAND_GREEN}`, borderRadius:40,
               padding:'9px 14px',
-              background: T ? `color-mix(in srgb, ${sponsorColor} 12%, transparent)` : `${sponsorColor}0D`,
+              background: `${BRAND_GREEN}0D`,
               letterSpacing:'.2px',
             }
           }, website.replace(/^https?:\/\//,'').replace(/\/$/,''))
@@ -2468,7 +2485,7 @@ const cercaRenderList = () => {
       const logo = (p.sponsor?.logo_url) ? `<img src="${p.sponsor.logo_url}" alt="${p.name}">` : (p.logo || '🏪');
       const rev = typeof p.reviewsN === 'number' ? p.reviewsN.toLocaleString('es-AR') : p.reviewsN;
       const isSponsor = p.sponsor?.tier === 'premium';
-      const sponsorStyle = isSponsor && p.sponsor?.badge_color ? `--sponsor-color:${p.sponsor.badge_color};` : '';
+      const sponsorStyle = isSponsor ? `--sponsor-color:${SPONSOR_GOLD};` : '';
       const sponsorBadge = isSponsor && p.sponsor?.badge_text ? `<span class="nc-sponsor-badge">${p.sponsor.badge_text}</span>` : '';
       html += `<div class="nc-card${isSponsor ? ' is-sponsor' : ''}" data-place-id="${p.id}" style="animation-delay:${Math.min(idx*0.025,0.3)}s;${sponsorStyle}">
         <div class="nc-logo">${logo}</div>
