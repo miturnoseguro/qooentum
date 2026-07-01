@@ -72,9 +72,9 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: #fff; colo
   position: relative;
 }
 .brand { display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
-.brand-mark { width: 110px; height: 34px; display: flex; align-items: center; }
+.brand-mark { width: 150px; height: 43px; display: flex; align-items: center; }
 .brand-mark img { width: 100%; height: 100%; object-fit: contain; }
-.brand-powered { font-size: 8px; font-weight: 600; color: var(--text3); letter-spacing: 0.2px; white-space: nowrap; }
+.brand-powered { font-size: 11px; font-weight: 600; color: var(--text3); letter-spacing: 0.2px; white-space: nowrap; }
 .brand-powered strong { font-weight: 800; color: var(--text2); }
 .topbar-auth { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0; }
 .user-chip {
@@ -815,6 +815,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: #fff; colo
     <div class="cerca-radius-row">
       <span class="cerca-radius-lbl">Radio:</span>
       <button class="cerca-r-btn active" data-r="1000" onclick="cercaSetRadius(1000,this)">1 km</button>
+      <button class="cerca-r-btn active" data-r="100" onclick="cercaSetRadius(100,this)">100 m</button>
     </div>
     <div class="cerca-filter-row">
       <button class="cerca-f-chip active" data-cat="all" onclick="cercaSetCat('all',this)">Todo</button>
