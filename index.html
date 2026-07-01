@@ -1476,7 +1476,18 @@ const syncBackend = async (lat,lng) => {
   if (!BACKEND_READY) return;
   const res = await apiGet('sync_places', {lat,lng,radius:300,status_only:1});
   if (!res?.places) return;
-  res.places.forEach(bp => { const p = placeStore[bp.id]; if (p) { p.status = bp.status ?? p.status; p.reporters = bp.reporters ?? p.reporters; } });
+  res.places.forEach(bp => {
+    const p = placeStore[bp.id];
+    if (!p) return;
+    p.status = bp.status ?? p.status;
+    p.reporters = bp.reporters ?? p.reporters;
+    const sponsorChanged = JSON.stringify(p.sponsor||null) !== JSON.stringify(bp.sponsor||null);
+    if (sponsorChanged) {
+      p.sponsor = bp.sponsor || null;
+      if (bp.sponsor) p.verified = true;
+      forceMarkerRebuild(p.id);
+    }
+  });
   persistCache();
 };
 
