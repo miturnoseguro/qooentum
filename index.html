@@ -722,6 +722,17 @@ html, body { height: 100%; width: 100%; overflow: hidden; background: #fff; colo
   <div id="panel-map" class="panel visible" style="position:relative;">
     <div class="map-pane">
       <div id="maplibre-map"></div>
+
+      <!-- BUSCADOR DEL MAPA (faltaba: initSearch() lo necesita) -->
+      <div class="map-search-wrap" id="map-search-wrap">
+        <div class="map-search-bar">
+          <svg class="map-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="map-search-input" id="map-search-input" type="text" placeholder="Buscar comercios…" autocomplete="off" autocorrect="off" spellcheck="false">
+          <button class="map-search-clear" id="map-search-clear" onclick="document.getElementById('map-search-input').value='';document.getElementById('search-results-dropdown').classList.remove('open');this.classList.remove('visible');">✕</button>
+        </div>
+        <div class="search-results-dropdown" id="search-results-dropdown"></div>
+      </div>
+
       <div class="map-float-controls">
         <div class="gps-float-btn" id="gps-btn" onclick="onGpsBtnClick()" title="Centrar / seguir mi ubicación">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 3"/></svg>
@@ -1549,7 +1560,13 @@ const initMap = (center) => {
     clearTimeout(forceHide);
     mlReady = true;
     mlMap.resize();
-    initSearch();
+    try {
+      initSearch();
+    } catch (e) {
+      // Blindaje: si el buscador falla por cualquier motivo, no debe
+      // impedir que el splash se oculte ni que el mapa quede usable.
+      console.warn('[initSearch]', e);
+    }
     followMode = true;
     updateGpsUI();
     splash.classList.add('hidden');
@@ -1909,24 +1926,32 @@ const updateUserMarker = (lat,lng) => {
 // ============================================================
 const initSearch = () => {
   const input = document.getElementById('map-search-input');
+  const dropdown = document.getElementById('search-results-dropdown');
+  const wrap = document.getElementById('map-search-wrap');
+  if (!input || !dropdown || !wrap) {
+    console.warn('[initSearch] Elementos del buscador no encontrados, se omite inicialización');
+    return;
+  }
   input.addEventListener('input', onSearch);
-  input.addEventListener('focus', () => { if (input.value.length>1) document.getElementById('search-results-dropdown').classList.add('open'); });
+  input.addEventListener('focus', () => { if (input.value.length>1) dropdown.classList.add('open'); });
   document.addEventListener('click', e => {
-    if (!document.getElementById('map-search-wrap')?.contains(e.target)) {
-      document.getElementById('search-results-dropdown').classList.remove('open');
-    }
+    if (!wrap.contains(e.target)) dropdown.classList.remove('open');
   });
 };
 let _searchTimer = null;
 const onSearch = e => {
   const val = e.target.value.trim();
-  document.getElementById('map-search-clear').classList.toggle('visible', val.length>0);
-  if (val.length < 2) { document.getElementById('search-results-dropdown').classList.remove('open'); return; }
+  const clearBtn = document.getElementById('map-search-clear');
+  if (clearBtn) clearBtn.classList.toggle('visible', val.length>0);
+  const dropdown = document.getElementById('search-results-dropdown');
+  if (!dropdown) return;
+  if (val.length < 2) { dropdown.classList.remove('open'); return; }
   clearTimeout(_searchTimer);
   _searchTimer = setTimeout(() => runSearch(val), 380);
 };
 const runSearch = async q => {
   const drop = document.getElementById('search-results-dropdown');
+  if (!drop) return;
   drop.innerHTML = `<div class="search-loading"><div class="search-spinner"></div>Buscando lugares…</div>`;
   drop.classList.add('open');
   const results = Object.values(placeStore).filter(p => p.name.toLowerCase().includes(q.toLowerCase()) || p.type.toLowerCase().includes(q.toLowerCase())).slice(0,8);
@@ -1940,7 +1965,8 @@ const runSearch = async q => {
     el.addEventListener('click', () => {
       vibrate(10);
       drop.classList.remove('open');
-      document.getElementById('map-search-input').blur();
+      const input = document.getElementById('map-search-input');
+      if (input) input.blur();
       const p = results[i];
       if (p) openPopup(p);
       if (mlMap && validCoord(p.lat,p.lng)) safeMove(() => mlMap.panTo([p.lng,p.lat]));
@@ -2339,7 +2365,7 @@ const cercaRenderList = () => {
       html += `<div class="nc-card" data-place-id="${p.id}" style="animation-delay:${Math.min(idx*0.025,0.3)}s">
         <div class="nc-logo">${logo}</div>
         <div class="nc-body">
-          <div class="nc-top"><div class="nc-name">${p.name}</div>${p.sponsor?.badge_text ?  : ''}<span class="nc-badge-open ${p.open?'open':'closed'}">${p.open?'Abierto':'Cerrado'}</span></div>
+          <div class="nc-top"><div class="nc-name">${p.name}</div><span class="nc-badge-open ${p.open?'open':'closed'}">${p.open?'Abierto':'Cerrado'}</span></div>
           <div class="nc-meta"><span class="nc-type">${p.type}</span><div class="nc-dot"></div><span class="nc-dist">📍 ${fmtDist(p.dist)}</span>${p.addr ? `<div class="nc-dot"></div><span class="nc-addr">${p.addr}</span>` : ''}</div>
           <div class="nc-status" style="background:${s.color}"><div class="nc-sdot"></div><span class="nc-slabel">${s.label}</span><span class="nc-ssub">${s.sub}</span></div>
         </div>
