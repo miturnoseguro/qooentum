@@ -2046,7 +2046,7 @@ const PlacePopup = ({ place, onClose }) => {
   const sponsorColor = sponsor?.badge_color || '#6366F1';
   const badgeText = sponsor?.badge_text || null;
   const promo = sponsor?.promo || null;
-  const website = sponsor?.website || null;
+  const  = sponsor?. || null;
 
   const overlayStyle = {
     position:'fixed', inset:0,
@@ -2213,9 +2213,20 @@ const PlacePopup = ({ place, onClose }) => {
             ),
             `${place.reporters} reportes en las últimas 2h`
           ),
-          website && React.createElement('a', {
+        website && React.createElement('a', {
             href: website, target:'_blank', rel:'noopener noreferrer',
-            style:{display:'block',marginTop:8,fontSize:11,fontWeight:800,color:sponsorColor,textAlign:'center',textDecoration:'none'}
+            style:{
+              display:'block',
+              marginTop:8,
+              fontSize:11,
+              fontWeight:800,
+              color:sponsorColor,
+              textAlign:'center',
+              textDecoration:'none',
+              border:`1px solid ${sponsorColor}`,
+              borderRadius:6,
+              padding:'6px 10px'
+            }
           }, website)
         )
       )
